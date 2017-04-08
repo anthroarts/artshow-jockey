@@ -1,6 +1,8 @@
 Artshow Jockey
 ==============
 
+[![](https://api.travis-ci.org/anthroarts/artshow-jockey.svg?branch=master)](https://travis-ci.org/anthroarts/artshow-jockey)
+
 Hello! Artshow Jockey is a application to assist in the management of a convention-style art show.
 
 If your show has the following basic arrangement, then you'll find that Artshow Jockey does exactly, or possibly more, than what you need:
