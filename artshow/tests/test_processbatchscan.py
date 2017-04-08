@@ -1,8 +1,13 @@
+from django.apps import apps
 from django.utils.timezone import now
 
 from .. import processbatchscan
 from django.test import TestCase
-from ..models import Person, Artist, Piece, BatchScan, Bidder, BidderId, Bid
+from ..conf import settings
+from ..models import Artist, Piece, BatchScan, Bidder, BidderId, Bid
+
+
+Person = apps.get_model(settings.ARTSHOW_PERSON_CLASS)
 
 
 def create_and_process_batch(batchtype, data):

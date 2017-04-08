@@ -1,12 +1,14 @@
 from django import forms
+from django.apps import apps
 from django.contrib.auth import get_user_model
 from .conf import settings
 from django.db.models import Q
-from .models import Person, Artist
+from .models import Artist
 from django.shortcuts import render
 from .utils import create_user_from_email, send_password_reset_email
 from .forms import ArtistRegisterForm, LongerTextInput
 
+Person = apps.get_model(settings.ARTSHOW_PERSON_CLASS)
 User = get_user_model()
 
 class AgreementForm(forms.Form):

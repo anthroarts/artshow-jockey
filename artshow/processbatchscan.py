@@ -3,11 +3,13 @@
 # Copyright (C) 2009, 2010 Chris Cogdon
 # See file COPYING for licence details
 
-from .models import BatchScan, Piece, Bid, BidderId, Person, Bidder
+from .models import BatchScan, Piece, Bid, BidderId, Bidder
 import datetime
 import re
+from django.apps import apps
 from django.db.models.query import transaction
 from django.core.exceptions import ValidationError
+from .conf import settings
 
 
 location_scan_re = re.compile(r'[PL](\w\d+)$')
@@ -306,6 +308,8 @@ class StateCB:
 
 @transaction.atomic
 def process_create_bidderids(data):
+    Person = apps.get_model(settings.ARTSHOW_PERSON_CLASS)
+
     errors = []
     state = StateCB.start
     current_person = None

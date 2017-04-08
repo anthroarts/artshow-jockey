@@ -4,7 +4,7 @@
 
 __all__ = ["Allocation", "Artist", "ArtistManager", "BatchScan", "Bid", "Bidder", "BidderId",
            "Checkoff", "ChequePayment", "EmailSignature", "EmailTemplate", "Event", "Invoice", "InvoiceItem",
-           "InvoicePayment", "Payment", "PaymentType", "Piece", "Person", "Product", "Space", "Task",
+           "InvoicePayment", "Payment", "PaymentType", "Piece", "Product", "Space", "Task",
            "Agent", "validate_space", "validate_space_increments"]
 
 from django.db import models
@@ -14,10 +14,6 @@ from . import mod11codes
 from django.contrib.auth.models import User
 from decimal import Decimal
 from .conf import settings
-
-from django.db.models.loading import get_model
-Person = get_model(*settings.ARTSHOW_PERSON_CLASS.split('.', 1))
-del get_model
 
 
 def validate_space(value):
@@ -556,7 +552,7 @@ class Task (models.Model):
 
 
 class Agent(models.Model):
-    person = models.ForeignKey(Person, related_name="agent_for")
+    person = models.ForeignKey(settings.ARTSHOW_PERSON_CLASS, related_name="agent_for")
     artist = models.ForeignKey(Artist)
     can_edit_spaces = models.BooleanField(default=False, help_text="Person is allowed to reserve or cancel spaces")
     can_edit_pieces = models.BooleanField(default=False,
