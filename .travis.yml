@@ -6,4 +6,5 @@ install:
   - pip install -r requirements.txt
 
 script:
+  - cp local_settings.py.example local_settings.py
   - ./manage.py test
