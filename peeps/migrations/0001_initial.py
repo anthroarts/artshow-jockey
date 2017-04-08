@@ -1,52 +1,38 @@
 # -*- coding: utf-8 -*-
-import datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+import django.db.models.deletion
+from django.conf import settings
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'Person'
-        db.create_table('peeps_person', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('address1', self.gf('django.db.models.fields.CharField')(max_length=100, blank=True)),
-            ('address2', self.gf('django.db.models.fields.CharField')(max_length=100, blank=True)),
-            ('city', self.gf('django.db.models.fields.CharField')(max_length=100, blank=True)),
-            ('state', self.gf('django.db.models.fields.CharField')(max_length=40, blank=True)),
-            ('postcode', self.gf('django.db.models.fields.CharField')(max_length=20, blank=True)),
-            ('country', self.gf('django.db.models.fields.CharField')(max_length=40, blank=True)),
-            ('phone', self.gf('django.db.models.fields.CharField')(max_length=40, blank=True)),
-            ('email', self.gf('django.db.models.fields.CharField')(max_length=100, blank=True)),
-            ('reg_id', self.gf('django.db.models.fields.CharField')(max_length=40, blank=True)),
-            ('comment', self.gf('django.db.models.fields.CharField')(max_length=100, blank=True)),
-        ))
-        db.send_create_signal('peeps', ['Person'])
+    dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+    ]
 
-
-    def backwards(self, orm):
-        # Deleting model 'Person'
-        db.delete_table('peeps_person')
-
-
-    models = {
-        'peeps.person': {
-            'Meta': {'object_name': 'Person'},
-            'address1': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
-            'address2': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
-            'city': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
-            'comment': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
-            'country': ('django.db.models.fields.CharField', [], {'max_length': '40', 'blank': 'True'}),
-            'email': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'phone': ('django.db.models.fields.CharField', [], {'max_length': '40', 'blank': 'True'}),
-            'postcode': ('django.db.models.fields.CharField', [], {'max_length': '20', 'blank': 'True'}),
-            'reg_id': ('django.db.models.fields.CharField', [], {'max_length': '40', 'blank': 'True'}),
-            'state': ('django.db.models.fields.CharField', [], {'max_length': '40', 'blank': 'True'})
-        }
-    }
-
-    complete_apps = ['peeps']
+    operations = [
+        migrations.CreateModel(
+            name='Person',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=100)),
+                ('address1', models.CharField(max_length=100, verbose_name=b'address', blank=True)),
+                ('address2', models.CharField(max_length=100, verbose_name=b'address line 2', blank=True)),
+                ('city', models.CharField(max_length=100, blank=True)),
+                ('state', models.CharField(max_length=40, blank=True)),
+                ('postcode', models.CharField(max_length=20, blank=True)),
+                ('country', models.CharField(max_length=40, blank=True)),
+                ('phone', models.CharField(max_length=40, blank=True)),
+                ('email', models.CharField(max_length=100, blank=True)),
+                ('reg_id', models.CharField(max_length=40, verbose_name=b'Reg ID', blank=True)),
+                ('comment', models.CharField(max_length=100, blank=True)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+                'verbose_name_plural': 'People',
+            },
+            bases=(models.Model,),
+        ),
+    ]

@@ -1,10 +1,11 @@
 # Artshow Jockey
 # Copyright (C) 2009, 2010 Chris Cogdon
 # See file COPYING for licence details
+from django.apps import apps
 from django.contrib import messages
 from django.db.transaction import atomic
 from django.shortcuts import render, redirect
-from .models import Bidder, BidderId, Person, Piece, Bid
+from .models import Bidder, BidderId, Piece, Bid
 from django import forms
 from django.core.exceptions import ValidationError
 from . import mod11codes
@@ -15,6 +16,7 @@ from .conf import settings
 
 BIDDERS_PER_PAGE = 10
 BIDS_PER_PAGE = 10
+Person = apps.get_model(settings.ARTSHOW_PERSON_CLASS)
 
 
 def mod11check(value):

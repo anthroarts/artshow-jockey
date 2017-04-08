@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.core.signing import Signer, BadSignature
 from django.db.models import Sum
@@ -23,6 +24,7 @@ from django.conf import settings
 
 
 EXTRA_PIECES = 5
+Person = apps.get_model(settings.ARTSHOW_PERSON_CLASS)
 
 
 def user_edits_allowable(view_func):

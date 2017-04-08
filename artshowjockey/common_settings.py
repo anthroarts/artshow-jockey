@@ -126,7 +126,6 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'peeps',
     'artshow',
-    'south',
     'ajax_select',
     'tinyreg',
     'tinyannounce',

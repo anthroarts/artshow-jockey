@@ -1,14 +1,18 @@
 from StringIO import StringIO
 import subprocess
 from django import forms
+from django.apps import apps
 from django.contrib.auth.decorators import permission_required
 from django.contrib.formtools.wizard.views import CookieWizardView
 from django.shortcuts import render, redirect
 from .conf import settings
-from .models import Person, Bidder, BidderId
+from .models import Bidder, BidderId
 import logging
 logger = logging.getLogger(__name__)
 from .conf import _DISABLED as SETTING_DISABLED
+
+
+Person = apps.get_model(settings.ARTSHOW_PERSON_CLASS)
 
 
 preprint = __import__(settings.ARTSHOW_PREPRINT_MODULE, globals(), locals(),
