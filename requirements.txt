@@ -1,7 +1,8 @@
 appdirs==1.4.3
-Django==1.7.11
+Django==1.8.18
 django-ajax-selects==1.5.2
 django-appconf==0.6
+django-formtools==2.0
 num2words==0.5.0
 packaging==16.8
 pdfrw==0.1

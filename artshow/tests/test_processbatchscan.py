@@ -32,6 +32,7 @@ class BidScanTest(BatchScanTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(BidScanTest, cls).setUpClass()
         cls.person1 = Person.objects.create(name="John Smith")
         cls.person2 = Person.objects.create(name="Joe Diddly")
         cls.artist1 = Artist.objects.create(artistid=1, person=cls.person1, publicname="Da Artiste")
@@ -367,6 +368,7 @@ class LocationScanTest(BatchScanTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(LocationScanTest, cls).setUpClass()
         cls.person1 = Person.objects.create(name="Chris Wilkie")
         cls.artist2 = Artist.objects.create(artistid=2, person=cls.person1, publicname="Man with the Planner")
         cls.piece1 = Piece.objects.create(artist=cls.artist2, pieceid=1, name="First Piece", min_bid=10,
@@ -428,6 +430,7 @@ class BidderIDScanTest(BatchScanTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(BidderIDScanTest, cls).setUpClass()
         cls.person1 = Person.objects.create(name="Fred Staring")
         cls.bidder = Bidder.objects.create(person=cls.person1)
         BidderId.objects.create(id='2002', bidder=cls.bidder)

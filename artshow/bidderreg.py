@@ -3,8 +3,8 @@ import subprocess
 from django import forms
 from django.apps import apps
 from django.contrib.auth.decorators import permission_required
-from django.contrib.formtools.wizard.views import CookieWizardView
 from django.shortcuts import render, redirect
+from formtools.wizard.views import CookieWizardView
 from .conf import settings
 from .models import Bidder, BidderId
 import logging
