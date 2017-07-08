@@ -162,6 +162,8 @@ LOGGING = {
     }
 }
 
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
 AJAX_LOOKUP_CHANNELS = {
     'person': ('peeps.lookups', 'PersonLookup'),
 }
