@@ -76,12 +76,12 @@ class ArtistManager (models.Manager):
     def grants_access_to(self, user, **kwargs):
         accessors = Agent.objects.filter(person__user=user, **kwargs)
         # TODO. find out if "distinct" is really needed here
-        return self.get_query_set().filter(Q(agent__in=accessors) | Q(person__user=user)).distinct()
+        return self.get_queryset().filter(Q(agent__in=accessors) | Q(person__user=user)).distinct()
 
     def viewable_by(self, user):
         accessors = Agent.objects.filter(person__user=user)
         # TODO. find out if "distinct" is really needed here
-        return self.get_query_set().filter(Q(agent__in=accessors) | Q(person__user=user)).distinct()
+        return self.get_queryset().filter(Q(agent__in=accessors) | Q(person__user=user)).distinct()
 
 
 class Artist (models.Model):

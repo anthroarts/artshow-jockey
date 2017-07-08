@@ -8,7 +8,7 @@ class AnnouncementManager(models.Manager):
 
     def active(self):
         now = timezone.now()
-        query = self.get_query_set().filter(Q(created__lt=now), (Q(expires__isnull=True) | Q(expires__gt=now)))
+        query = self.get_queryset().filter(Q(created__lt=now), (Q(expires__isnull=True) | Q(expires__gt=now)))
         return query
 
 
