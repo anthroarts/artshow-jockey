@@ -46,6 +46,7 @@ class AgentInline(AjaxSelectAdminTabularInline):
 class AllocationInlineForm(forms.ModelForm):
     class Meta:
         model = Allocation
+        fields = ('artist', 'space', 'requested', 'allocated')
         widgets = {
             'requested': forms.TextInput(attrs={'size': 6}),
             'allocated': forms.TextInput(attrs={'size': 6}),
@@ -117,6 +118,12 @@ class ArtistForm(forms.ModelForm):
 
     class Meta:
         model = Artist
+        fields = (
+            'artistid', 'person', 'publicname', 'website', 'mailin',
+            'mailback_instructions', 'attending', 'reservationdate', 'notes',
+            'spaces', 'checkoffs', 'payment_to'
+        )
+
     person = AutoCompleteSelectField('person', required=True)
     payment_to = AutoCompleteSelectField('person', required=False)
 
