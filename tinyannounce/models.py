@@ -23,6 +23,9 @@ class Announcement(models.Model):
     created = models.DateTimeField()
     expires = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        app_label = 'tinyannounce'
+
     def is_seen_by(self, user):
         return self.announcementseen_set.filter(user=user).exists()
 
@@ -44,6 +47,7 @@ class AnnouncementSeen(models.Model):
     seen_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        app_label = 'tinyannounce'
         unique_together = (('announcement', 'user'))
 
     def __unicode__(self):

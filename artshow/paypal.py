@@ -12,12 +12,12 @@ from .conf import settings
 from logging import getLogger
 from django.views.decorators.csrf import csrf_exempt
 from .models import Payment
-import django.utils.tzinfo
+import django.utils.timezone
 
 paypal_logger = getLogger("paypal")
 
-pstzone = django.utils.tzinfo.FixedOffset(-480)
-pdtzone = django.utils.tzinfo.FixedOffset(-420)
+pstzone = django.utils.timezone.get_fixed_timezone(-480)
+pdtzone = django.utils.timezone.get_fixed_timezone(-420)
 
 paypal_date_re = re.compile(r"(\d+:\d+:\d+ \w+ \d+, \d+) (\w+)")
 

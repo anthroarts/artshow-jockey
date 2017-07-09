@@ -1,5 +1,4 @@
 {% extends "artshow/base_generic.html" %}
-{% load url from future %}
 {% block content %}
     <p>Welcome to the {{ artshow_settings.ARTSHOW_SHOW_NAME }} management website.</p>
     <p>To do anything here, you will first need to <a href="{% url 'login' %}">log in</a>.</p>

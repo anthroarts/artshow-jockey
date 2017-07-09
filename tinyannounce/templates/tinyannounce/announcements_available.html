@@ -1,4 +1,3 @@
-{% load url from future %}
 {% if new %}
     <p class="announcements_available">You have {{ new }} unread announcement{{ new|pluralize }}.
         {% if new_and_important %}{{ new_and_important }} of them {{ new_and_important|pluralize:"is,are" }} important.{% endif %}

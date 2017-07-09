@@ -1,13 +1,13 @@
 from ajax_select import LookupChannel
 from django.utils.html import escape
+from django.apps import apps
 from django.db.models import Q
-from django.db.models.loading import get_model
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
 
 class PersonLookup(LookupChannel):
-    model = get_model(*settings.ARTSHOW_PERSON_CLASS.split('.', 1))
+    model = apps.get_model(*settings.ARTSHOW_PERSON_CLASS.split('.', 1))
 
     def get_query(self, q, request):
         return self.model.objects.filter(
