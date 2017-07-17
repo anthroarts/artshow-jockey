@@ -31,7 +31,7 @@ def artists(request):
     for n in field_names:
         field_names_d[n] = n
 
-    response = HttpResponse(mimetype="text/csv")
+    response = HttpResponse(content_type="text/csv")
     response['Content-Disposition'] = "attachment; filename=artists.csv"
     c = unicodewriter.UnicodeDictWriter(response, field_names)
     c.writerow(field_names_d)
@@ -66,7 +66,7 @@ def pieces(request):
     for n in field_names:
         field_names_d[n] = n
 
-    response = HttpResponse(mimetype="text/csv")
+    response = HttpResponse(content_type="text/csv")
     response['Content-Disposition'] = "attachment; filename=pieces.csv"
     c = unicodewriter.UnicodeDictWriter(response, field_names)
     c.writerow(field_names_d)
@@ -104,7 +104,7 @@ def bidders(request):
     for n in field_names:
         field_names_d[n] = n
 
-    response = HttpResponse(mimetype="text/csv")
+    response = HttpResponse(content_type="text/csv")
     response['Content-Disposition'] = "attachment; filename=bidders.csv"
     c = unicodewriter.UnicodeDictWriter(response, field_names)
     c.writerow(field_names_d)
@@ -137,7 +137,7 @@ def payments(request):
     for n in field_names:
         field_names_d[n] = n
 
-    response = HttpResponse(mimetype="text/csv")
+    response = HttpResponse(content_type="text/csv")
     response['Content-Disposition'] = "attachment; filename=payments.csv"
     c = unicodewriter.UnicodeDictWriter(response, field_names)
     c.writerow(field_names_d)
@@ -162,7 +162,7 @@ def cheques(request):
     for n in field_names:
         field_names_d[n] = n
 
-    response = HttpResponse(mimetype="text/csv")
+    response = HttpResponse(content_type="text/csv")
     response['Content-Disposition'] = "attachment; filename=cheques.csv"
     c = unicodewriter.UnicodeDictWriter(response, field_names)
     c.writerow(field_names_d)
