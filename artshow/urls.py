@@ -34,7 +34,7 @@ urlpatterns = [
     url(r'^reports/show-summary/$', reports.show_summary, name='artshow-summary'),
     url(r'^reports/voice-auction/$', reports.voice_auction, name='artshow-report-voice-auction'),
     url(r'^reports/sales-percentiles/$', reports.sales_percentiles, name='artshow-report-percentiles'),
-    url(r'^reports/allocations-waiting/$', reports.allocations_waiting),
+    url(r'^reports/allocations-waiting/$', reports.allocations_waiting, name='artshow-report-allocations-waiting'),
     url(r'^cashier/$', cashier.cashier, name='artshow-cashier'),
     url(r'^cashier/bidder/(?P<bidder_id>\d+)/$', cashier.cashier_bidder, name='artshow-cashier-bidder'),
     url(r'^cashier/bidder/(?P<bidder_id>\d+)/invoices/$', cashier.cashier_bidder_invoices, name='artshow-cashier-bidder-invoices'),

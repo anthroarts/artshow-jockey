@@ -1,5 +1,5 @@
 appdirs==1.4.3
-Django==1.9.13
+Django==1.10.7
 django-ajax-selects==1.5.2
 django-appconf==1.0.2
 django-formtools==2.0
