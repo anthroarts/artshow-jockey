@@ -21,7 +21,7 @@
         </tr>
         {% for b in bidders %}
             <tr>
-                <td><a href="{% url "artshow.cashier.cashier_bidder" bidder_id=b.id %}">{{ b.name }}</a></td>
+                <td><a href="{% url "artshow-cashier-bidder" bidder_id=b.id %}">{{ b.name }}</a></td>
                 <td>{{ b.bidder_ids|join:", " }}</td>
             </tr>
         {% endfor %}

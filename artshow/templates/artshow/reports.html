@@ -9,33 +9,33 @@
 {% block content %}
     <h3>General Stuff</h3>
     <ul>
-        <li><a href="{% url "artshow.reports.artists" %}">Showing Artists</a></li>
+        <li><a href="{% url "artshow-report-artists" %}">Showing Artists</a></li>
         <li><a href="{% url "artshow.reports.allocations_waiting" %}">Allocations Waiting</a></li>
-        <li><a href="{% url "artshow.reports.winning_bidders" %}">Winning Bidders</a></li>
-        <li><a href="{% url "artshow.reports.artist_panel_report" %}">Artist to Panel Report</a></li>
-        <li><a href="{% url "artshow.reports.panel_artist_report" %}">Panel to Artist Report</a></li>
-        <li><a href="{% url "artshow.reports.artist_payment_report" %}">Artist Payment Report</a></li>
-        <li><a href="{% url "artshow.reports.show_summary" %}">Show Summary</a></li>
-        <li><a href="{% url "artshow.reports.voice_auction" %}">Voice Auction</a>
+        <li><a href="{% url "artshow-report-winning-bidders" %}">Winning Bidders</a></li>
+        <li><a href="{% url "artshow-report-artist-to-panel" %}">Artist to Panel Report</a></li>
+        <li><a href="{% url "artshow-report-panel-to-artist" %}">Panel to Artist Report</a></li>
+        <li><a href="{% url "artshow-report-artist-payment" %}">Artist Payment Report</a></li>
+        <li><a href="{% url "artshow-summary" %}">Show Summary</a></li>
+        <li><a href="{% url "artshow-report-voice-auction" %}">Voice Auction</a>
             <ul>
-                <li><a href="{% url "artshow.reports.voice_auction" %}?adult=y">Adult</a></li>
-                <li><a href="{% url "artshow.reports.voice_auction" %}?adult=n">General</a></li>
+                <li><a href="{% url "artshow-report-voice-auction" %}?adult=y">Adult</a></li>
+                <li><a href="{% url "artshow-report-voice-auction" %}?adult=n">General</a></li>
             </ul>
         </li>
-        <li><a href="{% url "artshow.reports.sales_percentiles" %}">Sales Percentiles</a></li>
+        <li><a href="{% url "artshow-report-percentiles" %}">Sales Percentiles</a></li>
     </ul>
 
     <h3>PDF Reports</h3>
     <ul>
-        <li><a href="{% url "artshow.pdfreports.winning_bidders" %}">Winning Bidders</a></li>
+        <li><a href="{% url "artshow-winning-bidders-pdf" %}">Winning Bidders</a></li>
     </ul>
 
     <h3>CSV Reports</h3>
     <ul>
-        <li><a href="{% url "artshow.csvreports.artists" %}">Artists</a></li>
-        <li><a href="{% url "artshow.csvreports.pieces" %}">Pieces</a></li>
-        <li><a href="{% url "artshow.csvreports.bidders" %}">Bidders</a></li>
-        <li><a href="{% url "artshow.csvreports.payments" %}">Payments</a></li>
-        <li><a href="{% url "artshow.csvreports.cheques" %}">Cheques</a></li>
+        <li><a href="{% url "artshow-artists-csv" %}">Artists</a></li>
+        <li><a href="{% url "artshow-pieces-csv" %}">Pieces</a></li>
+        <li><a href="{% url "artshow-bidders-csv" %}">Bidders</a></li>
+        <li><a href="{% url "artshow-payments-csv" %}">Payments</a></li>
+        <li><a href="{% url "artshow-cheques-csv" %}">Cheques</a></li>
     </ul>
 {% endblock %}

@@ -64,10 +64,10 @@ def make_paypal_url(request, payment):
               "amount": unicode(payment.amount),
               "shipping": "0",
               "no_shipping": "1",
-              "return": request.build_absolute_uri(reverse("artshow.manage.payment_made_paypal",
+              "return": request.build_absolute_uri(reverse("artshow-manage-payment-paypal",
                                                            args=(payment.artist_id,))),
               "cancel_return": request.build_absolute_uri(
-                  reverse("artshow.manage.payment_cancelled_paypal",
+                  reverse("artshow-manage-payment-paypal-cancelled",
                           args=(payment.artist_id,)) + "?" + urlencode({"item_number": item_number})),
               "currency_code": "USD",
               "bn": "PP-BuyNow",

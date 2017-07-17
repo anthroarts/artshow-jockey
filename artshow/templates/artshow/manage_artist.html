@@ -3,7 +3,7 @@
 {% block breadcrumbs %}
     <ul class="breadcrumbs">
         <li><a href="/">Home</a></li>
-        <li><a href="{% url 'artshow.manage.index' %}">Manage Artists</a></li>
+        <li><a href="{% url 'artshow-manage' %}">Manage Artists</a></li>
         <li class="current">{{ artist.artistname }}</li>
     </ul>
 {% endblock %}
@@ -15,7 +15,7 @@
     </style>
 
     <h2>Personal Details {% if can_edit_personal_details %}
-        <a href="{% url 'artshow.manage.person_details' artist.artistid %}">Edit</a>{% endif %}</h2>
+        <a href="{% url 'artshow-manage-person-details' artist.artistid %}">Edit</a>{% endif %}</h2>
 
     <table>
         {% with person=artist.person %}
@@ -40,7 +40,7 @@
     </table>
 
     <h2>Artist Details {% if can_edit_artist_details %}
-        <a href="{% url 'artshow.manage.artist_details' artist.artistid %}">Edit</a>{% endif %}</h2>
+        <a href="{% url 'artshow-manage-artist-details' artist.artistid %}">Edit</a>{% endif %}</h2>
 
     <table>
         <tr>
@@ -73,7 +73,7 @@
 
 
 
-    <h2>Space Reservations {% if can_edit_space_reservations %}<a href="{% url "artshow.manage.spaces" artist.pk %}">
+    <h2>Space Reservations {% if can_edit_space_reservations %}<a href="{% url "artshow-manage-spaces" artist.pk %}">
         Edit</a>{% endif %}</h2>
     {% if allocations %}
     <table>
@@ -100,12 +100,12 @@
 
     <h2>Piece Details
         {% if can_edit_piece_details %}
-            <a href="{% url 'artshow.manage.pieces' artist.pk %}">Edit</a>
+            <a href="{% url 'artshow-manage-pieces' artist.pk %}">Edit</a>
         {% endif %}
         {% if artist.piece_set.count %}
-            <a href="{% url 'artshow.manage.downloadcsv' artist.pk %}">Download as CSV</a>
-            <a href="{% url 'artshow.manage.bid_sheets' artist.pk %}">Preview Bid Sheets</a>
-            <a href="{% url 'artshow.manage.control_forms' artist.pk %}">Preview Control Forms</a>
+            <a href="{% url 'artshow-manage-csv' artist.pk %}">Download as CSV</a>
+            <a href="{% url 'artshow-manage-bidsheets' artist.pk %}">Preview Bid Sheets</a>
+            <a href="{% url 'artshow-manage-controlforms' artist.pk %}">Preview Control Forms</a>
         {% endif %}
     </h2>
 
@@ -135,7 +135,7 @@
         </tr>
     </table>
 
-    <h2>Accounting <a href="{% url 'artshow.manage.make_payment' artist.pk %}">Make Payment</a></h2>
+    <h2>Accounting <a href="{% url 'artshow-manage-make-payment' artist.pk %}">Make Payment</a></h2>
 
     <table>
         <tr>

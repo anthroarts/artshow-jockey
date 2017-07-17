@@ -247,7 +247,7 @@ def spaces(request, artist_id):
                         continue
                 allocation.requested = requested
                 allocation.save()
-            return redirect(reverse('artshow.manage.artist', args=(artist_id,)))
+            return redirect(reverse('artshow-manage-artist', args=(artist_id,)))
     else:
         formset = RequestSpaceFormSet(initial=[{'requested': s.artist_allocation.requested if s.artist_allocation is not None else 0,
                                                 'space': s} for s in spaces])
@@ -276,7 +276,7 @@ def artist_details(request, artist_id):
         if form.is_valid():
             form.save()
             messages.info(request, "Changes to your artist details have been saved")
-            return redirect(reverse('artshow.manage.artist', args=(artist_id,)))
+            return redirect(reverse('artshow-manage-artist', args=(artist_id,)))
     else:
         form = ArtistModelForm(instance=artist)
 
@@ -301,7 +301,7 @@ def person_details(request, artist_id):
         if form.is_valid():
             form.save()
             messages.info(request, "Changes to your personal details have been saved")
-            return redirect(reverse('artshow.manage.artist', args=(artist_id,)))
+            return redirect(reverse('artshow-manage-artist', args=(artist_id,)))
     else:
         form = PersonModelForm(instance=person)
 
@@ -340,7 +340,7 @@ def make_payment(request, artist_id):
                 payment.description = "Mail-in pending receipt"
             form.save()
             if via_mail:
-                return redirect(reverse("artshow.manage.payment_made_mail", args=(artist_id,)))
+                return redirect(reverse("artshow-manage-payment-mail", args=(artist_id,)))
             else:
                 url = make_paypal_url(request, payment)
                 return redirect(url)

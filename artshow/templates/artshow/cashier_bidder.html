@@ -2,7 +2,7 @@
 {% block breadcrumbs %}
     <ul class="breadcrumbs">
         <li><a href="/">Home</a></li>
-        <li><a href="{% url 'artshow.cashier.cashier' %}">Casher</a></li>
+        <li><a href="{% url 'artshow-cashier' %}">Casher</a></li>
         <li class="current">Showing Artists</li>
     </ul>
 {% endblock %}
@@ -205,7 +205,7 @@
 </table>
 
 {% if bidder.invoice_set %}
-    <a href="{% url "artshow.cashier.cashier_bidder_invoices" bidder.id %}">{{ bidder.invoice_set.count }} invoice{{ bidder.invoice_set.count|pluralize }} found</a>
+    <a href="{% url 'artshow-cashier-bidder-invoices' bidder.id %}">{{ bidder.invoice_set.count }} invoice{{ bidder.invoice_set.count|pluralize }} found</a>
 {% endif %}
 {% if pending_bids %}
 <hr>
@@ -218,7 +218,7 @@
 </table>
 {% endif %}
 <hr>
-<form action="{% url 'artshow.cashier.cashier_bidder' bidder_id=bidder.id %}" method="POST">{% csrf_token %}
+<form action="{% url 'artshow-cashier-bidder' bidder_id=bidder.id %}" method="POST">{% csrf_token %}
 
 <table class="selecttable purchasetable" precision="{{ money_precision }}" taxrate="{{ tax_rate }}" amountclass="amount">
 <tr><th><label>Select All<input type="checkbox" class="selectallcontrol"/></label></th><th>Piece</th><th>Artist</th><th>Amount</th></tr>

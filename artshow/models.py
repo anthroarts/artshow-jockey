@@ -7,12 +7,15 @@ __all__ = ["Allocation", "Artist", "ArtistManager", "BatchScan", "Bid", "Bidder"
            "InvoicePayment", "Payment", "PaymentType", "Piece", "Product", "Space", "Task",
            "Agent", "validate_space", "validate_space_increments"]
 
+from decimal import Decimal
+
 from django.db import models
 from django.db.models import Sum, Q
-from django.core.exceptions import ValidationError
-from . import mod11codes
 from django.contrib.auth.models import User
-from decimal import Decimal
+from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse
+
+from . import mod11codes
 from .conf import settings
 
 
@@ -476,8 +479,7 @@ class Invoice (models.Model):
         return u"Invoice %d for %s" % (self.id, self.payer)
 
     def get_absolute_url(self):
-        from django.core.urlresolvers import reverse
-        return reverse('artshow.cashier.cashier_invoice', args=[str(self.id)])
+        return reverse('artshow-cashier-invoice', args=[str(self.id)])
 
     class Meta:
         permissions = (

@@ -2,7 +2,7 @@
 {% block breadcrumbs %}
     <ul class="breadcrumbs">
         <li><a href="/">Home</a></li>
-        <li><a href="{% url 'artshow.cashier.cashier' %}">Cashier</a></li>
+        <li><a href="{% url 'artshow-cashier' %}">Cashier</a></li>
         <li class="current">Invoices for {{ bidder.person.name }}</li>
     </ul>
 {% endblock %}
@@ -14,7 +14,7 @@
     <tr><th>Invoice ID</th><th>Number of Items</th><th>Amount</th></tr>
     {% for inv in invoices %}
     <tr>
-        <td><a href="{% url "artshow.cashier.cashier_invoice" inv.id %}">{{ inv.id }}</a></td>
+        <td><a href="{% url 'artshow-cashier-invoice' inv.id %}">{{ inv.id }}</a></td>
         <td>{{ inv.invoiceitem_set.count }}</td>
         <td class="money">{{ inv.total_paid|floatformat:money_precision }}</td>
     </tr>

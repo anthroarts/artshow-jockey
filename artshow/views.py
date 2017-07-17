@@ -15,7 +15,7 @@ def home(request):
     if request.user.has_module_perms('artshow'):
         return redirect(index)
     elif request.user.is_authenticated():
-        return redirect('artshow.manage.index')
+        return redirect('artshow-manage')
     else:
         return render(request, "artshow/home.html")
 
