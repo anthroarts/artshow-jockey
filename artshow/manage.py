@@ -146,7 +146,7 @@ def downloadcsv(request, artist_id):
 
     field_names = ['pieceid', 'code', 'title', 'media', 'min_bid', 'buy_now', 'adult', 'not_for_sale']
 
-    response = HttpResponse(mimetype="text/csv")
+    response = HttpResponse(content_type="text/csv")
     response['Content-Disposition'] = "attachment; filename=" + filename
 
     c = utils.UnicodeCSVWriter(response)
@@ -162,7 +162,7 @@ def downloadcsv(request, artist_id):
 def bid_sheets(request, artist_id):
     artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
 
-    response = HttpResponse(mimetype="application/pdf")
+    response = HttpResponse(content_type="application/pdf")
     bidsheets.generate_bidsheets_for_artists(output=response, artists=[artist])
     return response
 
@@ -171,7 +171,7 @@ def bid_sheets(request, artist_id):
 def control_forms(request, artist_id):
     artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
 
-    response = HttpResponse(mimetype="application/pdf")
+    response = HttpResponse(content_type="application/pdf")
     bidsheets.generate_control_forms(output=response, artists=[artist])
     return response
 

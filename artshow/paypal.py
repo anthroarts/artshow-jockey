@@ -159,4 +159,4 @@ def ipn_handler(request):
     paypal_logger.debug("received IPN notification with query: %s ", query_string)
     ipn_received.send(None, query=query_string)
 
-    return HttpResponse("", mimetype="text/plain")
+    return HttpResponse("", content_type="text/plain")

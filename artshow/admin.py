@@ -209,7 +209,7 @@ class ArtistAdmin(AjaxSelectAdmin):
     def print_bidsheets(self, request, queryset):
         import bidsheets
 
-        response = HttpResponse(mimetype="application/pdf")
+        response = HttpResponse(content_type="application/pdf")
         bidsheets.generate_bidsheets_for_artists(output=response, artists=queryset)
         self.message_user(request, "Bid sheets printed.")
         return response
@@ -219,7 +219,7 @@ class ArtistAdmin(AjaxSelectAdmin):
     def print_mailing_labels(self, request, queryset):
         import bidsheets
 
-        response = HttpResponse(mimetype="application/pdf")
+        response = HttpResponse(content_type="application/pdf")
         bidsheets.generate_mailing_labels(output=response, artists=queryset)
         self.message_user(request, "Mailing labels printed.")
         return response
@@ -229,7 +229,7 @@ class ArtistAdmin(AjaxSelectAdmin):
     def print_control_forms( self, request, artists ):
         import bidsheets
 
-        response = HttpResponse(mimetype="application/pdf")
+        response = HttpResponse(content_type="application/pdf")
         bidsheets.generate_control_forms(output=response, artists=artists)
         self.message_user(request, "Control Forms printed.")
         return response
@@ -239,7 +239,7 @@ class ArtistAdmin(AjaxSelectAdmin):
     def print_piece_stickers( self, request, artists ):
         import bidsheets
 
-        response = HttpResponse(mimetype="application/pdf")
+        response = HttpResponse(content_type="application/pdf")
         pieces = Piece.objects.filter(artist__in=artists).order_by('artist', 'pieceid')
         bidsheets.generate_piece_stickers(response, pieces)
         self.message_user(request, "Piece Stickers printed.")
@@ -448,7 +448,7 @@ class PieceAdmin(admin.ModelAdmin):
     def print_bidsheets(self, request, queryset):
         import bidsheets
 
-        response = HttpResponse(mimetype="application/pdf")
+        response = HttpResponse(content_type="application/pdf")
         bidsheets.generate_bidsheets(output=response, pieces=queryset)
         self.message_user(request, "Bid sheets printed.")
         return response
