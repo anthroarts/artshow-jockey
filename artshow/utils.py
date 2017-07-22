@@ -8,7 +8,6 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
 from .conf import settings
-from django.template import Context
 from django.template.loader import get_template
 from django.core.mail import send_mail
 
@@ -112,7 +111,7 @@ def send_password_reset_email(artist, user, subject=None, template=None):
         'artshow_settings': artshow_settings
     }
 
-    body = template.render(Context(c))
+    body = template.render(c)
     body = wrap(body, default_wrap_cols)
     send_mail(subject, body, settings.ARTSHOW_EMAIL_SENDER, [user.email], fail_silently=False)
 
