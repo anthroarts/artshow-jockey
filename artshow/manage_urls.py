@@ -23,7 +23,7 @@ urlpatterns = [
     url(r'^artist/(?P<artist_id>\d+)/makepayment/complete/mail/$', manage.payment_made_mail, name='artshow-manage-payment-mail'),
     url(r'^artist/(?P<artist_id>\d+)/makepayment/complete/paypal/$', manage.payment_made_paypal, name='artshow-manage-payment-paypal'),
     url(r'^artist/(?P<artist_id>\d+)/makepayment/cancelled/paypal/$', manage.payment_cancelled_paypal, name='artshow-manage-payment-paypal-cancelled'),
-    url(r'^register/$', register.main),
+    url(r'^register/$', register.main, name='artshow-register'),
     url(r'^ipn/$', paypal.ipn_handler),
     url(r'^announcement/$', announcement.index, name="view_announcements"),
     url(r'^announcement/(?P<announcement_id>\d+)/$', announcement.show, name='artshow-announcement'),
