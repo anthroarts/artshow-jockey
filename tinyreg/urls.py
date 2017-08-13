@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls import url
 import django.contrib.auth.views
 
@@ -26,6 +27,7 @@ urlpatterns = [
             'template_name': 'accounts/password_reset_form.html',
             'email_template_name': 'accounts/password_reset_email.html',
             'subject_template_name': 'accounts/password_reset_subject.txt',
+            'from_email': settings.ARTSHOW_EMAIL_SENDER,
             'password_reset_form': CaptchaPasswordResetForm,
         },
         name="password_reset"),
