@@ -6,5 +6,7 @@ local_settings.py
 data/
 con_specific
 .idea
+.vscode
 artshow-utils/*.csv
 static/
+env/
