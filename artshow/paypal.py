@@ -1,5 +1,5 @@
 from decimal import Decimal
-from urllib import urlopen
+from urllib2 import urlopen
 from urlparse import parse_qs
 import datetime
 from django.core.signing import Signer
