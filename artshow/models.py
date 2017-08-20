@@ -126,7 +126,7 @@ class Artist (models.Model):
 
     def deduction_remaining_with_details(self):
         """Calculate space fee reduction remaining. Takes into account spaces reserved, space fees already applied"""
-        total_requested_cost = 0
+        total_requested_cost = Decimal(0)
         for a in self.allocation_set.all():
             total_requested_cost += a.space.price * a.requested
         space_fee = PaymentType(id=settings.ARTSHOW_SPACE_FEE_PK)

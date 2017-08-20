@@ -330,6 +330,7 @@ def make_payment(request, artist_id):
     total_requested_cost, deduction_to_date, deduction_remaining, payment_remaining = \
         artist.payment_remaining_with_details()
 
+    payment_remaining = payment_remaining.quantize(Decimal('1.00'))
     payment = Payment(artist=artist, amount=payment_remaining, payment_type=payment_pending,
                       description="PayPal pending confirmation", date=now())
     if request.method == "POST":
