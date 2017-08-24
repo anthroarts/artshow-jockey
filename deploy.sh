@@ -7,7 +7,7 @@ git pull
 ./manage.py migrate
 
 # Update /static
-./manage.py collectstatic
+./manage.py collectstatic --noinput
 
 # Trigger a reload of the application
 touch artshowjockey/wsgi.py
