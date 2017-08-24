@@ -104,8 +104,10 @@
         {% endif %}
         {% if artist.piece_set.count %}
             <a href="{% url 'artshow-manage-csv' artist.pk %}">Download as CSV</a>
+{# Disabled while form generation is reworked.
             <a href="{% url 'artshow-manage-bidsheets' artist.pk %}">Preview Bid Sheets</a>
             <a href="{% url 'artshow-manage-controlforms' artist.pk %}">Preview Control Forms</a>
+#}
         {% endif %}
     </h2>
 
