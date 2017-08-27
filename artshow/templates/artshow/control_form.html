@@ -1,0 +1,128 @@
+<html>
+<head>
+<title>Art Show Control Form: {{ artist.name }}</title>
+<style>
+h1 {
+    font-size: 16pt;
+}
+
+.shaded {
+    background-color: lightgray;
+}
+
+div.artist-number {
+    text-align: right;
+    position: absolute;
+    margin: 8;
+    padding: 2;
+    top: 0;
+    right: 0;
+}
+
+div.artist-number-box {
+    display: inline-block;
+    border: 1px solid black;
+    width: 5em;
+    padding: 2;
+}
+
+div.field-label {
+    padding: 2 2 10 2;
+    display: inline-block;
+    width: 8em;
+    text-align: right;
+}
+
+div.field {
+  padding: 2;
+  display: inline-block;
+  width: 15em;
+  border-bottom: 1px solid black;
+}
+
+div.container {
+  position: relative;
+}
+
+div.column-two {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+
+th, td {
+  padding: 2;
+}
+</style>
+</head>
+<body>
+<h1>{{ convention.name }} Art Show Control Form</h1>
+<div class="artist-number">Artist Number <div class="artist-number-box shaded">4</div></div>
+
+<div class="container">
+  <div>
+    <div><div class="field-label">Legal name</div><div class="field"></div></div>
+    <div><div class="field-label">Artist name</div><div class="field"></div></div>
+    <div><div class="field-label">Address</div><div class="field"></div></div>
+    <div><div class="field-label">City</div><div class="field"></div></div>
+    <div><div class="field-label">State/province</div><div class="field"></div></div>
+    <div><div class="field-label">ZIP/postal code</div><div class="field"></div></div>
+    <div><div class="field-label">Country</div><div class="field"></div></div>
+    <div><div class="field-label">Telephone</div><div class="field"></div></div>
+  </div>
+  <div class="column-two">
+    <div><div class="field-label">Legal name</div><div class="field"></div></div>
+    <div><div class="field-label">Artist name</div><div class="field"></div></div>
+    <div><div class="field-label">Address</div><div class="field"></div></div>
+    <div><div class="field-label">City</div><div class="field"></div></div>
+    <div><div class="field-label">State/province</div><div class="field"></div></div>
+    <div><div class="field-label">ZIP/postal code</div><div class="field"></div></div>
+    <div><div class="field-label">Country</div><div class="field"></div></div>
+    <div><div class="field-label">Telephone</div><div class="field"></div></div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <th>Piece no.</th>
+    <th>Title of piece</th>
+    <th>Adult (Y/N)</th>
+    <th>Minimum bid</th>
+    <th>Buy now price (opt.)</th>
+    <th class="shaded">Location</th>
+    <th class="shaded">Winning bidder #</th>
+    <th class="shaded">Winning bid</th>
+  </thead>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td class="shaded">&nbsp;</td>
+    <td class="shaded">&nbsp;</td>
+    <td class="shaded">&nbsp;</td>
+  </tr>
+</table>
+
+<div class="container">
+  <div>
+    <div><div class="field-label">Artist check-in</div><div class="field"></div></div>
+    <div><div class="field-label">Artist check-out</div><div class="field"></div></div>
+  </div>
+  <div class="column-two">
+    <div><div class="field-label">Art show staff check-in</div><div class="field"></div></div>
+    <div><div class="field-label">Art show staff check-out</div><div class="field"></div></div>
+  </div>
+</div>
+</body>
+</html>
