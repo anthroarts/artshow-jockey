@@ -2,6 +2,10 @@
 <head>
 <title>Art Show Control Form: {{ artist.name }}</title>
 <style>
+body {
+  width: 8.5in;
+}
+
 h1 {
     font-size: 16pt;
 }
@@ -65,22 +69,25 @@ th, td {
 </style>
 </head>
 <body>
-<h1>{{ convention.name }} Art Show Control Form</h1>
-<div class="artist-number">Artist Number <div class="artist-number-box shaded">4</div></div>
+<div class="container">
+  <h1>{{ SITE_NAME }} Control Form</h1>
+  <div class="artist-number">Artist Number <div class="artist-number-box shaded">4</div></div>
+</div>
 
 <div class="container">
+  {% with person=artist.person %}
   <div>
-    <div><div class="field-label">Legal name</div><div class="field"></div></div>
-    <div><div class="field-label">Artist name</div><div class="field"></div></div>
-    <div><div class="field-label">Address</div><div class="field"></div></div>
-    <div><div class="field-label">City</div><div class="field"></div></div>
-    <div><div class="field-label">State/province</div><div class="field"></div></div>
-    <div><div class="field-label">ZIP/postal code</div><div class="field"></div></div>
-    <div><div class="field-label">Country</div><div class="field"></div></div>
-    <div><div class="field-label">Telephone</div><div class="field"></div></div>
+    <div><div class="field-label">Legal name</div><div class="field">{{ person.name }}</div></div>
+    <div><div class="field-label">Artist name</div><div class="field">{{ artist.artistname }}</div></div>
+    <div><div class="field-label">Address</div><div class="field">{{ person.address1 }}</div></div>
+    <div><div class="field-label">City</div><div class="field">{{ person.city }}</div></div>
+    <div><div class="field-label">State/province</div><div class="field">{{ person.state }}</div></div>
+    <div><div class="field-label">ZIP/postal code</div><div class="field">{{ person.postcode }}</div></div>
+    <div><div class="field-label">Country</div><div class="field">{{ person.country }}</div></div>
+    <div><div class="field-label">Telephone</div><div class="field">{{ person.phone }}</div></div>
   </div>
   <div class="column-two">
-    <div><div class="field-label">Legal name</div><div class="field"></div></div>
+    <div><div class="field-label">E-mail</div><div class="field">{{ person.email }}</div></div>
     <div><div class="field-label">Artist name</div><div class="field"></div></div>
     <div><div class="field-label">Address</div><div class="field"></div></div>
     <div><div class="field-label">City</div><div class="field"></div></div>
@@ -89,6 +96,7 @@ th, td {
     <div><div class="field-label">Country</div><div class="field"></div></div>
     <div><div class="field-label">Telephone</div><div class="field"></div></div>
   </div>
+  {% endwith %}
 </div>
 
 <table>
@@ -102,16 +110,20 @@ th, td {
     <th class="shaded">Winning bidder #</th>
     <th class="shaded">Winning bid</th>
   </thead>
+  {% for piece in pieces %}
   <tr>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td class="shaded">&nbsp;</td>
-    <td class="shaded">&nbsp;</td>
-    <td class="shaded">&nbsp;</td>
+    <td>{{ piece.pieceid }}</td>
+    <td>{{ piece.name }}</td>
+    <td>{{ piece.adult|yesno }}</td>
+    <td>{% if piece.not_for_sale %}NFS{% else %}{{ piece.min_bid }}{% endif %}</td>
+    <td>{{ piece.buy_now }}</td>
+    <td class="shaded">{{ piece.location }}</td>
+    {% with bid=piece.top_bid %}
+    <td class="shaded">{{ bid.bidder.id }}</td>
+    <td class="shaded">{{ bid.amount }}</td>
+    {% endwith %}
   </tr>
+  {% endfor %}
 </table>
 
 <div class="container">
