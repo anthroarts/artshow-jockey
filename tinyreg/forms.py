@@ -22,7 +22,8 @@ class ReCaptchaField(forms.CharField):
         recaptcha_challenge_value = smart_unicode(values[0])
         recaptcha_response_value = smart_unicode(values[1])
         check_captcha = captcha.submit(recaptcha_challenge_value,
-                                       recaptcha_response_value, settings.RECAPTCHA_PRIVATE_KEY, {})
+                                       recaptcha_response_value,
+                                       settings.RECAPTCHA_PRIVATE_KEY, {})
         if not check_captcha.is_valid:
             raise forms.ValidationError(self.error_messages['captcha_invalid'])
         return values[0]
@@ -33,7 +34,8 @@ class ReCaptchaWidget(forms.widgets.Widget):
     recaptcha_response_name = 'recaptcha_response_field'
 
     def render(self, name, value, attrs=None):
-        return mark_safe(u'%s' % captcha.displayhtml(settings.RECAPTCHA_PUBLIC_KEY, use_ssl=True))
+        return mark_safe(u'%s' % captcha.displayhtml(
+            settings.RECAPTCHA_PUBLIC_KEY, use_ssl=True))
 
     def value_from_datadict(self, data, files, name):
         return [data.get(self.recaptcha_challenge_name, None),
