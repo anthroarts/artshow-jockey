@@ -1,5 +1,6 @@
 from django.contrib import admin
-from tinyannounce.models import *
+from .models import Announcement, AnnouncementSeen
+
 
 class AnnouncementSeenInline(admin.TabularInline):
     model = AnnouncementSeen

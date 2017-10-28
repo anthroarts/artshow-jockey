@@ -1,5 +1,6 @@
 from .models import Announcement
 
+
 def get_announcement_counts(user, announcements=None):
     if announcements is None:
         announcements = Announcement.objects.active()
