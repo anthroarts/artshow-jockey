@@ -351,6 +351,7 @@ class Product (models.Model):
 
 class Bid (models.Model):
     bidder = models.ForeignKey(Bidder)
+    bidderid = models.ForeignKey(BidderId)
     amount = models.DecimalField(max_digits=5, decimal_places=0)
     piece = models.ForeignKey(Piece)
     buy_now_bid = models.BooleanField(default=False)
@@ -361,8 +362,7 @@ class Bid (models.Model):
     is_top_bid = property(_is_top_bid)
 
     def __unicode__(self):
-        bidderids = [bidderid.id for bidderid in self.bidder.bidderid_set.all()]
-        return "%s (%s) %s $%s on %s" % (self.bidder.name(), ",".join(bidderids),
+        return "%s (%s) %s $%s on %s" % (self.bidder.name(), self.bidderid,
                                          "INVALID BID" if self.invalid else "bid", self.amount, self.piece)
 
     class Meta:
@@ -392,9 +392,13 @@ class Bid (models.Model):
                 raise ValidationError("Buy Now bid cannot be less than Buy Now price")
         if self.amount < self.piece.min_bid:
             raise ValidationError("Bid cannot be less than Min Bid")
-#	def save ( self ):
-#		self.validate()
-#		super(Bid,self).save()
+
+    def save(self, **kwargs):
+        try:
+            self.bidderid
+        except BidderId.DoesNotExist:
+            self.bidderid = self.bidder.bidderid_set.first()
+        super(Bid, self).save(**kwargs)
 
 
 class EmailTemplate (models.Model):
