@@ -22,6 +22,7 @@ urlpatterns = [
         name='artshow-bulk-add-bidders'),
     url(r'^entry/bids/$', addbidder.bid_bulk_add,
         name='artshow-bulk-add-bids'),
+    url(r'^entry/bids/mobile/$', bid_entry.BidEntryView.as_view()),
     url(r'^entry/bids/(?P<artist_id>\d+)/(?P<piece_id>\d+)/$', bid_entry.bids),
     url(r'^entry/auction_bids/(?P<adult>[yn])/$', voice_auction.auction_bids),
     url(r'^entry/order_auction/(?P<adult>[yn])/$', voice_auction.order_auction,

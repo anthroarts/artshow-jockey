@@ -1,6 +1,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bid Sheet Entry</title>
 <style>
 .header {
   display: grid;
@@ -30,14 +31,26 @@
   grid-template-columns: 1fr;
   grid-gap: 10px;
 }
+
+input[type="text"] {
+  font-size: 18pt;
+}
+
+input[type="checkbox"] {
+  transform: scale(2);
+}
+
+#save {
+  height: 40px;
+}
 </style>
 </head>
 <body>
 <div class="header">
   <div>Artist Id</div>
-  <input type="number" id="artist" autofocus>
+  <input type="text" size="4" pattern="[0-9]*" inputmode="numeric" id="artist" autofocus>
   <div>Piece Id</div>
-  <input type="number" id="piece">
+  <input type="text" size="4" pattern="[0-9]*" inputmode="numeric" id="piece">
   <button type="button" id="load">Load</button>
 </div>
 <hr>
@@ -46,20 +59,20 @@
   <div>Bid</div>
   <div>AB</div>
   <div>1.</div>
-  <input type="number" class="bidder">
-  <input type="number" class="bid">
+  <input type="text" size="8" pattern="[0-9]*" inputmode="numeric" class="bidder">
+  <input type="text" size="4" pattern="[0-9]*" inputmode="numeric" class="bid">
   <input type="checkbox" class="autobuy">
   <div>2.</div>
-  <input type="number" class="bidder">
-  <input type="number" class="bid">
+  <input type="text" size="8" pattern="[0-9]*" inputmode="numeric" class="bidder">
+  <input type="text" size="4" pattern="[0-9]*" inputmode="numeric" class="bid">
   <input type="checkbox" class="autobuy">
   <div>3.</div>
-  <input type="number" class="bidder">
-  <input type="number" class="bid">
+  <input type="text" size="8" pattern="[0-9]*" inputmode="numeric" class="bidder">
+  <input type="text" size="4" pattern="[0-9]*" inputmode="numeric" class="bid">
   <input type="checkbox" class="autobuy">
   <div>4.</div>
-  <input type="number" class="bidder">
-  <input type="number" class="bid">
+  <input type="text" size="8" pattern="[0-9]*" inputmode="numeric" class="bidder">
+  <input type="text" size="4" pattern="[0-9]*" inputmode="numeric" class="bid">
   <input type="checkbox" class="autobuy">
 </div>
 <hr>

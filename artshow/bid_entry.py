@@ -1,8 +1,13 @@
 from django.contrib.auth.decorators import permission_required
 from django.http import JsonResponse
+from django.views.generic import TemplateView
 import json
 
 from .models import Artist, Piece
+
+
+class BidEntryView(TemplateView):
+    template_name = 'artshow/bid_entry.html'
 
 
 def error_response(field, message):
