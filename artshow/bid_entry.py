@@ -1,22 +1,24 @@
 from django.contrib.auth.decorators import permission_required
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 import json
 
-from .models import Artist, Piece
+from .models import Artist, Bid, BidderId, Piece
 
 
 class BidEntryView(TemplateView):
     template_name = 'artshow/bid_entry.html'
 
 
-def error_response(field, message):
-    return JsonResponse({
-        'error': {
-            'field': field,
-            'message': message,
-        }
-    })
+def error_response(field, message, index=None):
+    error = {
+        'field': field,
+        'message': message,
+    }
+    if index is not None:
+        error['index'] = index
+    return JsonResponse({'error': error})
 
 
 @permission_required('artshow.add_bid')
@@ -34,7 +36,7 @@ def bids(request, artist_id, piece_id):
     if request.method == 'GET':
         return get_bids(piece)
     elif request.method == 'POST':
-        return set_bids(piece, json.loads(request.body))
+        return set_bids(piece, json.loads(request.body)['bids'])
 
 
 def get_bids(piece):
@@ -48,5 +50,45 @@ def get_bids(piece):
     })
 
 
-def set_bids(piece, body):
-    pass
+def set_bids(piece, bids):
+    existing_bids = piece.bid_set.exclude(invalid=True).order_by('amount')
+
+    for i in range(len(bids)):
+        bid = bids[i]
+
+        try:
+            bidderid = BidderId.objects.get(id=bid['bidder'])
+        except BidderId.DoesNotExist:
+            return error_response('bidder', 'Invalid bidder ID', i)
+
+        if i < len(existing_bids):
+            # Skip this bid if it is unchanged. Otherwise delete it and all
+            # following bids so that the new set can be re-validated.
+            existing_bid = existing_bids[i]
+            if existing_bid.bidderid is bidderid and \
+               existing_bid.amount == bid['bid'] and \
+               existing_bid.but_now_bid == bid['buy_now_bid']:
+                continue  # Next bid
+            else:
+                for j in range(i, len(existing_bids)):
+                    existing_bids[j].delete()
+                existing_bids = existing_bids[:i]
+
+        new_bid = Bid(piece=piece,
+                      bidder=bidderid.bidder,
+                      bidderid=bidderid,
+                      amount=bid['bid'],
+                      buy_now_bid=bid['buy_now_bid'])
+
+        try:
+            new_bid.validate()
+        except ValidationError as e:
+            return error_response('bid', e.message, i)
+
+        new_bid.save()
+
+    # Handle bids that have been deleted.
+    for i in range(len(bids), len(existing_bids)):
+        existing_bids[i].delete()
+
+    return get_bids(piece)
