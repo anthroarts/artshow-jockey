@@ -105,4 +105,3 @@ def set_bids(piece, bids):
         return get_bids(piece)
     except ValidationError as e:
         return error_response('bid', e.message, i)
-

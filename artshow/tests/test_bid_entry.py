@@ -72,22 +72,19 @@ class BidEntryTests(TestCase):
 
     def test_piece_no_bids(self):
         response = self.client.get('/artshow/entry/bids/1/1/')
-        expected = {'bids': []}
-        self.assertEquals(response.json(), expected)
+        self.assertEquals(response.json()['bids'], [])
 
     def test_piece_two_bids(self):
         response = self.client.get('/artshow/entry/bids/1/2/')
-        expected = {
-            'bids': [
-                {'bidder': '0365327',
-                 'bid': 10,
-                 'buy_now_bid': False},
-                {'bidder': '0365327',
-                 'bid': 20,
-                 'buy_now_bid': False},
-            ]
-        }
-        self.assertEquals(response.json(), expected)
+        expected = [
+            {'bidder': '0365327',
+             'bid': 10,
+             'buy_now_bid': False},
+            {'bidder': '0365327',
+             'bid': 20,
+             'buy_now_bid': False},
+        ]
+        self.assertEquals(response.json()['bids'], expected)
 
     def test_invalid_bidder(self):
         bids = [
@@ -121,7 +118,7 @@ class BidEntryTests(TestCase):
             ]
         }
         response = self.postJson('/artshow/entry/bids/1/1/', expected)
-        self.assertEquals(response.json(), expected)
+        self.assertEquals(response.json()['bids'], expected['bids'])
 
     def test_replace_bids(self):
         expected = {
@@ -132,7 +129,7 @@ class BidEntryTests(TestCase):
             ]
         }
         response = self.postJson('/artshow/entry/bids/1/2/', expected)
-        self.assertEquals(response.json(), expected)
+        self.assertEquals(response.json()['bids'], expected['bids'])
 
     def test_piece_cannot_buy_now(self):
         bids = [
@@ -155,17 +152,15 @@ class BidEntryTests(TestCase):
 
         # Original bids should be unchanged.
         response = self.client.get('/artshow/entry/bids/1/2/')
-        expected = {
-            'bids': [
-                {'bidder': '0365327',
-                 'bid': 10,
-                 'buy_now_bid': False},
-                {'bidder': '0365327',
-                 'bid': 20,
-                 'buy_now_bid': False},
-            ]
-        }
-        self.assertEquals(response.json(), expected)
+        expected = [
+            {'bidder': '0365327',
+             'bid': 10,
+             'buy_now_bid': False},
+            {'bidder': '0365327',
+             'bid': 20,
+             'buy_now_bid': False},
+        ]
+        self.assertEquals(response.json()['bids'], expected)
 
     def test_non_monotonic_bids(self):
         bids = [
@@ -188,15 +183,12 @@ class BidEntryTests(TestCase):
 
         # Original bids should be unchanged.
         response = self.client.get('/artshow/entry/bids/1/2/')
-        expected = {
-            'bids': [
-                {'bidder': '0365327',
-                 'bid': 10,
-                 'buy_now_bid': False},
-                {'bidder': '0365327',
-                 'bid': 20,
-                 'buy_now_bid': False},
-            ]
-        }
-        self.assertEquals(response.json(), expected)
-
+        expected = [
+            {'bidder': '0365327',
+             'bid': 10,
+             'buy_now_bid': False},
+            {'bidder': '0365327',
+             'bid': 20,
+             'buy_now_bid': False},
+        ]
+        self.assertEquals(response.json()['bids'], expected)
