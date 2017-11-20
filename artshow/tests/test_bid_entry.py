@@ -153,6 +153,20 @@ class BidEntryTests(TestCase):
         }
         self.assertEquals(response.json(), expected)
 
+        # Original bids should be unchanged.
+        response = self.client.get('/artshow/entry/bids/1/2/')
+        expected = {
+            'bids': [
+                {'bidder': '0365327',
+                 'bid': 10,
+                 'buy_now_bid': False},
+                {'bidder': '0365327',
+                 'bid': 20,
+                 'buy_now_bid': False},
+            ]
+        }
+        self.assertEquals(response.json(), expected)
+
     def test_non_monotonic_bids(self):
         bids = [
             {'bidder': '0365327',
@@ -169,6 +183,20 @@ class BidEntryTests(TestCase):
                 'index': 1,
                 'message': 'New bid must be higher than existing bids',
             }
+        }
+        self.assertEquals(response.json(), expected)
+
+        # Original bids should be unchanged.
+        response = self.client.get('/artshow/entry/bids/1/2/')
+        expected = {
+            'bids': [
+                {'bidder': '0365327',
+                 'bid': 10,
+                 'buy_now_bid': False},
+                {'bidder': '0365327',
+                 'bid': 20,
+                 'buy_now_bid': False},
+            ]
         }
         self.assertEquals(response.json(), expected)
 

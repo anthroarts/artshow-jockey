@@ -116,7 +116,13 @@ function updateBids(json, newStatus) {
       bidFields[i].value = json.bids[i].bid;
       buyNowBidCheckboxes[i].checked = json.bids[i].buy_now_bid;
     }
-    statusText.textContent = newStatus;
+
+    let lastUpdated = json['last_updated']
+    if (lastUpdated === null)
+      lastUpdated = 'Never'
+    else
+      lastUpdated = new Date(lastUpdated)
+    statusText.textContent = 'Last updated: ' + lastUpdated;
   }
 }
 
@@ -154,7 +160,7 @@ loadButton.onclick = () => {
     else
       return Promise.reject(response.statusText);
   })
-  .then(json => updateBids(json, 'Loaded.'),
+  .then(json => updateBids(json),
         error => statusText.textContent = 'Error: ' + error);
 };
 
@@ -216,7 +222,7 @@ saveButton.onclick = () => {
     else
       return Promise.reject(response.statusText);
   })
-  .then(json => updateBids(json, 'Saved.'),
+  .then(json => updateBids(json),
         error => statusText.textContent = 'Error: ' + error);
 };
 </script>
