@@ -3,15 +3,16 @@ from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import JsonResponse
+from django.shortcuts import render
 from django.utils import timezone
-from django.views.generic import TemplateView
 import json
 
 from .models import Artist, Bid, BidderId, Piece
 
 
-class BidEntryView(TemplateView):
-    template_name = 'artshow/bid_entry.html'
+@permission_required('artshow.add_bid')
+def bid_entry(request):
+    return render(request, 'artshow/bid_entry.html')
 
 
 def error_response(field, message, index=None):
