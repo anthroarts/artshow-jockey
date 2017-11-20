@@ -377,6 +377,9 @@ class Bid (models.Model):
                 raise ValidationError("New bids cannot be placed on pieces that are not In Show")
             try:
                 top_bid = self.piece.top_bid()
+                print "top bid is", top_bid.amount, type(top_bid.amount)
+                print "this bid is", self.amount, type(self.amount)
+                print "comparison", self.amount <= top_bid.amount
                 if self.amount <= top_bid.amount:
                     raise ValidationError("New bid must be higher than existing bids")
                 if self.piece.buy_now and top_bid.buy_now_bid:

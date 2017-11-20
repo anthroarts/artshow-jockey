@@ -1,5 +1,6 @@
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from ajax_select import urls as ajax_select_urls
 
 import artshow.views
@@ -15,3 +16,5 @@ urlpatterns = [
     url(r'^accounts/', include('tinyreg.urls')),
     url(r'^$', artshow.views.home, name="home"),
 ]
+
+urlpatterns += staticfiles_urlpatterns()

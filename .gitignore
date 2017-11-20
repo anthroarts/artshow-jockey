@@ -4,10 +4,10 @@
 *.swp
 local_settings.py
 .DS_Store
-data/
+/data/
 con_specific
 .idea
 .vscode
 artshow-utils/*.csv
-static/
-env/
+/static/
+/env/

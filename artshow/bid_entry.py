@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
@@ -29,9 +30,9 @@ def bids(request, artist_id, piece_id):
     except Piece.DoesNotExist:
         try:
             Artist.objects.get(artistid=artist_id)
-            return error_response('piece_id', 'Invalid piece ID')
+            return error_response('piece_id', 'Invalid piece ID.')
         except Artist.DoesNotExist:
-            return error_response('artist_id', 'Invalid artist ID')
+            return error_response('artist_id', 'Invalid artist ID.')
 
     if request.method == 'GET':
         return get_bids(piece)
@@ -54,20 +55,21 @@ def set_bids(piece, bids):
     existing_bids = piece.bid_set.exclude(invalid=True).order_by('amount')
 
     for i in range(len(bids)):
-        bid = bids[i]
-
         try:
-            bidderid = BidderId.objects.get(id=bid['bidder'])
+            bidderid = BidderId.objects.get(id=bids[i]['bidder'])
         except BidderId.DoesNotExist:
-            return error_response('bidder', 'Invalid bidder ID', i)
+            return error_response('bidder', 'Invalid bidder ID.', i)
+
+        amount = Decimal(bids[i]['bid'])
+        buy_now_bid = bool(bids[i]['buy_now_bid'])
 
         if i < len(existing_bids):
             # Skip this bid if it is unchanged. Otherwise delete it and all
             # following bids so that the new set can be re-validated.
             existing_bid = existing_bids[i]
             if existing_bid.bidderid is bidderid and \
-               existing_bid.amount == bid['bid'] and \
-               existing_bid.but_now_bid == bid['buy_now_bid']:
+               existing_bid.amount == amount and \
+               existing_bid.but_now_bid == buy_now_bid:
                 continue  # Next bid
             else:
                 for j in range(i, len(existing_bids)):
@@ -77,8 +79,8 @@ def set_bids(piece, bids):
         new_bid = Bid(piece=piece,
                       bidder=bidderid.bidder,
                       bidderid=bidderid,
-                      amount=bid['bid'],
-                      buy_now_bid=bid['buy_now_bid'])
+                      amount=amount,
+                      buy_now_bid=buy_now_bid)
 
         try:
             new_bid.validate()
