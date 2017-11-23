@@ -113,7 +113,8 @@ class BidderRegistrationWizard(CookieWizardView):
         p.save()
         b.person = p
         b.save()
-        do_print_bidder_registration_form(b)
+        # TODO: Print bidder registration form on the final page.
+        #do_print_bidder_registration_form(b)
         return redirect(final)
 
 @permission_required('artshow.is_artshow_kiosk')
