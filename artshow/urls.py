@@ -80,7 +80,7 @@ urlpatterns = [
     url(r'^access/$', views.artist_self_access, name='artshow-artist-access'),
     url(r'^bidderreg/$', bidderreg.wizard_view,
         name='artshow-bidderreg-wizard'),
-    url(r'^bidderreg/done/$', bidderreg.final),
+    url(r'^bidderreg/done/$', bidderreg.final, name='artshow-bidderreg-final'),
     url(r'^bidder/(?P<bidder_id0>\d+)/(?P<bidder_id1>\d+)/stickers/$',
         bidderreg.bid_stickers),
     url(r'^bidder/$', views.bidder_results),
