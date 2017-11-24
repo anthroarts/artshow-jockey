@@ -1,0 +1,48 @@
+<html>
+<head>
+<title>Art Show Bidder Stickers</title>
+<style>
+body {
+  margin: 0;
+}
+
+.container {
+  width: 8.5in;
+  padding: 0.5in 0.3in 0.5in 0.3in;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 0px 0.3in;
+}
+
+.sticker {
+  width: 1.75in;
+  height: 0.5in;
+  border: 1px solid lightgrey;
+}
+
+.contents {
+  padding: 15px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.bidder-id {
+  text-align: center;
+}
+
+.bid-amount {
+  border-bottom: 1px solid black;
+}
+</style>
+<body>
+<div class="container">
+{% for n in range %}
+<div class="sticker">
+  <div class="contents">
+    <div class="bidder-id">{{ bidder_id }}</div>
+    <div class="bid-amount">&nbsp;</div>
+  </div>
+</div>
+{% endfor %}
+</div>
+</body>
