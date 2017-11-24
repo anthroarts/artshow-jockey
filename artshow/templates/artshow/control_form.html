@@ -32,6 +32,12 @@ div.artist-number-box {
   padding: 2;
 }
 
+div.field {
+  display: grid;
+  grid-template-columns: 105px 1fr;
+  grid-gap: 10px;
+}
+
 div.field-label {
   text-align: right;
 }
@@ -40,16 +46,26 @@ div.field-line {
   border-bottom: 1px solid black;
 }
 
-div.container {
+div.top-fields {
   display: grid;
   grid-gap: 10px;
-  grid-template-columns: 105px 1fr 105px 1fr;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(8, 1fr);
+  grid-template-columns: 1fr 1fr;
+}
+
+div.bottom-fields {
+  display: grid;
+  grid-gap: 10px;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr;
 }
 
 table {
-  grid-column: 1 / 5;
   border-collapse: collapse;
   width: 100%;
+  margin: 10px 0px;
 }
 
 table, th, td {
@@ -71,77 +87,119 @@ th, td {
   </div>
 </div>
 
-<div class="container">
+<div class="top-fields">
   {% with person=artist.person %}
-  <div class="field-label">Legal name</div>
-  <div class="field-line">{{ person.name|default:"&nbsp" }}</div>
-  <div class="field-label">Artist name</div>
-  <div class="field-line">{{ artist.artistname|default:"&nbsp" }}</div>
-  <div class="field-label">Address</div>
-  <div class="field-line">{{ person.address1|default:"&nbsp" }}</div>
-  <div class="field-label">City</div>
-  <div class="field-line">{{ person.city|default:"&nbsp" }}</div>
-  <div class="field-label">State/province</div>
-  <div class="field-line">{{ person.state|default:"&nbsp" }}</div>
-  <div class="field-label">ZIP/postal code</div>
-  <div class="field-line">{{ person.postcode|default:"&nbsp" }}</div>
-  <div class="field-label">Country</div>
-  <div class="field-line">{{ person.country|default:"&nbsp" }}</div>
-  <div class="field-label">Telephone</div>
-  <div class="field-line">{{ person.phone|default:"&nbsp" }}</div>
-  <div class="field-label">E-mail</div>
-  <div class="field-line">{{ person.email|default:"&nbsp" }}</div>
-  <div class="field-label">Artist name</div>
-  <div class="field-line">&nbsp;</div>
-  <div class="field-label">Address</div>
-  <div class="field-line">&nbsp;</div>
-  <div class="field-label">City</div>
-  <div class="field-line">&nbsp;</div>
-  <div class="field-label">State/province</div>
-  <div class="field-line">&nbsp;</div>
-  <div class="field-label">ZIP/postal code</div>
-  <div class="field-line">&nbsp;</div>
-  <div class="field-label">Country</div>
-  <div class="field-line">&nbsp;</div>
-  <div class="field-label">Telephone</div>
-  <div class="field-line">&nbsp;</div>
+  <div class="field">
+    <div class="field-label">Legal name</div>
+    <div class="field-line">{{ person.name|default:"&nbsp" }}</div>
+  </div>
+  <div class="field">
+    <div class="field-label">Artist name</div>
+    <div class="field-line">{{ artist.artistname|default:"&nbsp" }}</div>
+  </div>
+  <div class="field">
+    <div class="field-label">Address</div>
+    <div class="field-line">{{ person.address1|default:"&nbsp" }}</div>
+  </div>
+  <div class="field">
+    <div class="field-label">City</div>
+    <div class="field-line">{{ person.city|default:"&nbsp" }}</div>
+  </div>
+  <div class="field">
+    <div class="field-label">State/province</div>
+    <div class="field-line">{{ person.state|default:"&nbsp" }}</div>
+  </div>
+  <div class="field">
+    <div class="field-label">ZIP/postal code</div>
+    <div class="field-line">{{ person.postcode|default:"&nbsp" }}</div>
+  </div>
+  <div class="field">
+    <div class="field-label">Country</div>
+    <div class="field-line">{{ person.country|default:"&nbsp" }}</div>
+  </div>
+  <div class="field">
+    <div class="field-label">Telephone</div>
+    <div class="field-line">{{ person.phone|default:"&nbsp" }}</div>
+  </div>
+  <div class="field">
+    <div class="field-label">E-mail</div>
+    <div class="field-line">{{ person.email|default:"&nbsp" }}</div>
+  </div>
+  <div class="field">
+    <div class="field-label">Artist name</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
+  <div class="field">
+    <div class="field-label">Address</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
+  <div class="field">
+    <div class="field-label">City</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
+  <div class="field">
+    <div class="field-label">State/province</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
+  <div class="field">
+    <div class="field-label">ZIP/postal code</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
+  <div class="field">
+    <div class="field-label">Country</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
+  <div class="field">
+    <div class="field-label">Telephone</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
   {% endwith %}
+</div>
 
-  <table>
-    <thead>
-      <th>Piece no.</th>
-      <th>Title of piece</th>
-      <th>Adult (Y/N)</th>
-      <th>Minimum bid</th>
-      <th>Buy now price (opt.)</th>
-      <th class="shaded">Location</th>
-      <th class="shaded">Winning bidder #</th>
-      <th class="shaded">Winning bid</th>
-    </thead>
-    {% for piece in pieces %}
-    <tr>
-      <td>{{ piece.pieceid }}</td>
-      <td>{{ piece.name }}</td>
-      <td>{{ piece.adult|yesno }}</td>
-      <td>{% if piece.not_for_sale %}NFS{% else %}{{ piece.min_bid }}{% endif %}</td>
-      <td>{{ piece.buy_now }}</td>
-      <td class="shaded">{{ piece.location }}</td>
-      {% with bid=piece.top_bid %}
-      <td class="shaded">{{ bid.bidder.id }}</td>
-      <td class="shaded">{{ bid.amount }}</td>
-      {% endwith %}
-    </tr>
-    {% endfor %}
-  </table>
+<table>
+  <thead>
+    <th>Piece no.</th>
+    <th>Title of piece</th>
+    <th>Adult (Y/N)</th>
+    <th>Minimum bid</th>
+    <th>Buy now price (opt.)</th>
+    <th class="shaded">Location</th>
+    <th class="shaded">Winning bidder #</th>
+    <th class="shaded">Winning bid</th>
+  </thead>
+  {% for piece in pieces %}
+  <tr>
+    <td>{{ piece.pieceid }}</td>
+    <td>{{ piece.name }}</td>
+    <td>{{ piece.adult|yesno }}</td>
+    <td>{% if piece.not_for_sale %}NFS{% else %}{{ piece.min_bid }}{% endif %}</td>
+    <td>{{ piece.buy_now }}</td>
+    <td class="shaded">{{ piece.location }}</td>
+    {% with bid=piece.top_bid %}
+    <td class="shaded">{{ bid.bidder.id }}</td>
+    <td class="shaded">{{ bid.amount }}</td>
+    {% endwith %}
+  </tr>
+  {% endfor %}
+</table>
 
-  <div class="field-label">Artist check-in</div>
-  <div class="field-line">&nbsp;</div>
-  <div class="field-label">Artist check-out</div>
-  <div class="field-line">&nbsp;</div>
-  <div class="field-label">Staff check-in</div>
-  <div class="field-line">&nbsp;</div>
-  <div class="field-label">Staff check-out</div>
-  <div class="field-line">&nbsp;</div>
+<div class="bottom-fields">
+  <div class="field">
+    <div class="field-label">Artist check-in</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
+  <div class="field">
+    <div class="field-label">Artist check-out</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
+  <div class="field">
+    <div class="field-label">Staff check-in</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
+  <div class="field">
+    <div class="field-label">Staff check-out</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
 </div>
 </body>
 </html>
