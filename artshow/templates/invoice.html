@@ -1,0 +1,40 @@
+<html>
+<head>
+  <title>Invoice {{ invoice }}</title>
+</head>
+<body>
+  <h1>{{ showstr }}</h2>
+  <span class="label">Date: </span>{{ invoice.paid_date }}<br>
+  <span class="label">Invoice: </span>{{ invoice }}<br>
+  <span class="label">For: </span>{{ invoice.payer }}<br>
+  <table>
+    <tr>
+      <th>Item</th>
+      <th>Amount</th>
+    </tr>
+    {% for item in invoiceitems %}
+    <tr>
+      <td>{{ item.piece }}</td>
+      <td>{{ item.price }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <span class="label">{{ taxdescstr }}: </span>{{ taxamtstr }}<br>
+  <span class="label">Item count: </span>{{ itemcount }}<br>
+  <span class="label">Total: </span>{{ totalstr }}<br>
+  <table>
+    <tr>
+      <th>Payment method</th>
+      <th>Notes</th>
+      <th>Amount</th>
+    </tr>
+    {% for payment in invoicepayments %}
+    <tr>
+      <td>{{ payment.get_payment_method_display }}</td>
+      <td>{{ payment.notes }}</td>
+      <td>{{ payment.amount }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
