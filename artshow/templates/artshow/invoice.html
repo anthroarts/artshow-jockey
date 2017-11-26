@@ -15,24 +15,24 @@
     {% for item in invoiceitems %}
     <tr>
       <td>{{ item.piece }}</td>
-      <td>{{ item.price }}</td>
+      <td>${{ item.price }}</td>
     </tr>
     {% endfor %}
   </table>
-  <span class="label">{{ taxdescstr }}: </span>{{ taxamtstr }}<br>
-  <span class="label">Item count: </span>{{ itemcount }}<br>
-  <span class="label">Total: </span>{{ totalstr }}<br>
+  <span class="label">{{ taxdescstr }}: </span>${{ invoice.tax_paid }}<br>
+  <span class="label">Item count: </span>{{ invoiceitems.count }}<br>
+  <span class="label">Total: </span>${{ invoice.total_paid }}<br>
   <table>
     <tr>
       <th>Payment method</th>
       <th>Notes</th>
       <th>Amount</th>
     </tr>
-    {% for payment in invoicepayments %}
+    {% for payment in invoice.invoicepayment_set.all %}
     <tr>
       <td>{{ payment.get_payment_method_display }}</td>
       <td>{{ payment.notes }}</td>
-      <td>{{ payment.amount }}</td>
+      <td>${{ payment.amount }}</td>
     </tr>
     {% endfor %}
   </table>
