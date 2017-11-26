@@ -59,7 +59,7 @@ urlpatterns = [
     url(r'^cashier/invoice/(?P<invoice_id>\d+)/$', cashier.cashier_invoice,
         name='artshow-cashier-invoice'),
     url(r'^cashier/invoice/(?P<invoice_id>\d+)/print/$',
-        cashier.print_invoice),
+        cashier.print_invoice, name='artshow-cashier-print-invoice'),
     url(r'^cashier/invoice/(?P<invoice_id>\d+)/pdf/$', pdfreports.pdf_invoice),
     url(r'^cashier/invoice/(?P<invoice_id>\d+)/picklist/$',
         pdfreports.pdf_picklist),

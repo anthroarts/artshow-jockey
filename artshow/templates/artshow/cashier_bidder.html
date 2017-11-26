@@ -1,4 +1,5 @@
 {% extends "artshow/base_generic.html" %}
+{% load static %}
 {% block breadcrumbs %}
     <ul class="breadcrumbs">
         <li><a href="/">Home</a></li>
@@ -9,8 +10,8 @@
 {% block extra_head %}
   <link rel="stylesheet" href="{{ STATIC_URL }}artshow/cashierstyle.css" />
   <title>Bidder Information</title>
-  <script src="{{ STATIC_URL }}admin/js/jquery.min.js"></script>
-  <script src="{{ STATIC_URL }}artshow/bignumber.js"></script>
+  <script src="{% static 'admin/js/vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'artshow/bignumber.js' %}"></script>
   <script>
     payment_types = {{ payment_types_json|safe }};
     function reset_to_remaining ( o ) {
