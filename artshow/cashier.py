@@ -276,3 +276,16 @@ def print_invoice(request, invoice_id):
 
     messages.error(request, "Print Invoice request is invalid")
     return HttpResponseBadRequest("Print Invoice request is invalid.")
+
+@permission_required('artshow.add_invoice')
+def view_invoice(request, invoice_id):
+    invoice = get_object_or_404(Invoice, pk=invoice_id)
+    invoiceitems = invoice.invoiceitem_set.all() \
+            .order_by('piece__location', 'piece')
+
+    return render(request, 'artshow/invoice.html', {
+        'showstr': settings.ARTSHOW_SHOW_NAME,
+        'taxdescstr': settings.ARTSHOW_TAX_DESCRIPTION,
+        'invoice': invoice,
+        'invoiceitems': invoiceitems,
+    })
