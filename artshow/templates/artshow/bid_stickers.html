@@ -6,22 +6,30 @@ body {
   margin: 0;
 }
 
+/**
+ * Print at 103% with a top margin of 0.35" and a left margin of 0.15".
+ */
 .container {
-  width: 8.5in;
-  padding: 0.5in 0.3in 0.5in 0.3in;
+  width: 7.9in;
+  height: 10in;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(15, 1fr);
   grid-gap: 0px 0.3in;
 }
 
 .sticker {
-  width: 1.75in;
-  height: 0.5in;
-  border: 1px solid lightgrey;
+  /**
+   * For debugging alignment:
+   * border: 1px solid lightgrey;
+   */
 }
 
 .contents {
-  padding: 15px;
+  padding-top: 25px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
 }
@@ -39,7 +47,25 @@ body {
 {% for n in range %}
 <div class="sticker">
   <div class="contents">
-    <div class="bidder-id">{{ bidder_id }}</div>
+    <div class="bidder-id">{{ bidder_id0 }}</div>
+    <div class="bid-amount">&nbsp;</div>
+  </div>
+</div>
+<div class="sticker">
+  <div class="contents">
+    <div class="bidder-id">{{ bidder_id0 }}</div>
+    <div class="bid-amount">&nbsp;</div>
+  </div>
+</div>
+<div class="sticker">
+  <div class="contents">
+    <div class="bidder-id">{{ bidder_id1 }}</div>
+    <div class="bid-amount">&nbsp;</div>
+  </div>
+</div>
+<div class="sticker">
+  <div class="contents">
+    <div class="bidder-id">{{ bidder_id1 }}</div>
     <div class="bid-amount">&nbsp;</div>
   </div>
 </div>

@@ -132,7 +132,8 @@ wizard_view = permission_required('artshow.is_artshow_kiosk')(
         BidderRegistrationForm2
     ], condition_dict={'2': process_step_2}))
 
-def bid_stickers(request, bidder_id):
+def bid_stickers(request, bidder_id0, bidder_id1):
     return render(request, "artshow/bid_stickers.html",
-                  {'bidder_id': bidder_id,
-                   'range': range(80)})
+                  {'bidder_id0': bidder_id0,
+                   'bidder_id1': bidder_id1,
+                   'range': range(15)})
