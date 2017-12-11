@@ -3,9 +3,14 @@
 <title>Art Show Control Form: {{ artist.name }}</title>
 <style>
 body {
-  width: 8.5in;
   margin: 0;
-  padding: 0.5in;
+  -webkit-print-color-adjust: exact;
+}
+
+.container {
+  width: 8.5in;
+  box-sizing: border-box;
+  padding: 0.25in;
 }
 
 h1 {
@@ -34,19 +39,28 @@ div.artist-number-box {
 
 div.field {
   display: grid;
-  grid-template-columns: 105px 1fr;
+  grid-template-columns: 150px 1fr;
+  grid-gap: 10px;
+}
+
+div.small-field {
+  display: grid;
+  grid-template-columns: fit-content(100px) 1fr;
   grid-gap: 10px;
 }
 
 div.field-label {
   text-align: right;
+  margin-top: auto;
 }
 
 div.field-line {
   border-bottom: 1px solid black;
+  margin-top: auto;
 }
 
 div.top-fields {
+  margin: 10px 0px;
   display: grid;
   grid-gap: 10px;
   grid-auto-flow: column;
@@ -55,11 +69,12 @@ div.top-fields {
 }
 
 div.bottom-fields {
+  margin: 10px 0px;
   display: grid;
   grid-gap: 10px;
   grid-auto-flow: column;
-  grid-template-rows: repeat(2, 1fr);
-  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(2, 30px);
+  grid-template-columns: repeat(2, 1fr);
 }
 
 table {
@@ -70,14 +85,38 @@ table {
 
 table, th, td {
   border: 1px solid black;
+  table-layout: fixed;
 }
 
 th, td {
-  padding: 2;
+  padding: 4px;
+}
+
+.option {
+  margin-top: auto;
+}
+
+.checkbox {
+  margin: 0px 5px;
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border: 1px solid black;
+}
+
+.line {
+  display: inline-block;
+  width: 6em;
+  border-bottom: 1px solid black 
+}
+
+.note {
+  font-size: 6pt;
 }
 </style>
 </head>
 <body>
+  <div class="container">
 <div class="header">
   <div><h1>{{ SITE_NAME }} Control Form</h1></div>
   <div>
@@ -97,9 +136,9 @@ th, td {
     <div class="field-label">Artist name</div>
     <div class="field-line">{{ artist.artistname|default:"&nbsp" }}</div>
   </div>
-  <div class="field">
+  <div class="field" style="grid-row: span 2">
     <div class="field-label">Address</div>
-    <div class="field-line">{{ person.address1|default:"&nbsp" }}</div>
+    <div class="field-line">{{ person.address1|default:"&nbsp" }}{% if person.address2 %}<br>{{ person.address2 }}{% endif %}</div>
   </div>
   <div class="field">
     <div class="field-label">City</div>
@@ -126,31 +165,40 @@ th, td {
     <div class="field-line">{{ person.email|default:"&nbsp" }}</div>
   </div>
   <div class="field">
-    <div class="field-label">Artist name</div>
+    <div class="field-label">Ship unsold art?</div>
+    <div class="option">
+      <div class="checkbox"></div><span>No</span>
+      <div class="checkbox"></div><span>Yes, via <div class="line">&nbsp;</div></span>
+    </div>
+  </div>
+  <div class="field">
+    <div class="field-label">Insure for</div>
+    <div class="field-line">&nbsp</div>
+  </div>
+  <div style="font-size: 8pt;">
+    By authorizing the event to return unsold art by mail, the artist agrees
+    to pay for shipping and insurance costs, which will be invoiced after the
+    art is returned.
+  </div>
+  <div class="field">
+    <div class="field-label">
+      Authorization to ship
+      <div class="note">Sign to authorize shipping and insurance</div>
+    </div>
     <div class="field-line">&nbsp;</div>
   </div>
   <div class="field">
-    <div class="field-label">Address</div>
+    <div class="field-label">
+      Agent name
+      <div class="note">If an agent is handling art</div>
+    </div>
     <div class="field-line">&nbsp;</div>
   </div>
   <div class="field">
-    <div class="field-label">City</div>
-    <div class="field-line">&nbsp;</div>
-  </div>
-  <div class="field">
-    <div class="field-label">State/province</div>
-    <div class="field-line">&nbsp;</div>
-  </div>
-  <div class="field">
-    <div class="field-label">ZIP/postal code</div>
-    <div class="field-line">&nbsp;</div>
-  </div>
-  <div class="field">
-    <div class="field-label">Country</div>
-    <div class="field-line">&nbsp;</div>
-  </div>
-  <div class="field">
-    <div class="field-label">Telephone</div>
+    <div class="field-label">
+      Agent authorization
+      <div class="note">Artist must sign for an agent to be authorized</div>
+    </div>
     <div class="field-line">&nbsp;</div>
   </div>
   {% endwith %}
@@ -158,30 +206,35 @@ th, td {
 
 <table>
   <thead>
-    <th>Piece no.</th>
-    <th>Title of piece</th>
-    <th>Adult (Y/N)</th>
-    <th>Minimum bid</th>
-    <th>Buy now price (opt.)</th>
-    <th class="shaded">Location</th>
-    <th class="shaded">Winning bidder #</th>
-    <th class="shaded">Winning bid</th>
+    <th style="width:40px">Piece no.</th>
+    <th style="width:100%">Title of piece</th>
+    <th style="width:40px">Adult (Y/N)</th>
+    <th style="width:80px">Minimum bid</th>
+    <th style="width:80px">Buy now price (opt.)</th>
+    <th style="width:40px" class="shaded">Loca-tion</th>
+    <th style="width:80px" class="shaded">Winning bidder #</th>
+    <th style="width:80px" class="shaded">Winning bid</th>
   </thead>
   {% for piece in pieces %}
   <tr>
     <td>{{ piece.pieceid }}</td>
     <td>{{ piece.name }}</td>
     <td>{{ piece.adult|yesno }}</td>
-    <td>{% if piece.not_for_sale %}NFS{% else %}{{ piece.min_bid }}{% endif %}</td>
-    <td>{{ piece.buy_now }}</td>
+    <td>{% if piece.not_for_sale %}NFS{% else %}${{ piece.min_bid }}{% endif %}</td>
+    <td>{% if piece.buy_now %}${{ piece.buy_now }}{% else %}N/A{% endif %}</td>
     <td class="shaded">{{ piece.location }}</td>
     {% with bid=piece.top_bid %}
-    <td class="shaded">{{ bid.bidder.id }}</td>
-    <td class="shaded">{{ bid.amount }}</td>
+    <td class="shaded">{{ bid.bidderid.id }}</td>
+    <td class="shaded">{% if bid %}${{ bid.amount }}{% endif %}</td>
     {% endwith %}
   </tr>
   {% endfor %}
 </table>
+
+<p>
+  Please sign below to acknowledge satisfactory check-in and check-out. Do not
+  sign until you are at the show and have finished check-in with the staff.
+</p>
 
 <div class="bottom-fields">
   <div class="field">
