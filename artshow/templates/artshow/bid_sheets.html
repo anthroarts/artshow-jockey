@@ -80,6 +80,14 @@ body {
   justify-self: center;
 }
 
+.not-for-sale {
+  grid-column: 1 / 4;
+  text-align: center;
+  padding: 40px 0px;
+  font-size: 24pt;
+  font-variant: small-caps;
+}
+
 .instructions {
   grid-column: 1 / 4;
 }
@@ -91,10 +99,12 @@ body {
   <div class="bid-sheet">
     <div class="location"></div>
     <div class="bid-info">
+      {% if not piece.not_for_sale %}
       <div class="label">Minimum Bid</div>
       <div>${{ piece.min_bid }}</div>
       <div class="label">Auto Buy</div>
       <div>{% if piece.buy_now %}${{ piece.buy_now }}{% else %}N/A{% endif %}</div>
+      {% endif %}
     </div>
     <div class="piece-id">{{ piece.artist.artistid }}-{{ piece.pieceid }}</div>
     <div class="field">
@@ -109,6 +119,11 @@ body {
       <div class="field-label">Media</div>
       <div class="field-line">{{ piece.media|default:"&nbsp" }}</div>
     </div>
+    {% if piece.not_for_sale %}
+    <div class="not-for-sale">
+      Not For Sale
+    </div>
+    {% else %}
     <div class="bid-stickers">
       <div class="bid-sticker">Place 1st bid{% if piece.buy_now %} or AB{% endif %} here.</div>
       <div class="bid-sticker">Place 2nd bid here.</div>
@@ -121,6 +136,7 @@ body {
       A piece with 6 bids will be taken to voice auction.
       {% if piece.buy_now %}See a staff member to lock in an auto buy bid.{% endif %}
     </div>
+    {% endif %}
   </div>
 </div>
 {% endfor %}
