@@ -147,24 +147,34 @@ def cashier_bidder(request, bidder_id):
         payment_formset = PaymentFormSet(prefix="payment", queryset=InvoicePayment.objects.none())
 
     payment_types = dict(InvoicePayment.PAYMENT_METHOD_CHOICES[1:])
-    payment_types_json = json.dumps ( payment_types, sort_keys=True )
+    payment_types_json = json.dumps(payment_types, sort_keys=True)
 
     tax_rate = settings.ARTSHOW_TAX_RATE
     money_precision = settings.ARTSHOW_MONEY_PRECISION
 
-    c = dict(bidder=bidder, available_bids=available_bids, pending_bids=pending_bids, items_form=items_form,
-             payment_formset=payment_formset, payment_types=payment_types, payment_types_json=payment_types_json,
-             tax_rate=tax_rate, money_precision=money_precision)
+    return render(request, 'artshow/cashier_bidder.html', {
+        'bidder': bidder,
+        'available_bids': available_bids,
+        'pending_bids': pending_bids,
+        'items_form': items_form,
+        'payment_formset': payment_formset,
+        'payment_types': payment_types,
+        'payment_types_json': payment_types_json,
+        'tax_rate': tax_rate,
+        'money_precision': money_precision,
+    })
 
-    return render(request, 'artshow/cashier_bidder.html', c)
 
 @permission_required('artshow.add_invoice')
 def cashier_bidder_invoices(request, bidder_id):
 
     bidder = get_object_or_404(Bidder, pk=bidder_id)
     invoices = Invoice.objects.filter(payer=bidder).order_by('id')
-    return render(request, 'artshow/cashier_bidder_invoices.html',
-                  {'bidder': bidder, 'invoices': invoices, 'money_precision': settings.ARTSHOW_MONEY_PRECISION})
+    return render(request, 'artshow/cashier_bidder_invoices.html', {
+        'bidder': bidder,
+        'invoices': invoices,
+        'money_precision': settings.ARTSHOW_MONEY_PRECISION
+    })
 
 
 @permission_required('artshow.add_invoice')
@@ -172,11 +182,14 @@ def cashier_invoice(request, invoice_id):
     invoice = get_object_or_404(Invoice, pk=invoice_id)
     print_invoice_form = PrintInvoiceForm()
 
-    c = dict(invoice=invoice, money_precision=settings.ARTSHOW_MONEY_PRECISION, tax_rate=settings.ARTSHOW_TAX_RATE,
-             tax_description=settings.ARTSHOW_TAX_DESCRIPTION,
-             invoice_prefix=settings.ARTSHOW_INVOICE_PREFIX, print_invoice_form=print_invoice_form)
-
-    return render(request, 'artshow/cashier_invoice.html', c)
+    return render(request, 'artshow/cashier_invoice.html', {
+        'invoice': invoice,
+        'money_precision': settings.ARTSHOW_MONEY_PRECISION,
+        'tax_rate': settings.ARTSHOW_TAX_RATE,
+        'tax_description': settings.ARTSHOW_TAX_DESCRIPTION,
+        'invoice_prefix': settings.ARTSHOW_INVOICE_PREFIX,
+        'print_invoice_form': print_invoice_form
+    })
 
 
 class PrintInvoiceForm (forms.Form):
