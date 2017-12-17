@@ -6,14 +6,11 @@ body {
   margin: 0;
 }
 
-/**
- * Print at 103% with a top margin of 0.35" and a left margin of 0.15".
- */
 .container {
-  width: 7.9in;
-  height: 10in;
+  width: 8.5in;
+  height: 11in;
   box-sizing: border-box;
-  padding: 0;
+  padding: 0.5in 0.3in;
   margin: 0;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -22,14 +19,13 @@ body {
 }
 
 .sticker {
-  /**
-   * For debugging alignment:
-   * border: 1px solid lightgrey;
-   */
+/* border: 1px solid lightgrey;
+   box-sizing: border-box; */
+  padding: 10px;
 }
 
 .contents {
-  padding-top: 25px;
+  padding-top: 12px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
 }
