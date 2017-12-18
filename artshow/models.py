@@ -158,6 +158,9 @@ class Artist (models.Model):
     def viewable_by(self, user):
         return self.person.user == user or self.agent_set.filter(person__user=user).exists()
 
+    def ordered_pieces(self):
+        return self.piece_set.order_by('pieceid')
+
     def save(self, **kwargs):
         if self.artistid is None:
             try:
