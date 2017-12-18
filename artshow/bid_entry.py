@@ -12,7 +12,8 @@ from .models import Artist, Bid, BidderId, Piece
 
 @permission_required('artshow.add_bid')
 def bid_entry(request):
-    return render(request, 'artshow/bid_entry.html')
+    return render(request, 'artshow/bid_entry.html',
+                  {'bid_slots': range(1, 7)})
 
 
 def error_response(field, message, index=None):
