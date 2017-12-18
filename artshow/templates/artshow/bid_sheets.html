@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Art Show Bid Sheets: {{ artist.name }}</title>
+<title>Art Show Bid Sheets {% if artist %}({{ artist.name }}){% endif %}</title>
 <style>
 body {
   width: 8.5in;

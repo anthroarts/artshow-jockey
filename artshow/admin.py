@@ -207,12 +207,10 @@ class ArtistAdmin(AjaxSelectAdmin):
     send_email.short_description = "Send E-mail"
 
     def print_bidsheets(self, request, queryset):
-        import bidsheets
-
-        response = HttpResponse(content_type="application/pdf")
-        bidsheets.generate_bidsheets_for_artists(output=response, artists=queryset)
-        self.message_user(request, "Bid sheets printed.")
-        return response
+        pieces = Piece.objects.filter(artist__in=queryset) \
+                .order_by('artist__artistid', 'pieceid')
+        return render(request, 'artshow/bid_sheets.html',
+                      {'pieces': pieces})
 
     print_bidsheets.short_description = "Print Bid Sheets"
 
@@ -446,12 +444,8 @@ class PieceAdmin(admin.ModelAdmin):
         self.message_user(request, "Pieces marked as 'In Show' have been marked 'Returned'.")
 
     def print_bidsheets(self, request, queryset):
-        import bidsheets
-
-        response = HttpResponse(content_type="application/pdf")
-        bidsheets.generate_bidsheets(output=response, pieces=queryset)
-        self.message_user(request, "Bid sheets printed.")
-        return response
+        return render(request, 'artshow/bid_sheets.html',
+                      {'pieces': queryset})
 
     print_bidsheets.short_description = "Print Bid Sheets"
 
