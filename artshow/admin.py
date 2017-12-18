@@ -225,12 +225,8 @@ class ArtistAdmin(AjaxSelectAdmin):
     print_mailing_labels.short_description = "Print Mailing Labels"
 
     def print_control_forms( self, request, artists ):
-        import bidsheets
-
-        response = HttpResponse(content_type="application/pdf")
-        bidsheets.generate_control_forms(output=response, artists=artists)
-        self.message_user(request, "Control Forms printed.")
-        return response
+        return render(request, 'artshow/control_form.html',
+                      {'artists': artists})
 
     print_control_forms.short_description = "Print Control Forms"
 

@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Art Show Control Form: {{ artist.name }}</title>
+<title>Art Show Control Forms</title>
 <style>
 body {
   margin: 0;
@@ -11,6 +11,7 @@ body {
   width: 8.5in;
   box-sizing: border-box;
   padding: 0.25in;
+  page-break-after: always;
 }
 
 h1 {
@@ -116,7 +117,8 @@ th, td {
 </style>
 </head>
 <body>
-  <div class="container">
+{% for artist in artists %}
+<div class="container">
 <div class="header">
   <div><h1>{{ SITE_NAME }} Control Form</h1></div>
   <div>
@@ -215,7 +217,7 @@ th, td {
     <th style="width:80px" class="shaded">Winning bidder #</th>
     <th style="width:80px" class="shaded">Winning bid</th>
   </thead>
-  {% for piece in pieces %}
+  {% for piece in artist.ordered_pieces %}
   <tr>
     <td>{{ piece.pieceid }}</td>
     <td>{{ piece.name }}</td>
@@ -254,5 +256,7 @@ th, td {
     <div class="field-line">&nbsp;</div>
   </div>
 </div>
+</div>
+{% endfor %}
 </body>
 </html>
