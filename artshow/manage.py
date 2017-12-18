@@ -162,19 +162,17 @@ def downloadcsv(request, artist_id):
 def bid_sheets(request, artist_id):
     artist = get_object_or_404(Artist.objects.viewable_by(request.user),
                                pk=artist_id)
-    pieces = artist.piece_set.order_by("pieceid")
 
     return render(request, "artshow/bid_sheets.html",
-                  {'artist': artist, 'pieces': pieces})
+                  {'artist': artist, 'pieces': artist.ordered_pieces()})
 
 @login_required
 def control_forms(request, artist_id):
     artist = get_object_or_404(Artist.objects.viewable_by(request.user),
                                pk=artist_id)
-    pieces = artist.piece_set.order_by("pieceid")
 
     return render(request, "artshow/control_form.html",
-                  {'artist': artist, 'pieces': pieces})
+                  {'artists': [artist]})
 
 
 def requestspaceform_factory(artist):
