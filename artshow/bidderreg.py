@@ -3,7 +3,7 @@ import subprocess
 from django import forms
 from django.apps import apps
 from django.contrib.auth.decorators import permission_required
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect, reverse
 from formtools.wizard.views import CookieWizardView
 from .conf import settings
 from .models import Bidder, BidderId
@@ -114,7 +114,10 @@ class BidderRegistrationWizard(CookieWizardView):
                 other_contact = cleaned_data.get('other_contact', '')
                 at_con_contact = \
                     "\n".join((x for x in [cell_contact, other_contact] if x))
-                b = Bidder(at_con_contact=at_con_contact)
+                b = Bidder(
+                    at_con_contact=at_con_contact,
+                    details_changed=cleaned_data.get('details_changed', False)
+                )
             elif isinstance(form, BidderRegistrationForm2):
                 p.address1 = cleaned_data.get('address1', '')
                 p.address2 = cleaned_data.get('address2', '')
@@ -133,14 +136,13 @@ class BidderRegistrationWizard(CookieWizardView):
         p.save()
         b.person = p
         b.save()
-        # TODO: Print bidder registration form on the final page.
-        # do_print_bidder_registration_form(b)
-        return redirect(final)
+        return redirect(reverse('artshow-bidderreg-final', args=(b.pk,)))
 
 
 @permission_required('artshow.is_artshow_kiosk')
-def final(request):
-    return render(request, "artshow/bidderreg_final.html")
+def final(request, pk):
+    return render(request, "artshow/bidderreg_final.html", {
+        'agreement_url': reverse('artshow-bidder-agreement', args=(pk,))})
 
 
 def process_step_2(wizard):
@@ -154,6 +156,15 @@ wizard_view = permission_required('artshow.is_artshow_kiosk')(
         BidderRegistrationForm1,
         BidderRegistrationForm2
     ], condition_dict={'2': process_step_2}))
+
+
+@permission_required('artshow.is_artshow_kiosk')
+def bidder_agreement(request, pk):
+    bidder = get_object_or_404(Bidder, pk=pk)
+    return render(request, "artshow/bidder_agreement.html", {
+        'bidder': bidder,
+        'agreement_url': reverse('artshow-bidder-agreement', args=(pk,))})
+
 
 def bid_stickers(request, bidder_id0, bidder_id1):
     return render(request, "artshow/bid_stickers.html",

@@ -208,6 +208,7 @@ class Bidder (models.Model):
     def name(self):
         return self.person.name
     at_con_contact = models.TextField(blank=True)
+    details_changed = models.BooleanField(default=False)
     notes = models.TextField(blank=True)
 
     def bidder_ids(self):

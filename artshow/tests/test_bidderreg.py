@@ -29,7 +29,7 @@ class BidEntryTests(TestCase):
             '1-other_contact': 'Marriott 626',
             '1-details_changed': False,
         })
-        self.assertRedirects(response, reverse('artshow-bidderreg-final'))
+        self.assertRedirects(response, reverse('artshow-bidderreg-final', args=(1,)))
 
     def test_registration_details_changed(self):
         self.client = Client()
@@ -61,4 +61,4 @@ class BidEntryTests(TestCase):
             '2-phone': '(800) 555-5555',
             '2-email': 'bidder@example.com',
         })
-        self.assertRedirects(response, reverse('artshow-bidderreg-final'))
+        self.assertRedirects(response, reverse('artshow-bidderreg-final', args=(1,)))
