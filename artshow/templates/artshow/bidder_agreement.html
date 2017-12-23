@@ -1,0 +1,136 @@
+<html>
+<head>
+<title>Art Show Bidder Agreement</title>
+<style>
+body {
+  -webkit-print-color-adjust: exact;
+}
+
+.notice {
+  text-align: center;
+  padding: 0px 40px;
+}
+
+.fields {
+  display: grid;
+  grid-gap: 10px;
+  grid-template-columns: 2fr 1fr;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-gap: 10px;
+  height: 30px;
+}
+
+.full-width-field {
+  grid-column: 1 / 3;
+}
+
+.field-label {
+  align-self: end;
+}
+
+.field-line {
+  border-bottom: 1px solid black;
+  align-self: end;
+}
+
+.staff-only-fields {
+  display: grid;
+  grid-gap: 1px;
+  grid-auto-flow: column;
+  grid-template-rows: 20px repeat(3, 1fr);
+  grid-template-columns: 2fr 1fr;
+  background-color: lightgrey;
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 0px 10px 10px 10px;
+  margin: 10px 0;
+}
+
+.staff-only-label {
+  text-align: center;
+  grid-column: 1 / 3;
+  font-variant: small-caps;
+}
+
+.option {
+  align-self: end;
+}
+
+.bidder-label {
+  align-self: center;
+  justify-self: center;
+}
+</style>
+</head>
+<body>
+<h1>{{ SITE_NAME }} Bidder Agreement</h1>
+<p class="notice">
+  You must complete and sign this form before you can place a bid. Your
+  convention registration cannot be used to place bids.
+</p>
+<h2>Rules</h2>
+<ol>
+  <li>You must follow the Bidding Instructions &ndash; a separate document
+    &ndash; to place bids.</li>
+  <li>By placing a bid, you have contractually obligated yourself to purchase
+    the artwork at that price, unless a higher, valid bid is placed.</li>
+  <li>Art Show staff must be <em>immediately</em> notified for any “Buy Now”
+    bid, mistaken bids, or requests to “up” your own bid; do not make these
+    modifications yourself.</li>
+  <li>All “won” artwork must be paid-for and collected during sales periods on
+    Sunday or Monday. Otherwise, you will be charged for the packaging and
+    shipping costs to deliver the purchases to you.</li>
+  <li>By California law we, as a house of consignment, are obligated to provide
+    the artists of pieces you purchased a statement detailing your name and
+    contact information.</li>
+  <li><strong>No photography or videotaping.</strong> Cameras will be
+    confiscated.</li>
+  <li>Failure to abide by these rules or the Bidding Instructions may result in
+    cancelled bids, ejection from the art show, or cancellation of convention
+    membership.</li>
+</ol>
+<div class="fields">
+  <div class="field full-width-field">
+    <div class="field-label">Real name:</div>
+    <div class="field-line">{{ bidder.name|default:"&nbsp;" }}</div>
+  </div>
+  <div class="field">
+    <div class="field-label">Signature:</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
+  <div class="field">
+    <div class="field-label">Date:</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
+  <div class="field full-width-field">
+    <div class="field-label">"At con" Contact Phone or Hotel & Room #:</div>
+    <div class="field-line">{{ bidder.at_con_contact|default:"&nbsp" }}</div>
+  </div>
+</div>
+<div class="staff-only-fields">
+  <div class="staff-only-label">Staff Only</div>
+  <div class="field">
+    <div class="field-label">Registration ID:</div>
+    <div class="field-line">{{ bidder.person.reg_id|default:"&nbsp" }}</div>
+  </div>
+  <div class="field">
+    <div class="field-label">New address:</div>
+    <div class="option">
+      {% if bidder.details_changed %}&#x2611;{% else %}&#x2610;{% endif %} Yes
+      {% if bidder.details_changed %}&#x2610;{% else %}&#x2611;{% endif %} No
+    </div>
+  </div>
+  <div class="field">
+    <div class="field-label">Staff initials:</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
+  <div class="bidder-label">Place 1st bidder ID here.</div>
+  <div class="bidder-label">Place 2nd bidder ID here.</div>
+  <div class="bidder-label">Place 3rd bidder ID here.</div>
+</div>
+</body>
+</html>
