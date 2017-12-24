@@ -41,7 +41,7 @@ def bids(request, artist_id, piece_id):
     if request.method == 'GET':
         return get_bids(piece)
     elif request.method == 'POST':
-        return set_bids(piece, json.loads(request.body)['bids'])
+        return set_bids(piece, json.loads(request.body))
 
 
 def get_bids(piece):
@@ -57,15 +57,17 @@ def get_bids(piece):
             'bid': float(bid.amount),
             'buy_now_bid': bid.buy_now_bid,
         } for bid in bids],
-        'last_updated': bids_updated
+        'last_updated': bids_updated,
+        'location': piece.location
     })
 
 
-def set_bids(piece, bids):
+def set_bids(piece, data):
     existing_bids = piece.bid_set.exclude(invalid=True).order_by('amount')
 
     try:
         with transaction.atomic():
+            bids = data['bids']
             for i in range(len(bids)):
                 try:
                     bidderid = BidderId.objects.get(id=bids[i]['bidder'])
@@ -102,6 +104,7 @@ def set_bids(piece, bids):
                 existing_bids[i].delete()
 
             piece.bids_updated = timezone.now()
+            piece.location = data['location']
             piece.save()
 
         return get_bids(piece)

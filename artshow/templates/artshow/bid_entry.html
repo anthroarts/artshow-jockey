@@ -24,8 +24,20 @@
   grid-auto-flow: row;
 }
 
+.location_label {
+  grid-column: 2;
+}
+
+#location {
+  grid-column: 3;
+}
+
 .bidder_label {
   grid-column: 2;
+}
+
+.center {
+  align-self: center;
 }
 
 .status {
@@ -61,11 +73,13 @@ input[type="checkbox"] {
 </div>
 <hr>
 <div class="bid_entry">
+  <div class="location_label center">Location:</div>
+  <input type="text" size="4" id="location">
   <div class="bidder_label">Bidder Id</div>
   <div>Bid</div>
   <div>AB</div>
   {% for slot in bid_slots %}
-  <div>{{ slot }}.</div>
+  <div class="center">{{ slot }}.</div>
   <input type="text" size="8" pattern="[0-9]*" inputmode="numeric" class="bidder">
   <input type="text" size="4" pattern="[0-9]*" inputmode="numeric" class="bid">
   <input type="checkbox" class="autobuy">
@@ -82,6 +96,7 @@ let saveButton = document.getElementById('save');
 let statusText = document.getElementById('status');
 let artistIdField = document.getElementById('artist');
 let pieceIdField = document.getElementById('piece');
+let locationField = document.getElementById('location');
 let bidderFields = document.getElementsByClassName('bidder');
 let bidFields = document.getElementsByClassName('bid');
 let buyNowBidCheckboxes = document.getElementsByClassName('autobuy');
@@ -106,6 +121,8 @@ function updateBids(json, newStatus) {
       bidFields[i].value = json.bids[i].bid;
       buyNowBidCheckboxes[i].checked = json.bids[i].buy_now_bid;
     }
+
+    locationField.value = json['location']
 
     let lastUpdated = json['last_updated']
     if (lastUpdated === null)
@@ -135,6 +152,7 @@ loadButton.onclick = () => {
     bidFields[i].value = '';
     buyNowBidCheckboxes[i].checked = false;
   }
+  locationField.value = '';
 
   statusText.textContent = 'Loading...';
   fetch(`../${artistIdField.value}/${pieceIdField.value}/`, {
@@ -199,7 +217,7 @@ saveButton.onclick = () => {
   statusText.textContent = 'Saving...';
   fetch(`../${artistIdField.value}/${pieceIdField.value}/`, {
     method: 'POST',
-    body: JSON.stringify({'bids': bids}),
+    body: JSON.stringify({'bids': bids, 'location': locationField.value}),
     credentials: 'include',
     mode: 'cors',
     headers: {
