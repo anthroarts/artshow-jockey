@@ -67,6 +67,15 @@ def set_bids(piece, data):
 
     try:
         with transaction.atomic():
+            # Update piece first so that it is marked as InShow.
+            piece.bids_updated = timezone.now()
+            piece.location = data['location']
+            if piece.location and piece.status == Piece.StatusNotInShow:
+                piece.status = Piece.StatusInShow
+            if not piece.location and piece.status == Piece.StatusInShow:
+                piece.status = Piece.StatusNotInShow
+            piece.save()
+
             bids = data['bids']
             for i in range(len(bids)):
                 try:
@@ -103,9 +112,6 @@ def set_bids(piece, data):
             for i in range(len(bids), len(existing_bids)):
                 existing_bids[i].delete()
 
-            piece.bids_updated = timezone.now()
-            piece.location = data['location']
-            piece.save()
 
         return get_bids(piece)
     except ValidationError as e:

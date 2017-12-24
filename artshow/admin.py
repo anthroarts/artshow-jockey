@@ -406,34 +406,20 @@ class PieceAdmin(admin.ModelAdmin):
         self.message_user(request, "Bidsheet_scanned flags have been set if the piece is or was in show.")
 
     def clear_won_status(self, request, pieces):
-        pieces.filter(status=Piece.StatusWon).update(status=Piece.StatusInShow)
+        pieces.filter(status=Piece.StatusWon).update(status=Piece.StatusInShow,
+                                                     voice_auction=False)
         self.message_user(request, "Pieces marked as 'Won' have been returned to 'In Show'.")
 
     def apply_won_status(self, request, pieces):
         # This code is duplicated in the management code
-        for p in pieces.filter(status=Piece.StatusInShow, voice_auction=False):
-            try:
-                # noinspection PyUnusedLocal
-                top_bid = p.top_bid()
-            except Bid.DoesNotExist:
-                pass
-            else:
-                p.status = Piece.StatusWon
-                p.save()
-        self.message_user(request,
-                          "Pieces marked as 'In Show', not in Voice Auction and has a bid have been marked as 'Won'.")
-
-    def apply_won_status_incl_voice_auction(self, request, pieces):
         for p in pieces.filter(status=Piece.StatusInShow):
-            try:
-                # noinspection PyUnusedLocal
-                top_bid = p.top_bid()
-            except Bid.DoesNotExist:
-                pass
-            else:
-                p.status = Piece.StatusWon
+            bid_count = p.bid_set.exclude(invalid=True).count()
+            if bid_count > 0:
+                p.voice_auction = bid_count >= 6
+                if not p.voice_auction:
+                    p.status = Piece.StatusWon
                 p.save()
-        self.message_user(request, "Pieces marked as 'In Show' and has a bid have been marked as 'Won'.")
+        self.message_user(request, "Pieces with bids marked as 'In Show' have been marked 'Won' or sent to voice auction.")
 
     def apply_returned_status(self, request, pieces):
         pieces.filter(status=Piece.StatusInShow).update(status=Piece.StatusReturned)
@@ -492,8 +478,9 @@ class PieceAdmin(admin.ModelAdmin):
                    'bidsheet_scanned')
     search_fields = ('=code', '=artist__artistid', 'name', '=location', 'artist__person__name', 'artist__publicname')
     list_display = (
-        'code', 'clickable_artist', 'name', 'adult', 'min_bid_x', 'buy_now_x', 'location', 'voice_auction', 'status',
-        'top_bid')
+        'code', 'clickable_artist', 'name', 'adult', 'min_bid_x', 'buy_now_x',
+        'location', 'voice_auction', 'status', 'top_bid')
+    list_editable = ('status',)
     inlines = [PieceBidInline]
     # raw_id_fields = ( 'invoice', )
     # TODO put 'invoiceitem' back into the list. Waiting on bug #16433
@@ -507,8 +494,7 @@ class PieceAdmin(admin.ModelAdmin):
     )
     raw_id_fields = ('artist', )
     readonly_fields = ('top_bid_detail', 'invoice_item_detail', 'updated')
-    actions = ('clear_scanned_flag', 'set_scanned_flag', 'clear_won_status', 'apply_won_status',
-               'apply_won_status_to_voice_auction', 'apply_returned_status', 'print_bidsheets')
+    actions = ('clear_scanned_flag', 'set_scanned_flag', 'clear_won_status', 'apply_won_status', 'apply_returned_status', 'print_bidsheets')
 
 
 admin.site.register(Piece, PieceAdmin)
