@@ -115,7 +115,8 @@ class BidEntryTests(TestCase):
                 {'bidder': '0365327',
                  'bid': 10,
                  'buy_now_bid': False},
-            ]
+            ],
+            'location': '1A',
         }
         response = self.postJson('/artshow/entry/bids/1/1/', expected)
         self.assertEquals(response.json()['bids'], expected['bids'])
@@ -126,7 +127,8 @@ class BidEntryTests(TestCase):
                 {'bidder': '0365327',
                  'bid': 50,
                  'buy_now_bid': True},
-            ]
+            ],
+            'location': '2B',
         }
         response = self.postJson('/artshow/entry/bids/1/2/', expected)
         self.assertEquals(response.json()['bids'], expected['bids'])
