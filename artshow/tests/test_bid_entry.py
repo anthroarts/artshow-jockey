@@ -27,14 +27,14 @@ class BidEntryTests(TestCase):
         bidderid = BidderId(id='0365327', bidder=bidder)
         bidderid.save()
 
-        # Piece 1-1 has no bids.
-        piece = Piece(artist=artist, pieceid=1, min_bid=5, buy_now=50,
-                      status=Piece.StatusInShow)
+        # Piece 1-1 has no bids and is not marked in show yet.
+        piece = Piece(artist=artist, pieceid=1, min_bid=5, buy_now=50)
         piece.save()
 
-        # Piece 1-2 has 2 bids.
+        # Piece 1-2 has 2 bids and is already in the show.
         piece = Piece(artist=artist, pieceid=2, min_bid=5, buy_now=50,
-                      status=Piece.StatusInShow)
+                      status=Piece.StatusInShow,
+                      location='2B')
         piece.save()
 
         bid = Bid(bidder=bidder, piece=piece, amount=10)
@@ -72,31 +72,41 @@ class BidEntryTests(TestCase):
 
     def test_piece_no_bids(self):
         response = self.client.get('/artshow/entry/bids/1/1/')
-        self.assertEquals(response.json()['bids'], [])
+        self.assertEquals(response.json(), {
+            'bids': [],
+            'last_updated': None,
+            'location': '',
+        })
 
     def test_piece_two_bids(self):
         response = self.client.get('/artshow/entry/bids/1/2/')
-        expected = [
-            {'bidder': '0365327',
-             'bid': 10,
-             'buy_now_bid': False},
-            {'bidder': '0365327',
-             'bid': 20,
-             'buy_now_bid': False},
-        ]
-        self.assertEquals(response.json()['bids'], expected)
+        expected = {
+            'bids': [
+                {'bidder': '0365327',
+                 'bid': 10,
+                 'buy_now_bid': False},
+                {'bidder': '0365327',
+                 'bid': 20,
+                 'buy_now_bid': False},
+            ],
+            'last_updated': None,
+            'location': '2B',
+        }
+        self.assertEquals(response.json(), expected)
 
     def test_invalid_bidder(self):
-        bids = [
-            {'bidder': '0365327',
-             'bid': 10,
-             'buy_now_bid': False},
-            {'bidder': '0123456',
-             'bid': 10,
-             'buy_now_bid': False},
-        ]
-        response = self.postJson('/artshow/entry/bids/1/1/',
-                                 {'bids': bids})
+        data = {
+            'bids': [
+                {'bidder': '0365327',
+                 'bid': 10,
+                 'buy_now_bid': False},
+                {'bidder': '0123456',
+                 'bid': 10,
+                 'buy_now_bid': False},
+            ],
+            'location': '1A',
+        }
+        response = self.postJson('/artshow/entry/bids/1/1/', data)
         expected = {
             'error': {
                 'field': 'bidder',
@@ -120,6 +130,8 @@ class BidEntryTests(TestCase):
         }
         response = self.postJson('/artshow/entry/bids/1/1/', expected)
         self.assertEquals(response.json()['bids'], expected['bids'])
+        self.assertEquals(response.json()['location'], expected['location'])
+        self.assertIsNotNone(response.json()['last_updated'])
 
     def test_replace_bids(self):
         expected = {
@@ -132,17 +144,22 @@ class BidEntryTests(TestCase):
         }
         response = self.postJson('/artshow/entry/bids/1/2/', expected)
         self.assertEquals(response.json()['bids'], expected['bids'])
+        self.assertEquals(response.json()['location'], expected['location'])
+        self.assertIsNotNone(response.json()['last_updated'])
 
     def test_piece_cannot_buy_now(self):
-        bids = [
-            {'bidder': '0365327',
-             'bid': 10,
-             'buy_now_bid': False},
-            {'bidder': '0365327',
-             'bid': 50,
-             'buy_now_bid': True},
-        ]
-        response = self.postJson('/artshow/entry/bids/1/2/', {'bids': bids})
+        data = {
+            'bids': [
+                {'bidder': '0365327',
+                 'bid': 10,
+                 'buy_now_bid': False},
+                {'bidder': '0365327',
+                 'bid': 50,
+                 'buy_now_bid': True},
+            ],
+            'location': '2B',
+        }
+        response = self.postJson('/artshow/entry/bids/1/2/', data)
         expected = {
             'error': {
                 'field': 'bid',
@@ -165,15 +182,18 @@ class BidEntryTests(TestCase):
         self.assertEquals(response.json()['bids'], expected)
 
     def test_non_monotonic_bids(self):
-        bids = [
-            {'bidder': '0365327',
-             'bid': 20,
-             'buy_now_bid': False},
-            {'bidder': '0365327',
-             'bid': 10,
-             'buy_now_bid': False},
-        ]
-        response = self.postJson('/artshow/entry/bids/1/2/', {'bids': bids})
+        data = {
+            'bids': [
+                {'bidder': '0365327',
+                 'bid': 20,
+                 'buy_now_bid': False},
+                {'bidder': '0365327',
+                 'bid': 10,
+                 'buy_now_bid': False},
+            ],
+            'location': '2B',
+        }
+        response = self.postJson('/artshow/entry/bids/1/2/', data)
         expected = {
             'error': {
                 'field': 'bid',
@@ -185,12 +205,16 @@ class BidEntryTests(TestCase):
 
         # Original bids should be unchanged.
         response = self.client.get('/artshow/entry/bids/1/2/')
-        expected = [
-            {'bidder': '0365327',
-             'bid': 10,
-             'buy_now_bid': False},
-            {'bidder': '0365327',
-             'bid': 20,
-             'buy_now_bid': False},
-        ]
-        self.assertEquals(response.json()['bids'], expected)
+        expected = {
+            'bids': [
+                {'bidder': '0365327',
+                 'bid': 10,
+                 'buy_now_bid': False},
+                {'bidder': '0365327',
+                 'bid': 20,
+                 'buy_now_bid': False},
+            ],
+            'last_updated': None,
+            'location': '2B',
+        }
+        self.assertEquals(response.json(), expected)
