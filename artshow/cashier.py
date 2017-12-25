@@ -3,7 +3,7 @@
 # See file COPYING for licence details
 from StringIO import StringIO
 import subprocess
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import HttpResponseBadRequest
 from .models import Bidder, Piece, InvoicePayment, InvoiceItem, Invoice
 from django import forms
@@ -135,9 +135,6 @@ def cashier_bidder(request, bidder_id):
                         bid.piece.status = Piece.StatusSold
                         bid.piece.save()
 
-                    if settings.ARTSHOW_AUTOPRINT_INVOICE:
-                        do_print_invoices(request, invoice.id, settings.ARTSHOW_AUTOPRINT_INVOICE)
-
                     return redirect(cashier_invoice, invoice_id=invoice.id)
     else:
         for bid in available_bids:
@@ -180,7 +177,6 @@ def cashier_bidder_invoices(request, bidder_id):
 @permission_required('artshow.add_invoice')
 def cashier_invoice(request, invoice_id):
     invoice = get_object_or_404(Invoice, pk=invoice_id)
-    print_invoice_form = PrintInvoiceForm()
 
     return render(request, 'artshow/cashier_invoice.html', {
         'invoice': invoice,
@@ -188,7 +184,19 @@ def cashier_invoice(request, invoice_id):
         'tax_rate': settings.ARTSHOW_TAX_RATE,
         'tax_description': settings.ARTSHOW_TAX_DESCRIPTION,
         'invoice_prefix': settings.ARTSHOW_INVOICE_PREFIX,
-        'print_invoice_form': print_invoice_form
+        'print_invoice_url':
+                reverse('artshow-print-invoice', args=(invoice_id,)),
+    })
+
+@permission_required('artshow.add_invoice')
+def cashier_print_invoice(request, invoice_id):
+    invoice = get_object_or_404(Invoice, pk=invoice_id)
+
+    return render(request, 'artshow/invoice.html', {
+        'showstr': settings.ARTSHOW_SHOW_NAME,
+        'taxdescstr': settings.ARTSHOW_TAX_DESCRIPTION,
+        'invoice': invoice,
+        'invoice_prefix': settings.ARTSHOW_INVOICE_PREFIX,
     })
 
 
@@ -277,15 +285,4 @@ def print_invoice(request, invoice_id):
     messages.error(request, "Print Invoice request is invalid")
     return HttpResponseBadRequest("Print Invoice request is invalid.")
 
-@permission_required('artshow.add_invoice')
-def view_invoice(request, invoice_id):
-    invoice = get_object_or_404(Invoice, pk=invoice_id)
-    invoiceitems = invoice.invoiceitem_set.all() \
-            .order_by('piece__location', 'piece')
 
-    return render(request, 'artshow/invoice.html', {
-        'showstr': settings.ARTSHOW_SHOW_NAME,
-        'taxdescstr': settings.ARTSHOW_TAX_DESCRIPTION,
-        'invoice': invoice,
-        'invoiceitems': invoiceitems,
-    })
