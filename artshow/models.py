@@ -480,6 +480,9 @@ class Invoice (models.Model):
     def item_and_tax_total(self):
         return self.item_total() + (self.tax_paid or 0)
 
+    def invoiceitems(self):
+        return self.invoiceitem_set.order_by('piece__location', 'piece')
+
     paid_date = models.DateTimeField(blank=True, null=True)
     created_by = models.ForeignKey(User)
     notes = models.TextField(blank=True)

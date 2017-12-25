@@ -28,9 +28,13 @@
 </table>
 {% if invoice.item_and_tax_total != invoice.total_paid %}<p><strong>Oh crap; item total and payment total do not match!</strong></p>
 {% endif %}
-<form method="post" action="{% url "artshow-cashier-print-invoice" invoice.id %}">
-{% include "artshow/print-invoice.html" %}
-</form>
+<iframe id="invoice_iframe" src="{{ print_invoice_url }}" style="display: none"></iframe>
+<button id="print_invoice">Print Invoice</button>
+<script>
+document.getElementById('print_invoice').addEventListener('click', function () {
+  document.getElementById('invoice_iframe').contentWindow.print();
+});
+</script>
 {% if invoice.notes %}
 <h4>Notes</h4>
 <p>{{ invoice.notes }}</p>
