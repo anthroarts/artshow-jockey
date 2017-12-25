@@ -284,5 +284,3 @@ def print_invoice(request, invoice_id):
 
     messages.error(request, "Print Invoice request is invalid")
     return HttpResponseBadRequest("Print Invoice request is invalid.")
-
-
