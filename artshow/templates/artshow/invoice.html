@@ -77,7 +77,7 @@ table td:last-child, table th:last-child {
   </tr>
   {% for item in invoice.invoiceitems %}
   <tr>
-    <td>{{ item.piece }}</td>
+    <td>{{ item.piece }}{% if item.piece.location %} @ {{ item.piece.location }}{% endif %}</td>
     <td>${{ item.price }}</td>
   </tr>
   {% endfor %}
