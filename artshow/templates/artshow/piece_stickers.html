@@ -66,9 +66,9 @@ body {
 
 </style>
 <body>
-<div class="container">
+<div>
 {% for piece in pieces %}
-{% if forloop.counter|divisibleby:"60" %}</div><div class="container">{% endif %}
+{% if forloop.counter0|divisibleby:"60" %}</div><div class="container">{% endif %}
   <div class="sticker">
     <div class="artist">{{ piece.artist.artistname }}</div>
     <div class="name">{{ piece.name }}</div>
