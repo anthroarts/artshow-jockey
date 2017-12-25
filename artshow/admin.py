@@ -231,13 +231,10 @@ class ArtistAdmin(AjaxSelectAdmin):
     print_control_forms.short_description = "Print Control Forms"
 
     def print_piece_stickers( self, request, artists ):
-        import bidsheets
-
-        response = HttpResponse(content_type="application/pdf")
-        pieces = Piece.objects.filter(artist__in=artists).order_by('artist', 'pieceid')
-        bidsheets.generate_piece_stickers(response, pieces)
-        self.message_user(request, "Piece Stickers printed.")
-        return response
+        pieces = Piece.objects.filter(artist__in=artists) \
+                .order_by('artist', 'pieceid')
+        return render(request, 'artshow/piece_stickers.html',
+                      {'pieces': pieces})
 
     print_piece_stickers.short_description = "Print Piece Stickers"
 

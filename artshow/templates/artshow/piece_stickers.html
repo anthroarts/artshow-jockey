@@ -1,0 +1,77 @@
+<html>
+<head>
+<title>Art Show Piece Stickers</title>
+<style>
+body {
+  margin: 0;
+}
+
+.container {
+  width: 8.5in;
+  height: 11in;
+  box-sizing: border-box;
+  padding: 0.5in 0.3in;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(15, 1fr);
+  grid-gap: 0px 0.3in;
+  page-break-after: always;
+}
+
+.sticker {
+  height: calc(2in / 3);
+  width: 1.75in;
+  box-sizing: border-box;
+  padding: 5px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "artist piece_id"
+    "name   piece_id"
+    "media  piece_id";
+}
+
+.artist {
+  grid-area: artist;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.name {
+  grid-area: name;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.media {
+  grid-area: media;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.piece_id {
+  grid-area: piece_id;
+  font-size: 18pt;
+  align-self: center;
+  justify-self: center;
+  writing-mode: vertical-rl;
+}
+
+</style>
+<body>
+<div class="container">
+{% for piece in pieces %}
+{% if forloop.counter|divisibleby:"60" %}</div><div class="container">{% endif %}
+  <div class="sticker">
+    <div class="artist">{{ piece.artist.artistname }}</div>
+    <div class="name">{{ piece.name }}</div>
+    <div class="media">{{ piece.media }}</div>
+    <div class="piece_id">{{ piece.artist.artistid }}-{{ piece.pieceid }}</div>
+  </div>
+{% endfor %}
+</div>
+</body>
