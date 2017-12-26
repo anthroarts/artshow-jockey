@@ -394,14 +394,6 @@ class PieceBidInline(admin.TabularInline):
 
 
 class PieceAdmin(admin.ModelAdmin):
-    def clear_scanned_flag(self, request, pieces):
-        pieces.update(bidsheet_scanned=False)
-        self.message_user(request, "Bidsheet_scanned flags have been cleared.")
-
-    def set_scanned_flag(self, request, pieces):
-        pieces.exclude(status=Piece.StatusNotInShow).update(bidsheet_scanned=True)
-        self.message_user(request, "Bidsheet_scanned flags have been set if the piece is or was in show.")
-
     def clear_won_status(self, request, pieces):
         pieces.filter(status=Piece.StatusWon).update(status=Piece.StatusInShow,
                                                      voice_auction=False)
@@ -471,12 +463,11 @@ class PieceAdmin(admin.ModelAdmin):
             return obj.buy_now
 
     buy_now_x.short_description = "buy now"
-    list_filter = ('adult', 'not_for_sale', 'voice_auction', 'status', 'bid_sheet_printing', 'control_form_printing',
-                   'bidsheet_scanned')
+    list_filter = ('adult', 'not_for_sale', 'voice_auction', 'status')
     search_fields = ('=code', '=artist__artistid', 'name', '=location', 'artist__person__name', 'artist__publicname')
     list_display = (
         'code', 'clickable_artist', 'name', 'adult', 'min_bid_x', 'buy_now_x',
-        'location', 'voice_auction', 'status', 'top_bid')
+        'location', 'voice_auction', 'status', 'top_bid', 'updated')
     list_editable = ('status',)
     inlines = [PieceBidInline]
     # raw_id_fields = ( 'invoice', )
