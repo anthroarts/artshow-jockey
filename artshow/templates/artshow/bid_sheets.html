@@ -106,7 +106,7 @@ body {
       <div>{% if piece.buy_now %}${{ piece.buy_now }}{% else %}N/A{% endif %}</div>
       {% endif %}
     </div>
-    <div class="piece-id">{{ piece.artist.artistid }}-{{ piece.pieceid }}</div>
+    <div class="piece-id">{{ piece.code }}</div>
     <div class="field">
       <div class="field-label">Artist</div>
       <div class="field-line">{{ piece.artist.artistname|default:"&nbsp" }}</div>
