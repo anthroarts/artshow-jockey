@@ -6,12 +6,19 @@
         <li class="current">Artist Payment Report</li>
     </ul>
 {% endblock %}
+{% block extra_head %}
+<style>
+th a:link, th a:visited {
+  color: white;
+}
+</style>
+{% endblock %}
 {% block content %}
     <p><a href="?">All</a> | <a href="?nonzero=1">Non-Zero Balance</a></p>
     <table class="report">
         {% for a in artists %}
             <tr>
-                <th colspan="2">{{ a }}</th></tr>
+                <th colspan="2"><a  href="{% url 'admin:artshow_artist_change' a.artistid %}">{{ a }}</a></th></tr>
             <tbody>
             {% for p in a.payment_set.all %}
                 <tr>
