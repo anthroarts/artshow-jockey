@@ -164,10 +164,3 @@ def bidder_agreement(request, pk):
     return render(request, "artshow/bidder_agreement.html", {
         'bidder': bidder,
         'agreement_url': reverse('artshow-bidder-agreement', args=(pk,))})
-
-
-def bid_stickers(request, bidder_id0, bidder_id1):
-    return render(request, "artshow/bid_stickers.html",
-                  {'bidder_id0': bidder_id0,
-                   'bidder_id1': bidder_id1,
-                   'range': range(15)})

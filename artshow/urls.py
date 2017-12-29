@@ -85,8 +85,6 @@ urlpatterns = [
         name='artshow-bidderreg-final'),
     url(r'^bidder/(?P<pk>\d+)/agreement/$', bidderreg.bidder_agreement,
         name='artshow-bidder-agreement'),
-    url(r'^bidder/(?P<bidder_id0>\d+)/(?P<bidder_id1>\d+)/stickers/$',
-        bidderreg.bid_stickers),
     url(r'^bidder/$', views.bidder_results),
     url(r'^workflows/$', workflows.index, name='artshow-workflows'),
     url(r'^workflows/printing/$', workflows.printing,

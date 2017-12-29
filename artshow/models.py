@@ -223,8 +223,7 @@ class Bidder (models.Model):
         return results
 
     def __unicode__(self):
-        ids = [bidderid.id for bidderid in self.bidderid_set.all()]
-        return "%s (%s)" % (self.person.name, ",".join(ids))
+        return "%s (%s)" % (self.person.name, ", ".join(self.bidder_ids()))
 
     class Meta:
         permissions = (
@@ -234,7 +233,7 @@ class Bidder (models.Model):
 
 class BidderId (models.Model):
     id = models.CharField(max_length=8, primary_key=True)
-    bidder = models.ForeignKey(Bidder)
+    bidder = models.ForeignKey(Bidder, null=True)
 
     def validate(self):
         try:
@@ -243,7 +242,8 @@ class BidderId (models.Model):
             raise ValidationError("Bidder ID is not valid")
 
     def __unicode__(self):
-        return "BidderId %s (%s)" % (self.id, self.bidder.person.name)
+        name = self.bidder.person.name if self.bidder else "Unassigned"
+        return "BidderId %s (%s)" % (self.id, name)
 
 
 class Piece (models.Model):

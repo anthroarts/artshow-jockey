@@ -19,19 +19,18 @@ body {
 }
 
 .sticker {
-/* border: 1px solid lightgrey;
-   box-sizing: border-box; */
-  padding: 10px;
-}
-
-.contents {
-  padding-top: 12px;
+  height: calc(2in / 3);
+  width: 1.75in;
+  box-sizing: border-box;
+  padding: 15px 10px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
 }
 
 .bidder-id {
   text-align: center;
+  align-self: center;
+  justify-self: center;
 }
 
 .bid-amount {
@@ -41,30 +40,12 @@ body {
 <body>
 <div class="container">
 {% for n in range %}
+{% for bidder_id in bidder_ids %}
 <div class="sticker">
-  <div class="contents">
-    <div class="bidder-id">{{ bidder_id0 }}</div>
-    <div class="bid-amount">&nbsp;</div>
-  </div>
+  <div class="bidder-id">{{ bidder_id.id }}</div>
+  <div class="bid-amount">&nbsp;</div>
 </div>
-<div class="sticker">
-  <div class="contents">
-    <div class="bidder-id">{{ bidder_id0 }}</div>
-    <div class="bid-amount">&nbsp;</div>
-  </div>
-</div>
-<div class="sticker">
-  <div class="contents">
-    <div class="bidder-id">{{ bidder_id1 }}</div>
-    <div class="bid-amount">&nbsp;</div>
-  </div>
-</div>
-<div class="sticker">
-  <div class="contents">
-    <div class="bidder-id">{{ bidder_id1 }}</div>
-    <div class="bid-amount">&nbsp;</div>
-  </div>
-</div>
+{% endfor %}
 {% endfor %}
 </div>
 </body>
