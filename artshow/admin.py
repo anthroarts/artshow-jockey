@@ -534,6 +534,29 @@ class BidderAdmin(AjaxSelectAdmin):
 admin.site.register(Bidder, BidderAdmin)
 
 
+class BidderIdAdmin(admin.ModelAdmin):
+    ordering = ('id',)
+    list_display = ('id', 'bidder')
+    actions = ('print_bid_stickers',)
+
+    def print_bid_stickers(self, request, queryset):
+        bidder_ids = queryset
+        if queryset.count() == 1:
+            bidder_ids = [queryset.first()] * 4
+        elif queryset.count() == 2:
+            bidder_ids = [queryset[0]] * 2 + [queryset[1]] * 2
+        elif queryset.count() != 4:
+            messages.error(request, "Select 1, 2 or 4 bidder IDs.")
+            return
+
+        return render(request, "artshow/bid_stickers.html",
+                      {'bidder_ids': bidder_ids,
+                       'range': range(15)})
+
+
+admin.site.register(BidderId, BidderIdAdmin)
+
+
 class EmailTemplateAdmin(admin.ModelAdmin):
     save_as = True
 
