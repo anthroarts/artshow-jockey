@@ -420,6 +420,12 @@ class PieceAdmin(admin.ModelAdmin):
 
     print_bidsheets.short_description = "Print Bid Sheets"
 
+    def print_piece_stickers( self, request, queryset):
+        return render(request, 'artshow/piece_stickers.html',
+                      {'pieces': queryset})
+
+    print_piece_stickers.short_description = "Print Piece Stickers"
+
     def clickable_artist(self, obj):
         return u'<a href="%s">%s</a>' % (
             urlresolvers.reverse('admin:artshow_artist_change', args=(obj.artist.pk,)), escape(obj.artist.artistname()))
@@ -482,7 +488,9 @@ class PieceAdmin(admin.ModelAdmin):
     )
     raw_id_fields = ('artist', )
     readonly_fields = ('top_bid_detail', 'invoice_item_detail', 'updated')
-    actions = ('clear_scanned_flag', 'set_scanned_flag', 'clear_won_status', 'apply_won_status', 'apply_returned_status', 'print_bidsheets')
+    actions = ('clear_scanned_flag', 'set_scanned_flag', 'clear_won_status',
+               'apply_won_status', 'apply_returned_status', 'print_bidsheets',
+               'print_piece_stickers')
 
 
 admin.site.register(Piece, PieceAdmin)
