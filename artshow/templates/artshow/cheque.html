@@ -1,0 +1,92 @@
+<html>
+<head>
+<title>Cheques</title>
+<style>
+body {
+  margin: 0;
+}
+
+.page {
+  margin: 0.5in;
+  page-break-after: always;
+}
+</style>
+</head>
+<body>
+{% for cheque in cheques %}
+<div class="page">
+  <div class="cheque_date">{{ cheque.date|date:"F jS, Y" }}</div>
+  <div class="cheque_payee">{{ cheque.payee }}</div>
+  <div class="cheque_amount">{{ cheque.amount_string }}</div>
+  <div class="cheque_amount_words">{{ cheque.amount_words|capfirst }}</div>
+  <div class="mailing_label">
+    {% with cheque.artist.person as person %}
+    {{ cheque.payee }}<br>
+    {{ person.address1 }}<br>
+    {% if person.address2 %}{{ person.address2 }}{% endif %}<br>
+    {{ person.city }} {{ person.state }} {{ person.postcode }}<br>
+    {% if person.country and person.country != 'USA' %}{{ person.country }}{% endif %}
+    {% endwith %}
+  </div>
+  <div class="summary_payee">
+    <p>
+      ({{ cheque.artist.artistid }}) {{ cheque.artist.person.name }}
+      {% if cheque.artist.publicname %}({{ cheque.artist.publicname }}){% endif %}
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for payment in cheque.artist.payment_set.all %}
+        <tr>
+          <td>{% if payment.id == cheque.id %}This cheque{% else %}{{ payment.payment_type.name }}: {{ payment.description }}{% endif %}</td>
+          <td>${{ payment.amount }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Balance</td>
+          <td>${{ cheque.artist.balance }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  <div class="summary">
+    <p>
+      ({{ cheque.artist.artistid }}) {{ cheque.artist.person.name }}
+      {% if cheque.artist.publicname %}({{ cheque.artist.publicname }}){% endif %}
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for payment in cheque.artist.payment_set.all %}
+        <tr>
+          <td>{% if payment.id == cheque.id %}This cheque{% else %}{{ payment.payment_type.name }}: {{ payment.description }}{% endif %}</td>
+          <td>${{ payment.amount }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Balance</td>
+          <td>${{ cheque.artist.balance }}</td>
+        </tr>
+      </tfoot>
+    </table>
+    <p>Signature: _______________________________________</p>
+    <p>I have received this cheque and agree to return any amount paid in error.</p>
+  </div>
+</div>
+{% endfor %}
+</body>
+</html>
