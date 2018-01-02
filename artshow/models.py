@@ -15,6 +15,8 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 
+from num2words import num2words
+
 from . import mod11codes
 from .conf import settings
 
@@ -460,6 +462,17 @@ class ChequePayment (Payment):
             raise ValidationError("Cheque amounts are a payment outbound and must be negative")
         self.payment_type = PaymentType.objects.get(pk=settings.ARTSHOW_PAYMENT_SENT_PK)
         self.description = "Cheque %s Payee %s" % (self.number and "#" + self.number or "pending number", self.payee)
+
+    @property
+    def amount_string(self):
+        return str(-self.amount)
+
+    @property
+    def amount_words(self):
+        amount = -self.amount
+        dollars = int(amount)
+        cents = int((amount - dollars) * 100 + Decimal("0.5"))
+        return '%s dollars and %s cents' % (num2words(dollars), num2words(cents))
 
     class Meta:
         permissions = (

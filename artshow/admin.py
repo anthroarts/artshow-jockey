@@ -675,19 +675,7 @@ class ChequePaymentAdmin(admin.ModelAdmin):
 
     # noinspection PyUnusedLocal
     def print_cheques(self, request, cheqs):
-        import cheques
-
-        if settings.ARTSHOW_CHEQUES_AS_PDF:
-            response = HttpResponse(content_type="application/pdf")
-            buf = StringIO.StringIO()
-            for c in cheqs:
-                cheques.cheque_to_text(c, buf)
-            text2pdf.text_to_pdf(buf.getvalue(), response)
-        else:
-            response = HttpResponse(content_type="text/plain")
-            for c in cheqs:
-                cheques.cheque_to_text(c, response)
-        return response
+        return render(request, 'artshow/cheque.html', {'cheques': cheqs})
 
     list_display = ('artist', 'date', 'payee', 'number', 'cheque_amount')
     list_editable = ('number', )
