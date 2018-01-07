@@ -7,15 +7,56 @@ body {
 }
 
 .page {
-  margin: 0.5in;
   page-break-after: always;
+}
+
+.cheque_date {
+  position: absolute;
+  left: 7in;
+  top: 0.75in;
+}
+
+.cheque_payee {
+  position: absolute;
+  left: 1in;
+  top: 1.25in;
+}
+
+.cheque_amount {
+  position: absolute;
+  left: 7in;
+  top: 1.25in;
+}
+
+.cheque_amount_words {
+  position: absolute;
+  left: 0.25in;
+  top: 1.5625in;
+}
+
+.mailing_label {
+  display: none;
+}
+
+.summary_payee {
+  position: absolute;
+  left: 0in;
+  top: 3.5in;
+  margin: 0.5in;
+}
+
+.summary {
+  position: absolute;
+  left: 0in;
+  top: 7.25in;
+  margin: 0.5in;
 }
 </style>
 </head>
 <body>
 {% for cheque in cheques %}
 <div class="page">
-  <div class="cheque_date">{{ cheque.date|date:"F jS, Y" }}</div>
+  <div class="cheque_date">{{ cheque.date|date:"Y-m-d" }}</div>
   <div class="cheque_payee">{{ cheque.payee }}</div>
   <div class="cheque_amount">{{ cheque.amount_string }}</div>
   <div class="cheque_amount_words">{{ cheque.amount_words|capfirst }}</div>
