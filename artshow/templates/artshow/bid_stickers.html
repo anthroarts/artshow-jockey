@@ -15,7 +15,9 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(15, 1fr);
+  grid-auto-flow: column;
   grid-gap: 0px 0.3in;
+  page-break-after: always;
 }
 
 .sticker {
@@ -38,9 +40,10 @@ body {
 }
 </style>
 <body>
-<div class="container">
-{% for n in range %}
+<div>
 {% for bidder_id in bidder_ids %}
+{% if forloop.counter0|divisibleby:"4" %}</div><div class="container">{% endif %}
+{% for n in range %}
 <div class="sticker">
   <div class="bidder-id">{{ bidder_id.id }}</div>
   <div class="bid-amount">&nbsp;</div>

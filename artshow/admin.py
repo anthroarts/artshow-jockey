@@ -553,8 +553,8 @@ class BidderIdAdmin(admin.ModelAdmin):
             bidder_ids = [queryset.first()] * 4
         elif queryset.count() == 2:
             bidder_ids = [queryset[0]] * 2 + [queryset[1]] * 2
-        elif queryset.count() != 4:
-            messages.error(request, "Select 1, 2 or 4 bidder IDs.")
+        elif queryset.count() % 4 != 0:
+            messages.error(request, "Select 1, 2 or a multiple of 4 bidder IDs.")
             return
 
         return render(request, "artshow/bid_stickers.html",
