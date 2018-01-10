@@ -8,6 +8,8 @@ class Command(BaseCommand):
     help = "Generate a list of valid BidderID codes"
 
     def add_arguments(self, parser):
+        parser.add_argument("num_ids", metavar='N', type=int, nargs=1,
+                            help="create up to N unused bidder ids")
         parser.add_argument("--digits", type=int, default=3,
                             help="pad to this many digits [%default]"),
         parser.add_argument("--allow-x", action="store_true", default=False,
@@ -22,6 +24,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         value = 1
+        num_ids = options['num_ids'][0]
         digits = options['digits']
         allow_x = options['allow_x']
         prefix = options['prefix']
@@ -29,7 +32,7 @@ class Command(BaseCommand):
         offset = options['offset']
 
         unused_codes = BidderId.objects.filter(bidder__isnull=True).count()
-        while unused_codes < 100:
+        while unused_codes < num_ids:
             code = '%0*d' % (digits, value)
             value += 1
             check = make_check(code, offset=offset)
