@@ -131,7 +131,7 @@ class ArtistForm(forms.ModelForm):
 class ArtistAdmin(AjaxSelectAdmin):
     form = ArtistForm
     list_display = ('person_name', 'publicname', 'artistid', 'person_clickable_email', 'requested_spaces',
-                    'allocated_spaces')
+                    'allocated_spaces', 'piece_count')
     list_filter = ('mailin', 'person__country', 'checkoffs')
     search_fields = ('person__name', 'publicname', 'person__email', 'notes', 'artistid')
     fields = ['artistid', 'person', 'publicname', 'website', ('reservationdate', 'attending'),
@@ -143,6 +143,11 @@ class ArtistAdmin(AjaxSelectAdmin):
 
     def allocated_spaces(self, artist):
         return ", ".join("%s:%s" % (al.space.shortname, al.allocated) for al in artist.allocation_set.all())
+
+    def piece_count(self, artist):
+        return artist.piece_set.count()
+
+    piece_count.short_description = "pieces"
 
     def person_name(self, artist):
         return artist.person.name
