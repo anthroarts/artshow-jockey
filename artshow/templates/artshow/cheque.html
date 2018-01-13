@@ -7,31 +7,40 @@ body {
 }
 
 .page {
+  position: relative;
+  width: 8.5in;
+  height: 11in;
   page-break-after: always;
 }
 
 .cheque_date {
   position: absolute;
-  left: 7in;
-  top: 0.75in;
+  left: 7.5in;
+  top: 0.9in;
 }
 
 .cheque_payee {
   position: absolute;
   left: 1in;
-  top: 1.25in;
+  top: 1.45in;
 }
 
 .cheque_amount {
   position: absolute;
-  left: 7in;
-  top: 1.25in;
+  left: 7.5in;
+  top: 1.45in;
 }
 
 .cheque_amount_words {
   position: absolute;
-  left: 0.25in;
-  top: 1.5625in;
+  left: 0.375in;
+  top: 1.8125in;
+}
+
+.cheque_memo {
+  position: absolute;
+  left: 0.75in;
+  top: 2.8in;
 }
 
 .mailing_label {
@@ -43,6 +52,7 @@ body {
   left: 0in;
   top: 3.5in;
   margin: 0.5in;
+  width: 100%;
 }
 
 .summary {
@@ -50,6 +60,15 @@ body {
   left: 0in;
   top: 7.25in;
   margin: 0.5in;
+  width: 100%;
+}
+
+table {
+  width: 100%;
+}
+
+th {
+  text-align: left;
 }
 </style>
 </head>
@@ -60,6 +79,7 @@ body {
   <div class="cheque_payee">{{ cheque.payee }}</div>
   <div class="cheque_amount">{{ cheque.amount_string }}</div>
   <div class="cheque_amount_words">{{ cheque.amount_words|capfirst }}</div>
+  <div class="cheque_memo">{{ cheque.artist }}</div>
   <div class="mailing_label">
     {% with cheque.artist.person as person %}
     {{ cheque.payee }}<br>
@@ -96,6 +116,7 @@ body {
         </tr>
       </tfoot>
     </table>
+    <p>Thank you for exhibiting at {{ SITE_NAME }}!</p>
   </div>
   <div class="summary">
     <p>
