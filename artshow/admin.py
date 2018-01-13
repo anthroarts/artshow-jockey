@@ -547,10 +547,11 @@ class BidderAdmin(AjaxSelectAdmin):
 admin.site.register(Bidder, BidderAdmin)
 
 
-class BidderIdAdmin(admin.ModelAdmin):
+class BidderIdAdmin(AjaxSelectAdmin):
     ordering = ('id',)
     list_display = ('id', 'bidder')
     actions = ('print_bid_stickers',)
+    form = make_ajax_form(BidderId, {'bidder': 'bidder'})
 
     def print_bid_stickers(self, request, queryset):
         bidder_ids = queryset
