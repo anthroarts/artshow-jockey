@@ -20,14 +20,14 @@
             <tbody>
             {% for bid in bidder.top_bids %}
                 <tr>
-                    {% if forloop.first %}<th class="bidder" rowspan="{{ bidder.top_bids|length }}">{{ bidder }}</th>{% endif %}
+                    {% if forloop.first %}<th class="bidder" rowspan="{{ bidder.top_bids|length }}">{{ bidder.bidder_ids|join:", " }}</th>{% endif %}
                     <td>{{ bid.piece.code }} - <i>{{ bid.piece.name }}</i> by {{ bid.piece.artist.artistname }}</td>
                     <td>{{ bid.amount }}</td>
                     <td>{{ bid.piece.voice_auction|yesno:"Voice Auction," }}</td>
                 </tr>
             {% empty %}
                 <tr>
-                    <th class="bidder" rowspan="{{ bidder.top_bids.count }}">{{ bidder }}</th>
+                    <th class="bidder" rowspan="{{ bidder.top_bids.count }}">{{ bidder.bidder_ids|join:", " }}</th>
                     <td colspan="3">No winning bids</td>
                 </tr>
             {% endfor %}
