@@ -31,8 +31,8 @@ class BidderRegistrationForm1(forms.Form):
     reg_id = forms.CharField(
         max_length=20,
         help_text="The number on the front of your convention badge. It looks "
-                  "like 123-456, and may have fewer or more digits. Enter the "
-                  "dash, too.")
+                  "like PR:1234 or 1234569, and may have fewer or more digits. "
+                  "Enter the whole thing.")
     cell_contact = forms.CharField(
         max_length=40, required=False,
         help_text="If you have one, provide your cell number or that of a "
