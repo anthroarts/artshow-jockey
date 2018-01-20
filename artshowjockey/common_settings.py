@@ -125,6 +125,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'nocaptcha_recaptcha',
     'peeps',
     'artshow',
     'ajax_select',
