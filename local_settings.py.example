@@ -46,8 +46,9 @@ SITE_ROOT_URL = "http://www.example.com"
 # Type about 40 random characters between the quotes. Don't share this with anyone.
 SECRET_KEY = "--- NOT A SECURE SECRET KEY! CHANGE ME! ---"
 
-# Visit https://www.google.com/recaptcha/admin/create to create a keypair
-RECAPTCHA_PUBLIC_KEY = "YOUR_PUBLIC_KEY"
-RECAPTCHA_PRIVATE_KEY = "YOUR_PRIVATE_KEY"
+# Visit https://www.google.com/recaptcha/admin/create to create a keypair.
+# These are test keys.
+NORECAPTCHA_SITE_KEY = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+NORECAPTCHA_SECRET_KEY = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
 
 ARTSHOW_CHEQUES_AS_PDF = True
