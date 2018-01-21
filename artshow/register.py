@@ -70,7 +70,7 @@ def main(request):
                               {"error": "There is someone else using that email address."})
             try:
                 user = create_user_from_email(email)
-            except ValueError, x:
+            except ValueError as x:
                 return render(request, "artshow/manage_register_error.html",
                               {"error": str(x)})
             person = person_form.save(commit=False)

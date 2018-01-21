@@ -11,6 +11,6 @@ class AttributeFilterTest (TestCase):
     def test_failed_access(self):
         def get_secret_key():
             return artshow_settings.SECRET_KEY
-        self.assertRaisesRegexp(AttributeError,
+        self.assertRaisesRegex(AttributeError,
                                 "AttributeFilter blocked access to 'SECRET_KEY'.*",
                                 get_secret_key)

@@ -1,5 +1,5 @@
 import csv
-import StringIO
+import io
 
 
 class UnicodeWriter(object):
@@ -22,14 +22,14 @@ class UnicodeWriter(object):
 
     def __init__(self, f, dialect=csv.excel, encoding="utf-16", **kwds):
         # Redirect output to a queue
-        self.queue = StringIO.StringIO()
+        self.queue = io.StringIO()
         self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
         self.stream = f
         self.encoding = encoding
 
     def writerow(self, row):
         # Modified from original: now using unicode(s) to deal with e.g. ints
-        self.writer.writerow([unicode(s).encode("utf-8") for s in row])
+        self.writer.writerow([str(s).encode("utf-8") for s in row])
         # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
         data = data.decode("utf-8")
@@ -87,11 +87,11 @@ class UnicodeReader(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         # read and split the csv row into fields
-        row = self.csv_reader.next()
+        row = next(self.csv_reader)
         # now decode
-        return [unicode(cell, self.encoding) for cell in row]
+        return [str(cell, self.encoding) for cell in row]
 
     @property
     def line_num(self):

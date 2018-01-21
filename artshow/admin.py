@@ -1,7 +1,7 @@
 # Artshow Jockey
 # Copyright (C) 2009, 2010 Chris Cogdon
 # See file COPYING for licence details
-import StringIO
+import io
 import datetime
 import decimal
 import smtplib
@@ -184,7 +184,7 @@ class ArtistAdmin(AjaxSelectAdmin):
                             send_mail(selected_template.subject, body, settings.ARTSHOW_EMAIL_SENDER, [email],
                                       fail_silently=False)
                             self.message_user(request, "Mail to %s succeeded" % email)
-                        except smtplib.SMTPException, x:
+                        except smtplib.SMTPException as x:
                             # Note: ModelAdmin message_user only supports sending info-level messages.
                             messages.error(request, "Mail to %s failed: %s" % ( email, x ))
                     return None
@@ -220,7 +220,7 @@ class ArtistAdmin(AjaxSelectAdmin):
     print_bidsheets.short_description = "Print Bid Sheets"
 
     def print_mailing_labels(self, request, queryset):
-        import bidsheets
+        from . import bidsheets
 
         response = HttpResponse(content_type="application/pdf")
         bidsheets.generate_mailing_labels(output=response, artists=queryset)
@@ -357,7 +357,7 @@ class ArtistAdmin(AjaxSelectAdmin):
                         send_password_reset_email(artist, user, selected_template.subject,
                                                   selected_template.template)
                         self.message_user(request, "Mail to %s succeeded." % artist_email)
-                    except smtplib.SMTPException, x:
+                    except smtplib.SMTPException as x:
                         # Note: ModelAdmin message_user only supports sending info-level messages.
                         messages.error(request, "Mail to %s failed: %s" % (artist_email, x))
             return None
@@ -432,14 +432,14 @@ class PieceAdmin(admin.ModelAdmin):
     print_piece_stickers.short_description = "Print Piece Stickers"
 
     def clickable_artist(self, obj):
-        return u'<a href="%s">%s</a>' % (
+        return '<a href="%s">%s</a>' % (
             urlresolvers.reverse('admin:artshow_artist_change', args=(obj.artist.pk,)), escape(obj.artist.artistname()))
 
     clickable_artist.allow_tags = True
     clickable_artist.short_description = "artist"
 
     def clickable_invoice(self, obj):
-        return u'<a href="%s">%s</a>' % (
+        return '<a href="%s">%s</a>' % (
             urlresolvers.reverse('admin:artshow_invoice_change', args=(obj.invoice.id,)), obj.invoice)
 
     clickable_invoice.allow_tags = True
@@ -517,7 +517,7 @@ class BidderAdmin(AjaxSelectAdmin):
     form = make_ajax_form(Bidder, {'person': 'person'})
 
     def bidder_ids(self, obj):
-        return u", ".join([bidderid.id for bidderid in obj.bidderid_set.all()])
+        return ", ".join([bidderid.id for bidderid in obj.bidderid_set.all()])
 
     bidder_ids.short_description = "bidder IDs"
 
@@ -565,7 +565,7 @@ class BidderIdAdmin(AjaxSelectAdmin):
 
         return render(request, "artshow/bid_stickers.html",
                       {'bidder_ids': bidder_ids,
-                       'range': range(15)})
+                       'range': list(range(15))})
 
 
 admin.site.register(BidderId, BidderIdAdmin)
@@ -582,7 +582,7 @@ admin.site.register(EmailSignature)
 
 class PaymentAdmin(admin.ModelAdmin):
     def clickable_artist(self, obj):
-        return u'<a href="%s">%s</a>' % (
+        return '<a href="%s">%s</a>' % (
             urlresolvers.reverse('admin:artshow_artist_change', args=(obj.artist.pk,)), escape(str(obj.artist)))
     clickable_artist.allow_tags = True
     clickable_artist.short_description = "artist"

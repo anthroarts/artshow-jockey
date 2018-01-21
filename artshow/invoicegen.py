@@ -3,12 +3,12 @@
 # Copyright (C) 2009, 2010 Chris Cogdon
 # See file COPYING for licence details
 
-from models import Invoice
+from .models import Invoice
 import sys
 import subprocess
 from .conf import settings
 from .conf import _DISABLED as SETTING_DISABLED
-from StringIO import StringIO
+from io import StringIO
 import re
 from logging import getLogger
 logger = getLogger(__name__)
@@ -161,7 +161,7 @@ def print_invoice ( invoice, copy_name="SINGLE COPY", dest=sys.stdout ):
 	dest.write ( s )
 
 
-class PrintingError ( StandardError ):
+class PrintingError ( Exception ):
 	pass
 	
 def print_invoices ( invoices, copy_names, to_printer=False ):

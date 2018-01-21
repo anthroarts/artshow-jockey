@@ -1,6 +1,6 @@
 from decimal import Decimal
-from urllib2 import urlopen
-from urlparse import parse_qs
+from urllib.request import urlopen
+from urllib.parse import parse_qs
 import datetime
 from django.core.signing import Signer
 from django.core.urlresolvers import reverse
@@ -54,14 +54,14 @@ def convert_date(datestr):
 def make_paypal_url(request, payment):
 
     signer = Signer()
-    item_number = signer.sign(unicode(payment.id))
+    item_number = signer.sign(str(payment.id))
 
     params = {"cmd": "_xclick",
               "business": settings.ARTSHOW_PAYPAL_ACCOUNT,
               "undefined_quantity": "0",
               "item_name": "Art Show Payment from " + payment.artist.artistname(),
               "item_number": item_number,
-              "amount": unicode(payment.amount),
+              "amount": str(payment.amount),
               "shipping": "0",
               "no_shipping": "1",
               "return": request.build_absolute_uri(reverse("artshow-manage-payment-paypal",
@@ -141,7 +141,7 @@ def process_ipn(sender, **kwargs):
         payment.date = payment_date
         payment.save()
 
-    except Exception, x:
+    except Exception as x:
         paypal_logger.error("Error when getting validation for: %s", query)
         if payment_id:
             paypal_logger.error("... during processing of payment_id: %s", payment_id)

@@ -218,13 +218,13 @@ def invoice_to_pdf(invoice, outf):
         num_items += 1
         piece = item.piece
         paragraphs = [
-            Paragraph("<i>" + escape(piece.name) + u"</i> \u2014 by " + escape(piece.artistname()), normal_style)]
+            Paragraph("<i>" + escape(piece.name) + "</i> \u2014 by " + escape(piece.artistname()), normal_style)]
         details_body_parts = [escape(piece.media)]
         if piece.condition:
             details_body_parts.append(escape(piece.condition))
         if piece.other_artist:
             details_body_parts.append(escape("sold by " + piece.artist.artistname()))
-        paragraphs.append(Paragraph(u" \u2014 ".join(details_body_parts), piece_details_style))
+        paragraphs.append(Paragraph(" \u2014 ".join(details_body_parts), piece_details_style))
         body_data.append([item.piece.code, paragraphs, format_money(item.price)])
 
     if invoice.tax_paid:
@@ -235,14 +235,14 @@ def invoice_to_pdf(invoice, outf):
         subtotal_row = None
 
     total_row = len(body_data)
-    body_data.append(["", str(num_items) + u" items \u2014 Total Due", format_money(invoice.item_and_tax_total())])
+    body_data.append(["", str(num_items) + " items \u2014 Total Due", format_money(invoice.item_and_tax_total())])
 
     body_data.append(["", "", ""])
 
     for payment in invoice.invoicepayment_set.all():
         body_data.append(["", payment.get_payment_method_display(), format_money(payment.amount)])
 
-    body_data.append(["", "Total Paid", unicode(invoice.total_paid())])
+    body_data.append(["", "Total Paid", str(invoice.total_paid())])
 
     body_table_style = [
         ("FONTSIZE", (0, 0), (-1, 0), normal_style.fontSize - 4),
@@ -298,8 +298,8 @@ def picklist_to_pdf(invoice, outf):
     story = []
 
     body_data = [
-        ["Loc.", "Code", u"\u2714", "Description", "Amount", u"\u2714"],
-        [Paragraph('<para align="right">Confirm Bidder ID on each sheet</para>', normal_style), "", "", "", "", u"[ ]"],
+        ["Loc.", "Code", "\u2714", "Description", "Amount", "\u2714"],
+        [Paragraph('<para align="right">Confirm Bidder ID on each sheet</para>', normal_style), "", "", "", "", "[ ]"],
     ]
 
     num_items = 0
@@ -307,17 +307,17 @@ def picklist_to_pdf(invoice, outf):
         num_items += 1
         piece = item.piece
         paragraphs = [
-            Paragraph("<i>" + escape(piece.name) + u"</i> \u2014 by " + escape(piece.artistname()), normal_style)]
+            Paragraph("<i>" + escape(piece.name) + "</i> \u2014 by " + escape(piece.artistname()), normal_style)]
         details_body_parts = [escape(piece.media)]
         if piece.condition:
             details_body_parts.append(escape(piece.condition))
         if piece.other_artist:
             details_body_parts.append(escape("sold by " + piece.artist.artistname()))
-        paragraphs.append(Paragraph(u" \u2014 ".join(details_body_parts), piece_details_style))
-        body_data.append([piece.location, piece.code, u"[ ]", paragraphs,
+        paragraphs.append(Paragraph(" \u2014 ".join(details_body_parts), piece_details_style))
+        body_data.append([piece.location, piece.code, "[ ]", paragraphs,
                           Paragraph("<para align=\"right\"><b>" + escape(str(item.price)) + "</b></para>",
                                     normal_style),
-                          u"[ ]"])
+                          "[ ]"])
 
     body_data.append([Paragraph('<para align="right">Confirm <b>%s</b> items, <b>%s</b> '
                                 'bid-sheets, then initial</para>' % (num_items, num_items),

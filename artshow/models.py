@@ -276,12 +276,12 @@ class Piece (models.Model):
     StatusNotInShowLocked = 5
 
     STATUS_CHOICES = [
-        (StatusNotInShow, u'Not In Show'),
-        (StatusNotInShowLocked, u'Not In Show, Locked'),
-        (StatusInShow, u'In Show'),
-        (StatusWon, u'Won'),
-        (StatusSold, u'Sold'),
-        (StatusReturned, u'Returned'),
+        (StatusNotInShow, 'Not In Show'),
+        (StatusNotInShowLocked, 'Not In Show, Locked'),
+        (StatusInShow, 'In Show'),
+        (StatusWon, 'Won'),
+        (StatusSold, 'Sold'),
+        (StatusReturned, 'Returned'),
     ]
     status = models.IntegerField(choices=STATUS_CHOICES, default=StatusNotInShow)
 
@@ -289,9 +289,9 @@ class Piece (models.Model):
     PrintingToBePrinted = 1
     PrintingPrinted = 2
     PRINTING_CHOICES = [
-        (PrintingNotPrinted, u'Not Printed'),
-        (PrintingToBePrinted, u'To Be Printed'),
-        (PrintingPrinted, u'Printed'),
+        (PrintingNotPrinted, 'Not Printed'),
+        (PrintingToBePrinted, 'To Be Printed'),
+        (PrintingPrinted, 'Printed'),
     ]
 
     bid_sheet_printing = models.IntegerField(choices=PRINTING_CHOICES, default=PrintingNotPrinted)
@@ -501,7 +501,7 @@ class Invoice (models.Model):
     notes = models.TextField(blank=True)
 
     def __unicode__(self):
-        return u"Invoice %d for %s" % (self.id, self.payer)
+        return "Invoice %d for %s" % (self.id, self.payer)
 
     def get_absolute_url(self):
         return reverse('artshow-cashier-invoice', args=[str(self.id)])
@@ -518,11 +518,11 @@ class InvoicePayment(models.Model):
     # types.
     # TODO: Create a flexible table with flags indicating how each should be handled.
     PAYMENT_METHOD_CHOICES = [
-        (0, u"Not Paid"),
-        (1, u"Cash"),
-        (2, u"Check"),
-        (3, u"Card"),
-        (4, u"Other"),
+        (0, "Not Paid"),
+        (1, "Cash"),
+        (2, "Check"),
+        (3, "Card"),
+        (4, "Other"),
     ]
     payment_method = models.IntegerField(choices=PAYMENT_METHOD_CHOICES, default=0)
     invoice = models.ForeignKey(Invoice)
@@ -540,11 +540,11 @@ class InvoiceItem (models.Model):
 
 class BatchScan (models.Model):
     BATCHTYPES = [
-        (0, u"Unknown"),
-        (1, u"Locations"),
-        (2, u"Intermediate Bids"),
-        (3, u"Final Bids"),
-        (4, u"Bidder ID Allocation"),
+        (0, "Unknown"),
+        (1, "Locations"),
+        (2, "Intermediate Bids"),
+        (3, "Final Bids"),
+        (4, "Bidder ID Allocation"),
     ]
     batchtype = models.IntegerField(choices=BATCHTYPES, default=0)
     data = models.TextField()
@@ -554,7 +554,7 @@ class BatchScan (models.Model):
     processing_log = models.TextField(blank=True)
 
     def __unicode__(self):
-        return u"BatchScan %s" % self.id
+        return "BatchScan %s" % self.id
 
 
 class Event (models.Model):

@@ -113,7 +113,7 @@ def auction_bids(request, adult):
                     b = Bid(bidder=bidder.bidder, amount=amount, piece=piece)
                     try:
                         b.validate()
-                    except ValidationError, x:
+                    except ValidationError as x:
                         messages.error(request, "Bid on %s not saved: %s" % (piece, x))
                     else:
                         b.save()

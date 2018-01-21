@@ -58,7 +58,7 @@ class BidEntryTests(TestCase):
                 'message': 'Invalid artist ID',
             }
         }
-        self.assertEquals(response.json(), expected)
+        self.assertEqual(response.json(), expected)
 
     def test_invalid_piece(self):
         response = self.client.get('/artshow/entry/bids/1/3/')
@@ -68,11 +68,11 @@ class BidEntryTests(TestCase):
                 'message': 'Invalid piece ID',
             }
         }
-        self.assertEquals(response.json(), expected)
+        self.assertEqual(response.json(), expected)
 
     def test_piece_no_bids(self):
         response = self.client.get('/artshow/entry/bids/1/1/')
-        self.assertEquals(response.json(), {
+        self.assertEqual(response.json(), {
             'bids': [],
             'last_updated': None,
             'location': '',
@@ -92,7 +92,7 @@ class BidEntryTests(TestCase):
             'last_updated': None,
             'location': '2B',
         }
-        self.assertEquals(response.json(), expected)
+        self.assertEqual(response.json(), expected)
 
     def test_invalid_bidder(self):
         data = {
@@ -114,7 +114,7 @@ class BidEntryTests(TestCase):
                 'message': 'Invalid bidder ID',
             }
         }
-        self.assertEquals(response.json(), expected)
+        self.assertEqual(response.json(), expected)
 
     def test_add_bids(self):
         expected = {
@@ -129,8 +129,8 @@ class BidEntryTests(TestCase):
             'location': '1A',
         }
         response = self.postJson('/artshow/entry/bids/1/1/', expected)
-        self.assertEquals(response.json()['bids'], expected['bids'])
-        self.assertEquals(response.json()['location'], expected['location'])
+        self.assertEqual(response.json()['bids'], expected['bids'])
+        self.assertEqual(response.json()['location'], expected['location'])
         self.assertIsNotNone(response.json()['last_updated'])
 
     def test_replace_bids(self):
@@ -143,8 +143,8 @@ class BidEntryTests(TestCase):
             'location': '2B',
         }
         response = self.postJson('/artshow/entry/bids/1/2/', expected)
-        self.assertEquals(response.json()['bids'], expected['bids'])
-        self.assertEquals(response.json()['location'], expected['location'])
+        self.assertEqual(response.json()['bids'], expected['bids'])
+        self.assertEqual(response.json()['location'], expected['location'])
         self.assertIsNotNone(response.json()['last_updated'])
 
     def test_piece_cannot_buy_now(self):
@@ -167,7 +167,7 @@ class BidEntryTests(TestCase):
                 'message': 'Buy Now option not available on piece with bids',
             }
         }
-        self.assertEquals(response.json(), expected)
+        self.assertEqual(response.json(), expected)
 
         # Original bids should be unchanged.
         response = self.client.get('/artshow/entry/bids/1/2/')
@@ -179,7 +179,7 @@ class BidEntryTests(TestCase):
              'bid': 20,
              'buy_now_bid': False},
         ]
-        self.assertEquals(response.json()['bids'], expected)
+        self.assertEqual(response.json()['bids'], expected)
 
     def test_non_monotonic_bids(self):
         data = {
@@ -201,7 +201,7 @@ class BidEntryTests(TestCase):
                 'message': 'New bid must be higher than existing bids',
             }
         }
-        self.assertEquals(response.json(), expected)
+        self.assertEqual(response.json(), expected)
 
         # Original bids should be unchanged.
         response = self.client.get('/artshow/entry/bids/1/2/')
@@ -217,4 +217,4 @@ class BidEntryTests(TestCase):
             'last_updated': None,
             'location': '2B',
         }
-        self.assertEquals(response.json(), expected)
+        self.assertEqual(response.json(), expected)

@@ -1,7 +1,7 @@
 # Artshow Jockey
 # Copyright (C) 2009, 2010, 2011 Chris Cogdon
 # See file COPYING for licence details
-from StringIO import StringIO
+from io import StringIO
 import subprocess
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import HttpResponseBadRequest
@@ -232,7 +232,7 @@ def do_print_invoices3(invoice, copy_name):
             pdfreports.picklist_to_pdf(invoice, sbuf)
         else:
             pdfreports.invoice_to_pdf(invoice, sbuf)
-    except Exception, x:
+    except Exception as x:
         logger.error("Could not generate invoice: %s", x)
         raise invoicegen.PrintingError ("Could not generate invoice: %s" % x)
 
@@ -256,7 +256,7 @@ def do_print_invoices(request, invoice_id, copy_names):
     invoice = Invoice.objects.get(id=invoice_id)
     try:
         do_print_invoices2(invoice, copy_names)
-    except invoicegen.PrintingError, x:
+    except invoicegen.PrintingError as x:
         messages.error(request, "Printing failed. Please ask administrator to consult error log")
         logger.error("Printing failed with exception: %s", x)
     else:

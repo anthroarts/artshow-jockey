@@ -16,11 +16,11 @@ class UnicodeCsvReader(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         # read and split the csv row into fields
-        row = self.csv_reader.next()
+        row = next(self.csv_reader)
         # now decode
-        return [unicode(cell, self.encoding) for cell in row]
+        return [str(cell, self.encoding) for cell in row]
 
     @property
     def line_num(self):
@@ -114,14 +114,14 @@ class Command(BaseCommand):
         self.merge_peeps(db, dry_run=options['dry_run'], results=results, comment=options['comment'])
 
     def print_person(self, person):
-        print "Person ID:%s  Name:%s  RegID:%s  Comment:%s" % (person.id, person.name, person.reg_id, person.comment)
-        print "Address:%s  Address2:%s  City:%s  State:%s  Country:%s  Postcode:%s" % (
-            person.address1, person.address2, person.city, person.state, person.country, person.postcode)
-        print "Phone:%s  Email:%s" % (person.phone, person.email)
-        print
+        print("Person ID:%s  Name:%s  RegID:%s  Comment:%s" % (person.id, person.name, person.reg_id, person.comment))
+        print("Address:%s  Address2:%s  City:%s  State:%s  Country:%s  Postcode:%s" % (
+            person.address1, person.address2, person.city, person.state, person.country, person.postcode))
+        print("Phone:%s  Email:%s" % (person.phone, person.email))
+        print()
 
     def print_person_summary(self, person):
-        print "Person ID:%s  Name:%s  RegID:%s  Comment:%s" % (person.id, person.name, person.reg_id, person.comment)
+        print("Person ID:%s  Name:%s  RegID:%s  Comment:%s" % (person.id, person.name, person.reg_id, person.comment))
 
     def row_into_person(self, result):
         p = Person(name=result[0], address1=result[1], address2=result[2], city=result[3], state=result[4],
@@ -131,12 +131,12 @@ class Command(BaseCommand):
 
     def merge_peeps(self, db, dry_run=False, results=None, comment=None):
 
-        print
+        print()
 
         for person in Person.objects.all():
 
             if person.reg_id == "":
-                print "Missing Reg ID for:"
+                print("Missing Reg ID for:")
                 self.print_person_summary(person)
                 csv_person = None
             else:
@@ -145,7 +145,7 @@ class Command(BaseCommand):
                 if result:
                     csv_person = self.row_into_person(result)
                 else:
-                    print "Reg ID not found for:"
+                    print("Reg ID not found for:")
                     self.print_person_summary(person)
                     csv_person = None
 
@@ -153,11 +153,11 @@ class Command(BaseCommand):
                 results = db.execute("select * from person where name like ?", (person.name[:4] + "%", ))
                 results = results.fetchall()
                 results = [self.row_into_person(row) for row in results]
-                print "Database search:", len(results), "possibilities found"
+                print("Database search:", len(results), "possibilities found")
                 for index, found_person in enumerate(results):
-                    print "Option", index + 1, ":"
+                    print("Option", index + 1, ":")
                     self.print_person(found_person)
-                response = raw_input("Option (or 0 for none): ")
+                response = input("Option (or 0 for none): ")
                 while True:
                     try:
                         index = int(response)
@@ -165,35 +165,35 @@ class Command(BaseCommand):
                             break
                         csv_person = results[index - 1]
                     except (ValueError, IndexError):
-                        print "Invalid Option"
+                        print("Invalid Option")
                     else:
                         break
-                print
+                print()
 
             if csv_person is not None:
                 person.reg_id = csv_person.reg_id
                 if person.name != csv_person.name:
-                    print "CSV Entry found, but names mismatch"
+                    print("CSV Entry found, but names mismatch")
                     self.print_person_summary(person)
                     while True:
-                        print "Database:", person.name, " CSV:", csv_person.name
-                        print "  1) Keep Database Name:", person.name
-                        print "  2) Use CSV Name:", csv_person.name
-                        print "  3) Enter Anew"
-                        response = raw_input("Option: ")
+                        print("Database:", person.name, " CSV:", csv_person.name)
+                        print("  1) Keep Database Name:", person.name)
+                        print("  2) Use CSV Name:", csv_person.name)
+                        print("  3) Enter Anew")
+                        response = input("Option: ")
                         if response == "1":
                             break
                         elif response == "2":
                             person.name = csv_person.name
                             break
                         elif response == "3":
-                            new_name = raw_input("Enter Name: ")
+                            new_name = input("Enter Name: ")
                             if new_name:
                                 person.name = new_name
                             break
                         else:
-                            print "Invalid Option"
-                    print
+                            print("Invalid Option")
+                    print()
                 if not (person.address1 or person.address2 or person.city or
                         person.state or person.country or person.postcode):
                     person.address1 = csv_person.address1

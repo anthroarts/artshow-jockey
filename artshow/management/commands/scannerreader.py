@@ -24,23 +24,23 @@ class Command(BaseCommand):
 
         while True:
             data = []
-            print "waiting for new data"
+            print("waiting for new data")
             l = f.readline()
-            print "\a"
+            print("\a")
             while True:
                 if not l:
-                    print "oops. no data to read. wtf?"
+                    print("oops. no data to read. wtf?")
                 l = l.strip()
                 if l:
                     data.append(l)
-                print l
+                print(l)
                 rlist, wlist, xlist = select.select([f], [], [f], 5.0)
                 if not rlist and not xlist:
                     break
                 l = f.readline()
-            print "timed out"
-            print "\a"
+            print("timed out")
+            print("\a")
             data_str = "\n".join(data) + "\n"
             batchscan = BatchScan(data=data_str, date_scanned=now())
             batchscan.save()
-            print str(batchscan), "saved"
+            print(str(batchscan), "saved")

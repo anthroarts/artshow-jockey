@@ -27,7 +27,7 @@ class Person (models.Model):
     clickable_email.allow_tags = True
 
     def mailing_label(self):
-        return u'<a href="javascript:w=window.open(\'%s\',\'blank\',\'toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=300,height=100\');">ML&rarr;</a>' % (reverse('person-mailing-label', args=(self.pk,)), )
+        return '<a href="javascript:w=window.open(\'%s\',\'blank\',\'toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=300,height=100\');">ML&rarr;</a>' % (reverse('person-mailing-label', args=(self.pk,)), )
     mailing_label.allow_tags = True
 
     def get_address_lines(self):

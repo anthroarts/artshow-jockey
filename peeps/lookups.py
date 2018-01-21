@@ -14,7 +14,7 @@ class PersonLookup(LookupChannel):
             Q(name__icontains=q) | Q(email__istartswith=q) | Q(reg_id__istartswith=q)).order_by('name')
 
     def get_result(self, obj):
-        u""" result is the simple text that is the completion of what the person typed """
+        """ result is the simple text that is the completion of what the person typed """
         return obj.name
 
     def add_common_bits(self, obj, parts):

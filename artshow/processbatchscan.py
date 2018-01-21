@@ -170,7 +170,7 @@ def process_bids(data, final_scan=False):
                         bid = Bid(bidder=current_bidder, amount=current_price, piece=current_piece)
                         try:
                             bid.validate()
-                        except ValidationError, x:
+                        except ValidationError as x:
                             add_error(errors, lines, lineno, "invalid bid: %s" % str(x))
                             state = State.error_skipping
                             continue
@@ -194,7 +194,7 @@ def process_bids(data, final_scan=False):
                         bid = Bid(bidder=current_bidder, amount=current_price, piece=current_piece, buy_now_bid=True)
                         try:
                             bid.validate()
-                        except ValidationError, x:
+                        except ValidationError as x:
                             add_error(errors, lines, lineno, "invalid bid: %s" % str(x))
                             state = State.error_skipping
                             continue
@@ -218,7 +218,7 @@ def process_bids(data, final_scan=False):
                         bid = Bid(bidder=current_bidder, amount=current_price, piece=current_piece)
                         try:
                             bid.validate()
-                        except ValidationError, x:
+                        except ValidationError as x:
                             add_error(errors, lines, lineno, "invalid bid: %s" % str(x))
                             state = State.error_skipping
                             continue
@@ -243,7 +243,7 @@ def process_bids(data, final_scan=False):
                         bid = Bid(bidder=current_bidder, amount=current_price, piece=current_piece)
                         try:
                             bid.validate()
-                        except ValidationError, x:
+                        except ValidationError as x:
                             add_error(errors, lines, lineno, "invalid bid: %s" % str(x))
                             state = State.error_skipping
                             continue

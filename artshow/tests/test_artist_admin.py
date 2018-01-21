@@ -95,4 +95,4 @@ class ArtistAdminTest(TestCase):
         cheque = Payment.objects.get(
                 artist=self.artist,
                 payment_type__pk=settings.ARTSHOW_PAYMENT_SENT_PK)
-        self.assertEquals(cheque.amount, Decimal(-9))
+        self.assertEqual(cheque.amount, Decimal(-9))

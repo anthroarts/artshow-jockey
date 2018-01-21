@@ -32,14 +32,14 @@ def printing(request):
                 bid_sheets_marked, control_forms_marked))
             return redirect('.')
         elif request.POST.get("print_bid_sheets"):
-            import bidsheets
+            from . import bidsheets
             response = HttpResponse(content_type="application/pdf")
             bidsheets.generate_bidsheets(output=response, pieces=bid_sheets_to_print_query)
             messages.info(request, "Bid sheets printed.")
             return response
 
         elif request.POST.get("print_control_forms"):
-            import bidsheets
+            from . import bidsheets
             response = HttpResponse(content_type="application/pdf")
             bidsheets.generate_control_forms_for_pieces(output=response, pieces=control_forms_to_print_query)
             messages.info(request, "Control forms printed.")

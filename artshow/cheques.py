@@ -33,7 +33,7 @@ class PRINT_GRID:
 
     def save(self, f):
         for line in self.data:
-            print >> f, line
+            print(line, file=f)
 
 
 def dotpad(s, max_length):
