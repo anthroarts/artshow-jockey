@@ -9,7 +9,7 @@ admin.autodiscover()
 
 urlpatterns = [
     url(r'^admin/lookups/', include(ajax_select_urls)),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
     url(r'^artshow/', include('artshow.urls')),
     url(r'^manage/', include('artshow.manage_urls')),
     url(r'^peeps/', include('peeps.urls')),

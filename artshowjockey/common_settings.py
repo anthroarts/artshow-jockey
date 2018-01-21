@@ -102,7 +102,7 @@ TEMPLATES = [
     },
 ]
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -118,6 +118,7 @@ ROOT_URLCONF = 'artshowjockey.urls'
 WSGI_APPLICATION = 'artshowjockey.wsgi.application'
 
 INSTALLED_APPS = (
+    'tinyreg',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -129,7 +130,6 @@ INSTALLED_APPS = (
     'peeps',
     'artshow',
     'ajax_select',
-    'tinyreg',
     'tinyannounce',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',

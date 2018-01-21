@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('important', models.BooleanField(default=False)),
                 ('created', models.DateTimeField()),
                 ('expires', models.DateTimeField(null=True, blank=True)),
-                ('author', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('author', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -33,8 +33,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('seen_at', models.DateTimeField(auto_now_add=True)),
-                ('announcement', models.ForeignKey(to='tinyannounce.Announcement')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('announcement', models.ForeignKey(to='tinyannounce.Announcement', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },

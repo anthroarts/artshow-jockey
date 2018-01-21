@@ -1,6 +1,6 @@
 from django.contrib.auth.models import Permission, User
-from django.core.urlresolvers import reverse
 from django.test import Client, TestCase
+from django.urls import reverse
 
 
 class BidEntryTests(TestCase):

@@ -2,8 +2,8 @@ import re
 
 from django.contrib.auth.models import User
 from django.core import mail
-from django.core.urlresolvers import reverse
 from django.test import Client, TestCase
+from django.urls import reverse
 
 class RegisterTests(TestCase):
 
@@ -35,12 +35,12 @@ class RegisterTests(TestCase):
         self.assertEqual(message.to, [email_address])
 
         match = re.search(
-            r'reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/',
+            r'accounts/reset/(?P<uidb64>\w+)/(?P<token>\w+-\w+)/',
             message.body)
         self.assertIsNotNone(match)
 
         response = c.get(reverse('password_reset_confirm',
-                                 kwargs=match.groupdict()))
+                                 kwargs=match.groupdict()), follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['validlink'])
         self.assertTemplateUsed('accounts/password_reset_confirm.html')

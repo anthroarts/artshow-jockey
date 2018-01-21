@@ -1,47 +1,28 @@
 from django.conf import settings
-from django.conf.urls import url
-import django.contrib.auth.views
+from django.contrib.auth import views as auth_views
+from django.urls import path
 
 from .forms import CaptchaPasswordResetForm
 
 urlpatterns = [
-    url(r'login/$',
-        django.contrib.auth.views.login,
-        {'template_name': 'accounts/login.html'},
-        name="login"),
-    url(r'logout/$',
-        django.contrib.auth.views.logout,
-        {'template_name': 'accounts/logged_out.html'},
-        name="logout"),
-    url(r'password_change/$',
-        django.contrib.auth.views.password_change,
-        {'template_name': 'accounts/password_change_form.html'},
-        name="password_change"),
-    url(r'password_change/done/$',
-        django.contrib.auth.views.password_change_done,
-        {'template_name': 'accounts/password_change_done.html'},
-        name="password_change_done"),
-    url(r'password_reset/$',
-        django.contrib.auth.views.password_reset,
-        {
-            'template_name': 'accounts/password_reset_form.html',
-            'email_template_name': 'accounts/password_reset_email.html',
-            'subject_template_name': 'accounts/password_reset_subject.txt',
-            'from_email': settings.ARTSHOW_EMAIL_SENDER,
-            'password_reset_form': CaptchaPasswordResetForm,
-        },
-        name="password_reset"),
-    url(r'password_reset/done/$',
-        django.contrib.auth.views.password_reset_done,
-        {'template_name': 'accounts/password_reset_done.html'},
-        name="password_reset_done"),
-    url(r'reset/(?P<uidb64>[0-9A-Za-z_\-]+)/'
-        r'(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
-        django.contrib.auth.views.password_reset_confirm,
-        {'template_name': 'accounts/password_reset_confirm.html'},
-        name="password_reset_confirm"),
-    url(r'password_reset/complete/$',
-        django.contrib.auth.views.password_reset_complete,
-        {'template_name': 'accounts/password_reset_complete.html'},
-        name="password_reset_complete"),
+    path('login/', auth_views.LoginView.as_view(), name="login"),
+    path('logout/', auth_views.LogoutView.as_view(), name="logout"),
+    path('password_change/', auth_views.PasswordChangeView.as_view(),
+         name="password_change"),
+    path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(),
+         name="password_change_done"),
+    path('password_reset/', auth_views.PasswordResetView.as_view(),
+         {
+             'from_email': settings.ARTSHOW_EMAIL_SENDER,
+             'password_reset_form': CaptchaPasswordResetForm,
+         },
+         name="password_reset"),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(),
+         name="password_reset_done"),
+    path('reset/<uidb64>/<token>/',
+         auth_views.PasswordResetConfirmView.as_view(),
+         name="password_reset_confirm"),
+    path('password_reset/complete/',
+         auth_views.PasswordResetCompleteView.as_view(),
+         name="password_reset_complete"),
 ]

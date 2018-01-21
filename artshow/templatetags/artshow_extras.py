@@ -10,7 +10,7 @@ register = template.Library()
 @register.inclusion_tag("artshow/navigation_bar.html", takes_context=True)
 def nagivation_bar(context):
     user = context['request'].user
-    if user and not user.is_authenticated():
+    if user and not user.is_authenticated:
         user = None
     announcement_counts = {}
     if get_announcement_counts is not None:

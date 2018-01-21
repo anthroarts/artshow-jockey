@@ -7,13 +7,13 @@ from django.forms import IntegerField, HiddenInput, ModelChoiceField
 from django.forms.formsets import formset_factory
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.forms.models import inlineformset_factory, modelformset_factory
 from django.http import HttpResponse
-from django.core.urlresolvers import reverse
 from django.contrib import messages
 from .utils import artshow_settings
 from . import utils

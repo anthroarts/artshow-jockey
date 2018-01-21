@@ -3,7 +3,7 @@ from django.utils.html import escape
 from django.apps import apps
 from django.db.models import Q
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 
 class PersonLookup(LookupChannel):

@@ -13,7 +13,7 @@ from django.db import models
 from django.db.models import Sum, Q
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from num2words import num2words
 
@@ -94,7 +94,8 @@ class Artist (models.Model):
     objects = ArtistManager()
 
     artistid = models.IntegerField(primary_key=True, verbose_name="artist ID")
-    person = models.ForeignKey(settings.ARTSHOW_PERSON_CLASS)
+    person = models.ForeignKey(settings.ARTSHOW_PERSON_CLASS,
+                               on_delete=models.CASCADE)
 
     def name(self):
         return self.person.name
@@ -108,7 +109,8 @@ class Artist (models.Model):
     spaces = models.ManyToManyField(Space, through="Allocation")
     checkoffs = models.ManyToManyField(Checkoff, blank=True)
     payment_to = models.ForeignKey(settings.ARTSHOW_PERSON_CLASS, null=True,
-                                   blank=True, related_name="receiving_payment_for")
+                                   blank=True, on_delete=models.CASCADE,
+                                   related_name="receiving_payment_for")
 
     def artistname(self):
         return self.publicname or self.person.name
@@ -181,8 +183,8 @@ class Artist (models.Model):
 
 
 class Allocation(models.Model):
-    artist = models.ForeignKey(Artist)
-    space = models.ForeignKey(Space)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
+    space = models.ForeignKey(Space, on_delete=models.CASCADE)
     requested = models.DecimalField(max_digits=4, decimal_places=1, validators=[validate_space])
     allocated = models.DecimalField(max_digits=4, decimal_places=1, validators=[validate_space], default=0)
 
@@ -205,7 +207,8 @@ class Allocation(models.Model):
 
 
 class Bidder (models.Model):
-    person = models.OneToOneField(settings.ARTSHOW_PERSON_CLASS)
+    person = models.OneToOneField(settings.ARTSHOW_PERSON_CLASS,
+                                  on_delete=models.CASCADE)
 
     def name(self):
         return self.person.name
@@ -235,7 +238,7 @@ class Bidder (models.Model):
 
 class BidderId (models.Model):
     id = models.CharField(max_length=8, primary_key=True)
-    bidder = models.ForeignKey(Bidder, null=True)
+    bidder = models.ForeignKey(Bidder, null=True, on_delete=models.CASCADE)
 
     def validate(self):
         try:
@@ -250,7 +253,7 @@ class BidderId (models.Model):
 
 class Piece (models.Model):
 
-    artist = models.ForeignKey(Artist)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     pieceid = models.IntegerField()
     code = models.CharField(max_length=10, editable=False)
     name = models.CharField(max_length=100, verbose_name="title")
@@ -341,7 +344,7 @@ class Piece (models.Model):
 
 
 class Product (models.Model):
-    artist = models.ForeignKey(Artist)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     productid = models.IntegerField()
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=8, blank=True)
@@ -357,10 +360,10 @@ class Product (models.Model):
 
 
 class Bid (models.Model):
-    bidder = models.ForeignKey(Bidder)
-    bidderid = models.ForeignKey(BidderId)
+    bidder = models.ForeignKey(Bidder, on_delete=models.CASCADE)
+    bidderid = models.ForeignKey(BidderId, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=5, decimal_places=0)
-    piece = models.ForeignKey(Piece)
+    piece = models.ForeignKey(Piece, on_delete=models.CASCADE)
     buy_now_bid = models.BooleanField(default=False)
     invalid = models.BooleanField(default=False)
 
@@ -436,9 +439,9 @@ class PaymentType (models.Model):
 
 
 class Payment (models.Model):
-    artist = models.ForeignKey(Artist)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=7, decimal_places=2)
-    payment_type = models.ForeignKey(PaymentType)
+    payment_type = models.ForeignKey(PaymentType, on_delete=models.CASCADE)
     description = models.CharField(max_length=100)
     date = models.DateField()
 
@@ -481,7 +484,7 @@ class ChequePayment (Payment):
 
 
 class Invoice (models.Model):
-    payer = models.ForeignKey(Bidder)
+    payer = models.ForeignKey(Bidder, on_delete=models.CASCADE)
     tax_paid = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
 
     def total_paid(self):
@@ -497,7 +500,7 @@ class Invoice (models.Model):
         return self.invoiceitem_set.order_by('piece__location', 'piece')
 
     paid_date = models.DateTimeField(blank=True, null=True)
-    created_by = models.ForeignKey(User)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     notes = models.TextField(blank=True)
 
     def __unicode__(self):
@@ -525,13 +528,13 @@ class InvoicePayment(models.Model):
         (4, "Other"),
     ]
     payment_method = models.IntegerField(choices=PAYMENT_METHOD_CHOICES, default=0)
-    invoice = models.ForeignKey(Invoice)
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     notes = models.CharField(max_length=100, blank=True)
 
 
 class InvoiceItem (models.Model):
-    piece = models.OneToOneField(Piece)
-    invoice = models.ForeignKey(Invoice)
+    piece = models.OneToOneField(Piece, on_delete=models.CASCADE)
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=7, decimal_places=2)
 
     def __unicode__(self):
@@ -570,8 +573,8 @@ class Task (models.Model):
     summary = models.CharField(max_length=100)
     detail = models.TextField(blank=True)
     time_entered = models.DateTimeField()
-    due_at = models.ForeignKey(Event)
-    actor = models.ForeignKey('auth.User')
+    due_at = models.ForeignKey(Event, on_delete=models.CASCADE)
+    actor = models.ForeignKey('auth.User', on_delete=models.CASCADE)
     done = models.BooleanField(default=False)
 
     def __unicode__(self):
@@ -579,8 +582,10 @@ class Task (models.Model):
 
 
 class Agent(models.Model):
-    person = models.ForeignKey(settings.ARTSHOW_PERSON_CLASS, related_name="agent_for")
-    artist = models.ForeignKey(Artist)
+    person = models.ForeignKey(settings.ARTSHOW_PERSON_CLASS,
+                               on_delete=models.CASCADE,
+                               related_name="agent_for")
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     can_edit_spaces = models.BooleanField(default=False, help_text="Person is allowed to reserve or cancel spaces")
     can_edit_pieces = models.BooleanField(default=False,
                                           help_text="Person is allowed to add, delete or change piece details")

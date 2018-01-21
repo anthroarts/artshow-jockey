@@ -1,6 +1,6 @@
 from django.db import models
-from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.urls import reverse
 
 class Person (models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, default=None, blank=True, null=True, on_delete=models.SET_NULL)

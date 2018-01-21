@@ -89,7 +89,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('at_con_contact', models.TextField(blank=True)),
                 ('notes', models.TextField(blank=True)),
-                ('person', models.OneToOneField(to='peeps.Person')),
+                ('person', models.OneToOneField(to='peeps.Person', on_delete=models.CASCADE)),
             ],
             options={
                 'permissions': (('view_bidder', 'Can view Bidder details outside of Admin system.'),),
@@ -100,7 +100,7 @@ class Migration(migrations.Migration):
             name='BidderId',
             fields=[
                 ('id', models.CharField(max_length=8, serialize=False, primary_key=True)),
-                ('bidder', models.ForeignKey(to='artshow.Bidder')),
+                ('bidder', models.ForeignKey(to='artshow.Bidder', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -159,8 +159,8 @@ class Migration(migrations.Migration):
                 ('tax_paid', models.DecimalField(null=True, max_digits=7, decimal_places=2, blank=True)),
                 ('paid_date', models.DateTimeField(null=True, blank=True)),
                 ('notes', models.TextField(blank=True)),
-                ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
-                ('payer', models.ForeignKey(to='artshow.Bidder')),
+                ('created_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
+                ('payer', models.ForeignKey(to='artshow.Bidder', on_delete=models.CASCADE)),
             ],
             options={
                 'permissions': (('view_invoice', 'Can view Invoice details outside of Admin system.'),),
@@ -172,7 +172,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('price', models.DecimalField(max_digits=7, decimal_places=2)),
-                ('invoice', models.ForeignKey(to='artshow.Invoice')),
+                ('invoice', models.ForeignKey(to='artshow.Invoice', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -185,7 +185,7 @@ class Migration(migrations.Migration):
                 ('amount', models.DecimalField(max_digits=7, decimal_places=2)),
                 ('payment_method', models.IntegerField(default=0, choices=[(0, 'Not Paid'), (1, 'Cash'), (2, 'Check'), (3, 'Card'), (4, 'Other')])),
                 ('notes', models.CharField(max_length=100, blank=True)),
-                ('invoice', models.ForeignKey(to='artshow.Invoice')),
+                ('invoice', models.ForeignKey(to='artshow.Invoice', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -207,7 +207,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ChequePayment',
             fields=[
-                ('payment_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='artshow.Payment')),
+                ('payment_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='artshow.Payment', on_delete=models.CASCADE)),
                 ('number', models.CharField(max_length=10, blank=True)),
                 ('payee', models.CharField(max_length=100, blank=True)),
             ],
@@ -248,7 +248,7 @@ class Migration(migrations.Migration):
                 ('status', models.IntegerField(default=0, choices=[(0, 'Not In Show'), (5, 'Not In Show, Locked'), (1, 'In Show'), (2, 'Won'), (3, 'Sold'), (4, 'Returned')])),
                 ('bid_sheet_printing', models.IntegerField(default=0, choices=[(0, 'Not Printed'), (1, 'To Be Printed'), (2, 'Printed')])),
                 ('control_form_printing', models.IntegerField(default=0, choices=[(0, 'Not Printed'), (1, 'To Be Printed'), (2, 'Printed')])),
-                ('artist', models.ForeignKey(to='artshow.Artist')),
+                ('artist', models.ForeignKey(to='artshow.Artist', on_delete=models.CASCADE)),
             ],
             options={
                 'permissions': (('view_piece', 'Can view Piece details outside of Admin system.'),),
@@ -264,7 +264,7 @@ class Migration(migrations.Migration):
                 ('location', models.CharField(max_length=8, blank=True)),
                 ('adult', models.BooleanField(default=False)),
                 ('price', models.DecimalField(null=True, max_digits=5, decimal_places=2, blank=True)),
-                ('artist', models.ForeignKey(to='artshow.Artist')),
+                ('artist', models.ForeignKey(to='artshow.Artist', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -294,8 +294,8 @@ class Migration(migrations.Migration):
                 ('detail', models.TextField(blank=True)),
                 ('time_entered', models.DateTimeField()),
                 ('done', models.BooleanField(default=False)),
-                ('actor', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
-                ('due_at', models.ForeignKey(to='artshow.Event')),
+                ('actor', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
+                ('due_at', models.ForeignKey(to='artshow.Event', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -308,31 +308,31 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='payment',
             name='artist',
-            field=models.ForeignKey(to='artshow.Artist'),
+            field=models.ForeignKey(to='artshow.Artist', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='payment',
             name='payment_type',
-            field=models.ForeignKey(to='artshow.PaymentType'),
+            field=models.ForeignKey(to='artshow.PaymentType', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='invoiceitem',
             name='piece',
-            field=models.OneToOneField(to='artshow.Piece'),
+            field=models.OneToOneField(to='artshow.Piece', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='bid',
             name='bidder',
-            field=models.ForeignKey(to='artshow.Bidder'),
+            field=models.ForeignKey(to='artshow.Bidder', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='bid',
             name='piece',
-            field=models.ForeignKey(to='artshow.Piece'),
+            field=models.ForeignKey(to='artshow.Piece', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(
@@ -348,13 +348,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='artist',
             name='payment_to',
-            field=models.ForeignKey(related_name='receiving_payment_for', blank=True, to='peeps.Person', null=True),
+            field=models.ForeignKey(related_name='receiving_payment_for', blank=True, to='peeps.Person', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='artist',
             name='person',
-            field=models.ForeignKey(to='peeps.Person'),
+            field=models.ForeignKey(to='peeps.Person', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -366,13 +366,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='allocation',
             name='artist',
-            field=models.ForeignKey(to='artshow.Artist'),
+            field=models.ForeignKey(to='artshow.Artist', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='allocation',
             name='space',
-            field=models.ForeignKey(to='artshow.Space'),
+            field=models.ForeignKey(to='artshow.Space', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(
@@ -382,13 +382,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='agent',
             name='artist',
-            field=models.ForeignKey(to='artshow.Artist'),
+            field=models.ForeignKey(to='artshow.Artist', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='agent',
             name='person',
-            field=models.ForeignKey(related_name='agent_for', to='peeps.Person'),
+            field=models.ForeignKey(related_name='agent_for', to='peeps.Person', on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

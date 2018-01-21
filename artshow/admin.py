@@ -14,11 +14,11 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
 from django.contrib.auth import get_user_model
-from django.core import urlresolvers
 from django.core.mail import send_mail
 from django.db.models import Max, Sum
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils.html import escape
 
 from artshow import text2pdf
@@ -433,14 +433,14 @@ class PieceAdmin(admin.ModelAdmin):
 
     def clickable_artist(self, obj):
         return '<a href="%s">%s</a>' % (
-            urlresolvers.reverse('admin:artshow_artist_change', args=(obj.artist.pk,)), escape(obj.artist.artistname()))
+            reverse('admin:artshow_artist_change', args=(obj.artist.pk,)), escape(obj.artist.artistname()))
 
     clickable_artist.allow_tags = True
     clickable_artist.short_description = "artist"
 
     def clickable_invoice(self, obj):
         return '<a href="%s">%s</a>' % (
-            urlresolvers.reverse('admin:artshow_invoice_change', args=(obj.invoice.id,)), obj.invoice)
+            reverse('admin:artshow_invoice_change', args=(obj.invoice.id,)), obj.invoice)
 
     clickable_invoice.allow_tags = True
     clickable_invoice.short_description = "invoice"
@@ -583,7 +583,7 @@ admin.site.register(EmailSignature)
 class PaymentAdmin(admin.ModelAdmin):
     def clickable_artist(self, obj):
         return '<a href="%s">%s</a>' % (
-            urlresolvers.reverse('admin:artshow_artist_change', args=(obj.artist.pk,)), escape(str(obj.artist)))
+            reverse('admin:artshow_artist_change', args=(obj.artist.pk,)), escape(str(obj.artist)))
     clickable_artist.allow_tags = True
     clickable_artist.short_description = "artist"
 

@@ -3,10 +3,10 @@ from urllib.request import urlopen
 from urllib.parse import parse_qs
 import datetime
 from django.core.signing import Signer
-from django.core.urlresolvers import reverse
 from django.dispatch import Signal, receiver
 from django.http import HttpResponse
 from django.utils.http import urlencode
+from django.urls import reverse
 import re
 from .conf import settings
 from logging import getLogger

@@ -20,7 +20,7 @@ class Announcement(models.Model):
 
     subject = models.CharField(max_length=200)
     body = models.TextField(blank=True)
-    author = models.ForeignKey(User)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     important = models.BooleanField(default=False)
     created = models.DateTimeField()
     expires = models.DateTimeField(null=True, blank=True)
@@ -44,8 +44,8 @@ class Announcement(models.Model):
 
 class AnnouncementSeen(models.Model):
 
-    announcement = models.ForeignKey(Announcement)
-    user = models.ForeignKey(User)
+    announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     seen_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
