@@ -84,9 +84,9 @@ def create_user_from_email(email):
                 return ValueError("Could not create user. Ran out of numbers to add.")
     else:
         username = email
-    user = User(username=username, email=email)
-    user.set_unusable_password()
-    user.save()
+    password = User.objects.make_random_password()
+    user = User.objects.create_user(username=username, email=email,
+                                    password=password)
     return user
 
 
@@ -113,7 +113,8 @@ def send_password_reset_email(artist, user, subject=None, template=None):
 
     body = template.render(c)
     body = wrap(body, default_wrap_cols)
-    send_mail(subject, body, settings.ARTSHOW_EMAIL_SENDER, [user.email], fail_silently=False)
+    send_mail(subject, body, settings.ARTSHOW_EMAIL_SENDER, [user.email],
+              fail_silently=False)
 
 
 _quantization_value = Decimal(10) ** -settings.ARTSHOW_MONEY_PRECISION
