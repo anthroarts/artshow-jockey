@@ -11,11 +11,10 @@ urlpatterns = [
          name="password_change"),
     path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(),
          name="password_change_done"),
-    path('password_reset/', auth_views.PasswordResetView.as_view(),
-         {
-             'from_email': settings.ARTSHOW_EMAIL_SENDER,
-             'password_reset_form': CaptchaPasswordResetForm,
-         },
+    path('password_reset/', auth_views.PasswordResetView.as_view(
+             from_email=settings.ARTSHOW_EMAIL_SENDER,
+             form_class=CaptchaPasswordResetForm,
+         ),
          name="password_reset"),
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(),
          name="password_reset_done"),
