@@ -41,7 +41,7 @@ def bids(request, artist_id, piece_id):
     if request.method == 'GET':
         return get_bids(piece)
     elif request.method == 'POST':
-        return set_bids(piece, json.loads(request.body))
+        return set_bids(piece, json.loads(request.body.decode('utf-8')))
 
 
 def get_bids(piece):
