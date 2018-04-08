@@ -9,4 +9,4 @@ install:
 
 script:
   - cp local_settings.py.example local_settings.py
-  - pipenv run manage.py test
+  - pipenv run python manage.py test
