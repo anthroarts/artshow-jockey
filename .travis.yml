@@ -5,8 +5,9 @@ cache: pip
 
 install:
   - pip install pipenv
-  - pipenv install
+  - pipenv install --dev
 
 script:
   - cp local_settings.py.example local_settings.py
+  - pipenv run flake8
   - pipenv run python manage.py test
