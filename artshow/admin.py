@@ -215,7 +215,7 @@ class ArtistAdmin(AjaxSelectAdmin):
 
     def print_bidsheets(self, request, queryset):
         pieces = Piece.objects.filter(artist__in=queryset) \
-                .order_by('artist__artistid', 'pieceid')
+                      .order_by('artist__artistid', 'pieceid')
         return render(request, 'artshow/bid_sheets.html',
                       {'pieces': pieces})
 
@@ -239,7 +239,7 @@ class ArtistAdmin(AjaxSelectAdmin):
 
     def print_piece_stickers(self, request, artists):
         pieces = Piece.objects.filter(artist__in=artists) \
-                .order_by('artist', 'pieceid')
+                      .order_by('artist', 'pieceid')
         return render(request, 'artshow/piece_stickers.html',
                       {'pieces': pieces})
 

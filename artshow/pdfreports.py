@@ -54,12 +54,14 @@ def winning_bidders(request):
                         bid.piece.voice_auction and "Voice Auction" or ""))
                 if i + MAX_PIECES_PER_PAGE <= len(top_bids):
                     bidder_data.append((Paragraph("continued on next page...", normal_style), "", ""))
-                right_part = Table(bidder_data, colWidths=[0.5 * inch, 4.5 * inch, 0.5 * inch, 1.2 * inch],
-                                   style=[
-                                       ("ROWBACKGROUNDS", (0, 0), (-1, -1), (colors.lightgrey, colors.white)),
-                                       ("SIZE", (0, 0), (0, -1), 8),
-                                       ("ALIGN", (2, 0), (2, -1), "DECIMAL"),
-                                   ])
+                right_part = Table(
+                    bidder_data,
+                    colWidths=[0.5 * inch, 4.5 * inch, 0.5 * inch, 1.2 * inch],
+                    style=[
+                        ("ROWBACKGROUNDS", (0, 0), (-1, -1), (colors.lightgrey, colors.white)),
+                        ("SIZE", (0, 0), (0, -1), 8),
+                        ("ALIGN", (2, 0), (2, -1), "DECIMAL"),
+                    ])
                 data.append((
                     Paragraph(", ".join(["B" + str(x) for x in bidder.bidder_ids()]), heading_style_white),
                     right_part,

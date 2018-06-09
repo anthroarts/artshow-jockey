@@ -75,14 +75,14 @@ class ArtistAdminTest(TestCase):
         self.admin.apply_winnings_and_commission(request, Artist.objects.all())
 
         winnings = Payment.objects.get(
-                artist=self.artist,
-                payment_type__pk=settings.ARTSHOW_SALES_PK)
+            artist=self.artist,
+            payment_type__pk=settings.ARTSHOW_SALES_PK)
         self.assertEqual(winnings.amount, Decimal(10))
         self.assertEqual(winnings.description, '2 pieces, 1 with bid')
 
         commission = Payment.objects.get(
-                artist=self.artist,
-                payment_type__pk=settings.ARTSHOW_COMMISSION_PK)
+            artist=self.artist,
+            payment_type__pk=settings.ARTSHOW_COMMISSION_PK)
         self.assertEqual(commission.amount, Decimal(-1))
         self.assertEqual(commission.description, '10.0% of sales')
 
@@ -92,6 +92,6 @@ class ArtistAdminTest(TestCase):
         self.admin.create_cheques(request, Artist.objects.all())
 
         cheque = Payment.objects.get(
-                artist=self.artist,
-                payment_type__pk=settings.ARTSHOW_PAYMENT_SENT_PK)
+            artist=self.artist,
+            payment_type__pk=settings.ARTSHOW_PAYMENT_SENT_PK)
         self.assertEqual(cheque.amount, Decimal(-9))

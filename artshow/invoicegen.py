@@ -86,15 +86,15 @@ def print_invoice(invoice, copy_name="SINGLE COPY", dest=sys.stdout):
 
     def write_header():
         buffer.write(invoice_header % {
-                'showstr': settings.ARTSHOW_SHOW_NAME.upper(),
-                'datestr': str(invoice.paid_date),
-                'invoice': settings.ARTSHOW_INVOICE_PREFIX + str(invoice.id),
-                'name': str(invoice.payer.name()),
-                'pageno': pageno,
-                'numpages': numpages,
-                'bidderidstr': bidderidstr,
-                'bidderidpad': bidderidpad,
-                })
+            'showstr': settings.ARTSHOW_SHOW_NAME.upper(),
+            'datestr': str(invoice.paid_date),
+            'invoice': settings.ARTSHOW_INVOICE_PREFIX + str(invoice.id),
+            'name': str(invoice.payer.name()),
+            'pageno': pageno,
+            'numpages': numpages,
+            'bidderidstr': bidderidstr,
+            'bidderidpad': bidderidpad,
+        })
 
     def write_footer():
         for i in range(max_lines_per_page - lines_this_page):

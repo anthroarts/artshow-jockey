@@ -25,7 +25,7 @@ def text_to_pdf(text, output, lines_per_page=66):
         lines = lines[lines_per_page:]
         newtext = "<br/>".join(escape(l) for l in group)
         story = [Paragraph(newtext, style)]
-        f = Frame(0.5*inch, 0.25*inch, 7.5*inch, 10.5*inch)
+        f = Frame(0.5 * inch, 0.25 * inch, 7.5 * inch, 10.5 * inch)
         f.addFromList(story, c)
         assert len(story) == 0
         c.showPage()

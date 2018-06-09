@@ -129,10 +129,10 @@ class BidderRegistrationWizard(CookieWizardView):
                 p.email = cleaned_data.get('email', '')
         if b is None:
             raise forms.ValidationError(
-                    "End of wizard without creating bidder.")
+                "End of wizard without creating bidder.")
         if p is None:
             raise forms.ValidationError(
-                    "End of wizard without creating person.")
+                "End of wizard without creating person.")
         p.save()
         b.person = p
         b.save()

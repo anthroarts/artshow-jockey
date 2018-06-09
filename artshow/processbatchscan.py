@@ -38,8 +38,8 @@ class StateL:
 
 def add_error(errors, lines, lineno, message):
     if lineno is not None:
-        errors.append("line %d: %s" % (lineno+1, message))
-        if len(lines) < lineno+1:
+        errors.append("line %d: %s" % (lineno + 1, message))
+        if len(lines) < lineno + 1:
             lines.append("")
         lines[lineno] += " # " + message
     else:

@@ -16,7 +16,7 @@ def nagivation_bar(context):
     announcement_counts = {}
     if get_announcement_counts is not None:
         announcement_counts['total'], announcement_counts['new'], announcement_counts['new_and_important'] = \
-                get_announcement_counts(user)
+            get_announcement_counts(user)
     return {'user': user, 'has_add_invoice': user and user.has_perm('artshow.add_invoice'),
             'is_artshow_staff': user and user.has_perm('artshow.is_artshow_staff'),
             'announcement_counts': announcement_counts}
