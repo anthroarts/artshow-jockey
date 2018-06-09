@@ -2,7 +2,6 @@
 # Copyright (C) 2009, 2010 Chris Cogdon
 # See file COPYING for licence details
 from django.contrib import messages, auth
-from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import ModelChoiceField, forms, CharField
 from django.shortcuts import render, redirect

@@ -6,7 +6,9 @@ from . import unicodewriter
 from artshow.utils import format_money
 from django.http import HttpResponse
 from django.contrib.auth.decorators import permission_required
-from .models import *
+from .models import (
+    Artist, Bid, Bidder, Checkoff, ChequePayment, Payment, Piece, Space
+)
 
 
 @permission_required('artshow.view_artist')

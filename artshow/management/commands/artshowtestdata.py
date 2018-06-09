@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models.loading import get_model
 from ...conf import settings
-from ...models import *
+from ...models import Artist, Bid, Bidder, BidderId, Piece
 
 
 Person = get_model(*settings.ARTSHOW_PERSON_CLASS.split('.', 1))

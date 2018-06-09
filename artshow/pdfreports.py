@@ -3,7 +3,6 @@
 # See file COPYING for licence details
 
 from cgi import escape
-from decimal import Decimal
 
 from django.db.models import Min
 from django.shortcuts import get_object_or_404
@@ -15,7 +14,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, Spacer, Fram
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib import colors
-from .models import *
+from .models import Bidder, Invoice, Piece
 from .conf import settings
 from artshow.utils import format_money
 
@@ -116,8 +115,6 @@ def bid_entry(request, pieces):
 
     styles = getSampleStyleSheet()
     normal_style = styles["Normal"]
-    heading_style = styles["Heading3"]
-    heading_style_white = ParagraphStyle("heading_style_white", parent=heading_style, textColor=colors.white)
     doc = SimpleDocTemplate(response, leftMargin=0.5 * inch, rightMargin=0.5 * inch, topMargin=0.5 * inch,
                             bottomMargin=0.5 * inch)
 

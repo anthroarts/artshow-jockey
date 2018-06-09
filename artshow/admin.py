@@ -1,7 +1,6 @@
 # Artshow Jockey
 # Copyright (C) 2009, 2010 Chris Cogdon
 # See file COPYING for licence details
-import io
 import datetime
 import decimal
 import smtplib
@@ -21,10 +20,13 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.html import escape
 
-from artshow import text2pdf
 from . import email1
 from . import processbatchscan
-from .models import *
+from .models import (
+    Agent, Allocation, Artist, BatchScan, Bid, Bidder, BidderId, Checkoff,
+    ChequePayment, EmailSignature, EmailTemplate, Invoice, InvoiceItem,
+    InvoicePayment, Payment, PaymentType, Piece, Space
+)
 
 User = get_user_model()
 

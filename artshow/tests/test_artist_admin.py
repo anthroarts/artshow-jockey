@@ -2,7 +2,6 @@ from decimal import Decimal
 
 from django.contrib.admin.sites import AdminSite
 from django.conf import settings
-from django.http.request import HttpRequest
 from django.test import TestCase
 
 from ..admin import ArtistAdmin

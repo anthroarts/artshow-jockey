@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from ...models import *
+from ...models import Bid, Piece
 
 
 class Command(BaseCommand):
@@ -17,7 +17,7 @@ class Command(BaseCommand):
 
         for p in Piece.objects.filter(status=Piece.StatusInShow, voice_auction=False):
             try:
-                top_bid = p.top_bid()
+                p.top_bid()
             except Bid.DoesNotExist:
                 pass
             else:

@@ -3,21 +3,23 @@ from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.core.signing import Signer, BadSignature
 from django.db.models import Sum
-from django.forms import IntegerField, HiddenInput, ModelChoiceField
+from django.forms import HiddenInput, ModelChoiceField
 from django.forms.formsets import formset_factory
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from .models import *
+from .models import (
+    Allocation, Artist, Payment, PaymentType, Piece, Space, validate_space,
+    validate_space_increments
+)
 from django import forms
 from django.contrib.auth.decorators import login_required
-from django.forms.models import inlineformset_factory, modelformset_factory
+from django.forms.models import inlineformset_factory
 from django.http import HttpResponse
 from django.contrib import messages
 from .utils import artshow_settings
 from . import utils
-from . import bidsheets
 from .paypal import make_paypal_url, ipn_received
 import re
 from django.conf import settings

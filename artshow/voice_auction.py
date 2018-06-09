@@ -99,8 +99,7 @@ def auction_bids(request, adult):
                 amount = form.cleaned_data['amount']
                 if action == 1:
                     try:
-                        # noinspection PyUnusedLocal
-                        top_bid = piece.top_bid()
+                        piece.top_bid()
                         if piece.status == piece.StatusInShow:
                             piece.status = piece.StatusWon
                             piece.save()

@@ -14,10 +14,6 @@ class Command(BaseCommand):
                             help="pad to this many digits [%default]"),
         parser.add_argument("--allow-x", action="store_true", default=False,
                             help="allow X checkdigit"),
-        parser.add_argument("--prefix", type=str, default="",
-                            help="prefix characters [%default]"),
-        parser.add_argument("--suffix", type=str, default="",
-                            help="suffix characters [%default]"),
         parser.add_argument("--offset", type=int,
                             default=settings.ARTSHOW_BIDDERID_MOD11_OFFSET or 0,
                             help="offset checkdigit [%default]"),
@@ -27,8 +23,6 @@ class Command(BaseCommand):
         num_ids = options['num_ids'][0]
         digits = options['digits']
         allow_x = options['allow_x']
-        prefix = options['prefix']
-        suffix = options['suffix']
         offset = options['offset']
 
         unused_codes = BidderId.objects.filter(bidder__isnull=True).count()

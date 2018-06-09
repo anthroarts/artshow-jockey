@@ -58,7 +58,7 @@ class BidScanTest(BatchScanTestCase):
 
     def assertNoBids(self, piece):
         with self.assertRaises(Bid.DoesNotExist):
-            bid = piece.top_bid()
+            piece.top_bid()
 
     def test_intermediate_no_bids(self):
         batch = create_and_process_batch(2, "A1P1\nNB\n")
