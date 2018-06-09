@@ -47,7 +47,6 @@ class Space(models.Model):
     def clean(self):
         validate_space_increments(self.available, self.allow_half_spaces)
 
-
     def allocated(self):
         allocated = self.allocation_set.aggregate(sum=Sum('allocated'))['sum']
         if allocated is None:
@@ -123,7 +122,7 @@ class Artist (models.Model):
 
     def used_locations(self):
         return [x[0] for x in self.piece_set.exclude(status__in=[Piece.StatusNotInShow, Piece.StatusNotInShowLocked])
-        .distinct().values_list("location")]
+                                  .distinct().values_list("location")]
 
     def balance(self):
         return self.payment_set.aggregate(balance=Sum('amount'))['balance'] or 0
@@ -172,7 +171,7 @@ class Artist (models.Model):
                 self.artistid = highest_idd_artist.artistid + 1
             except IndexError:
                 self.artistid = 1
-        super(Artist,self).save(**kwargs)
+        super(Artist, self).save(**kwargs)
 
     class Meta:
         permissions = (

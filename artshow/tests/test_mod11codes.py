@@ -1,6 +1,7 @@
 from django.test import TestCase
 from .. import mod11codes
 
+
 class Mod11Test (TestCase):
     def test_generation(self):
         self.assertEqual(mod11codes.make_check("196"), "1")

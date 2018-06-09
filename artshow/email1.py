@@ -13,19 +13,19 @@ default_wrap_cols = 79
 def wrap(text, cols=default_wrap_cols, always_wrap=False):
     old_lines = text.split("\n")
     new_lines = []
-    for l in old_lines:
-        if always_wrap or l.startswith('.'):
+    for line in old_lines:
+        if always_wrap or line.startswith('.'):
             if not always_wrap:
-                l = l[1:]
-            while len(l) > cols:
-                pos = l.rfind(" ", 0, cols)
+                line = line[1:]
+            while len(line) > cols:
+                pos = line.rfind(" ", 0, cols)
                 if pos == -1:
-                    pos = l.find(" ", cols)
+                    pos = line.find(" ", cols)
                 if pos == -1:
                     break
-                new_lines.append(l[:pos].rstrip())
-                l = l[pos:].lstrip()
-        new_lines.append(l)
+                new_lines.append(line[:pos].rstrip())
+                line = line[pos:].lstrip()
+        new_lines.append(line)
     return "\n".join(new_lines)
 
 

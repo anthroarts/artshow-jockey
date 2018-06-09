@@ -59,12 +59,12 @@ def artist(request, artist_id):
     allocations = artist.allocation_set.order_by("space__id")
 
     can_edit_personal_details = not settings.ARTSHOW_SHUT_USER_EDITS and \
-                                (request.user == artist.person.user)
+        (request.user == artist.person.user)
     can_edit_artist_details = can_edit_personal_details
     can_edit_piece_details = not settings.ARTSHOW_SHUT_USER_EDITS and \
-                             artist.grants_access_to(request.user, can_edit_pieces=True)
+        artist.grants_access_to(request.user, can_edit_pieces=True)
     can_edit_space_reservations = not settings.ARTSHOW_SHUT_USER_EDITS and \
-                                  artist.grants_access_to(request.user, can_edit_spaces=True)
+        artist.grants_access_to(request.user, can_edit_spaces=True)
 
     return render(request, "artshow/manage_artist.html",
                   {'artist': artist, 'pieces': pieces, 'allocations': allocations,
@@ -132,7 +132,7 @@ def pieces(request, artist_id):
 
     return render(request, "artshow/manage_pieces.html",
                   {'artist': artist, 'formset': formset, 'delete_confirm_form': delete_confirm_form,
-                   'locked_pieces':locked_pieces, 'artshow_settings': artshow_settings})
+                   'locked_pieces': locked_pieces, 'artshow_settings': artshow_settings})
 
 
 def yesno(b):
@@ -167,6 +167,7 @@ def bid_sheets(request, artist_id):
 
     return render(request, "artshow/bid_sheets.html",
                   {'artist': artist, 'pieces': artist.ordered_pieces()})
+
 
 @login_required
 def control_forms(request, artist_id):
@@ -219,7 +220,7 @@ def spaces(request, artist_id):
             s.artist_allocation = s.allocation_set.get(artist=artist)
         except Allocation.DoesNotExist:
             s.artist_allocation = None
-    spaces = [s for s in spaces if s.reservable == True or s.artist_allocation is not None]
+    spaces = [s for s in spaces if s.reservable is True or s.artist_allocation is not None]
 
     if request.method == "POST":
         formset = RequestSpaceFormSet(request.POST)

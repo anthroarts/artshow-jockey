@@ -5,9 +5,9 @@ import io
 class UnicodeWriter(object):
     """
     Like UnicodeDictWriter, but takes lists rather than dictionaries.
-    
+
     Usage example:
-    
+
     fp = open('my-file.csv', 'wb')
     writer = UnicodeWriter(fp)
     writer.writerows([
@@ -52,9 +52,9 @@ class UnicodeDictWriter(UnicodeWriter):
     get unicode data in to Excel using CSV.
 
     Modification: switched to csv.excel as the default dialect -- chriscog
-    
+
     Usage example:
-    
+
     fp = open('my-file.csv', 'wb')
     writer = UnicodeDictWriter(fp, ['name', 'age', 'shoesize'])
     writer.writerows([
@@ -65,7 +65,7 @@ class UnicodeDictWriter(UnicodeWriter):
         {'name': '\xc4\x80dam'.decode('utf8'), 'age': 11, 'shoesize': 4},
     ])
     fp.close()
-    
+
     Initially derived from http://docs.python.org/lib/csv-examples.html
     """
 

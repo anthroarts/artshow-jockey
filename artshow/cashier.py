@@ -17,11 +17,13 @@ import logging
 import datetime
 from . import invoicegen
 from . import pdfreports
-logger = logging.getLogger(__name__)
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 import json
 from .conf import _DISABLED as SETTING_DISABLED
+
+
+logger = logging.getLogger(__name__)
 
 
 class BidderSearchForm (forms.Form):
@@ -185,8 +187,9 @@ def cashier_invoice(request, invoice_id):
         'tax_description': settings.ARTSHOW_TAX_DESCRIPTION,
         'invoice_prefix': settings.ARTSHOW_INVOICE_PREFIX,
         'print_invoice_url':
-                reverse('artshow-print-invoice', args=(invoice_id,)),
+            reverse('artshow-print-invoice', args=(invoice_id,)),
     })
+
 
 @permission_required('artshow.add_invoice')
 def cashier_print_invoice(request, invoice_id):
@@ -234,7 +237,7 @@ def do_print_invoices3(invoice, copy_name):
             pdfreports.invoice_to_pdf(invoice, sbuf)
     except Exception as x:
         logger.error("Could not generate invoice: %s", x)
-        raise invoicegen.PrintingError ("Could not generate invoice: %s" % x)
+        raise invoicegen.PrintingError("Could not generate invoice: %s" % x)
 
     if not sbuf.getvalue():
         logger.error("nothing to generate")

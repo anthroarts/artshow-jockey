@@ -4,7 +4,7 @@ from django import forms
 class LongerTextInput(forms.TextInput):
     def __init__(self, attrs=None, **kwargs):
         attrs = attrs if attrs is not None else {}
-        attrs.setdefault("size","60")
+        attrs.setdefault("size", "60")
         super(LongerTextInput, self).__init__(attrs, **kwargs)
 
 

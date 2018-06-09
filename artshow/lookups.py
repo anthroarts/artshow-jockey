@@ -1,6 +1,7 @@
 from ajax_select import register, LookupChannel
 from .models import Bidder
 
+
 @register('bidder')
 class BidderLookup(LookupChannel):
     model = Bidder

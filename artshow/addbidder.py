@@ -145,6 +145,7 @@ class BidAddForm (forms.Form):
 
         return cleaned_data
 
+
 BidAddFormSet = formset_factory(BidAddForm, extra=BIDS_PER_PAGE)
 
 
@@ -157,7 +158,6 @@ class BidAddOptionsForm (forms.Form):
     )
 
     stage = forms.ChoiceField(choices=STAGE_CHOICES, widget=forms.RadioSelect)
-
 
 
 def finalize_bid(stage, piece, bid_type):

@@ -165,6 +165,7 @@ def get_summary_statistics():
             'invoice_payments': invoice_payments, 'spaces': spaces, 'total_spaces': total_spaces,
             'num_artists': num_artists, 'num_active_artists': num_active_artists}
 
+
 @permission_required('artshow.is_artshow_staff')
 def show_summary(request):
 

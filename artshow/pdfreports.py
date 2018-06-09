@@ -56,7 +56,7 @@ def winning_bidders(request):
                     bidder_data.append((Paragraph("continued on next page...", normal_style), "", ""))
                 right_part = Table(bidder_data, colWidths=[0.5 * inch, 4.5 * inch, 0.5 * inch, 1.2 * inch],
                                    style=[
-                                       ("ROWBACKGROUNDS", (0, 0), (-1, -1), ( colors.lightgrey, colors.white)),
+                                       ("ROWBACKGROUNDS", (0, 0), (-1, -1), (colors.lightgrey, colors.white)),
                                        ("SIZE", (0, 0), (0, -1), 8),
                                        ("ALIGN", (2, 0), (2, -1), "DECIMAL"),
                                    ])
@@ -97,14 +97,14 @@ def winning_bidders(request):
 
 @permission_required('artshow.is_artshow_staff')
 def bid_entry_by_artist(request):
-    #	pieces = Piece.objects.filter ( status=Piece.StatusInShow ).order_by ( 'artist__artistid', 'pieceid' )
+    # pieces = Piece.objects.filter ( status=Piece.StatusInShow ).order_by ( 'artist__artistid', 'pieceid' )
     pieces = Piece.objects.all().order_by('artist__artistid', 'pieceid')
     return bid_entry(request, pieces)
 
 
 @permission_required('artshow.is_artshow_staff')
 def bid_entry_by_location(request):
-    #	pieces = Piece.objects.filter ( status=Piece.StatusInShow ).order_by ( 'location', 'artist__artistid', 'pieceid' )
+    # pieces = Piece.objects.filter ( status=Piece.StatusInShow ).order_by ( 'location', 'artist__artistid', 'pieceid' )
     pieces = Piece.objects.all().order_by('location', 'artist__artistid', 'pieceid')
     return bid_entry(request, pieces)
 
@@ -163,7 +163,7 @@ def draw_invoice_header(canvas, doc, invoice, purpose):
                    normal_style)],
     ]
     invoice_info_style = [
-        #("GRID", (0,0), (-1,-1), 0.1, colors.black),
+        # ("GRID", (0,0), (-1,-1), 0.1, colors.black),
         ("LEFTPADDING", (0, 0), (-1, -1), 3),
         ("RIGHTPADDING", (0, 0), (-1, -1), 3),
         ("TOPPADDING", (0, 0), (-1, -1), 0),
@@ -329,7 +329,7 @@ def picklist_to_pdf(invoice, outf):
         ("SPAN", (0, 1), (4, 1)),
         ("SPAN", (0, num_items + 2), (4, num_items + 2)),
         ("LINEBELOW", (0, 0), (-1, -1), 0.1, colors.black),
-        #("GRID", (0,0), (-1,-1), 0.1, colors.black),
+        # ("GRID", (0,0), (-1,-1), 0.1, colors.black),
     ]
 
     body_table = Table(body_data, colWidths=[0.5 * inch, 0.75 * inch, 0.25 * inch, 4.25 * inch, 1 * inch, 0.25 * inch],
@@ -347,7 +347,6 @@ def picklist_to_pdf(invoice, outf):
         Paragraph("Agent Name _______________________________________________", normal_style),
     ])
     story.append(signature_block)
-
 
     # TODO - Figure out a better way of handling this horrible hack.
     # "Paragraph" does not use the sequencer inside the Document, but instead the global sequencer :(

@@ -4,6 +4,7 @@ from django.core import mail
 from django.test import Client, TestCase
 from django.urls import reverse
 
+
 class RegisterTests(TestCase):
 
     def test_load(self):

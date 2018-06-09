@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
+
 class HomeTests(TestCase):
 
     def test_unauthenticated(self):
@@ -32,4 +33,3 @@ class HomeTests(TestCase):
         c.login(username=artist.username, password=password)
         response = c.get(reverse('home'))
         self.assertRedirects(response, reverse('artshow-manage'))
-

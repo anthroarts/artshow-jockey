@@ -52,9 +52,8 @@ class BidScanTest(BatchScanTestCase):
         Bid.objects.create(piece=cls.piece_withabuynow, bidder=cls.bidder, amount=15, buy_now_bid=True)
 
         cls.piece_won = Piece.objects.create(artist=cls.artist1, pieceid=7, name="Seventh Piece", min_bid=10,
-                                                     buy_now=15, status=Piece.StatusWon)
+                                             buy_now=15, status=Piece.StatusWon)
         Bid.objects.create(piece=cls.piece_won, bidder=cls.bidder, amount=15, buy_now_bid=True)
-
 
     def assertNoBids(self, piece):
         with self.assertRaises(Bid.DoesNotExist):
@@ -377,7 +376,6 @@ class LocationScanTest(BatchScanTestCase):
                                           status=Piece.StatusNotInShowLocked)
         cls.piece3 = Piece.objects.create(artist=cls.artist2, pieceid=3, name="Third Piece", min_bid=10,
                                           status=Piece.StatusSold)
-
 
     def test_locate_notinshow(self):
         batch = create_and_process_batch(1, data="LA1\nA2P1\nLEND\n")

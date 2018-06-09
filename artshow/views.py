@@ -92,4 +92,3 @@ def bidder_results(request):
         form = BidderResultsForm()
 
     return render(request, "artshow/bidder_results.html", {'form': form, 'bidder': bidder})
-

@@ -2,6 +2,7 @@ from django.test import TestCase
 from ..utils import artshow_settings
 from django.conf import settings
 
+
 class AttributeFilterTest (TestCase):
     def test_passed_access(self):
         self.assertEqual(artshow_settings.SITE_NAME, settings.SITE_NAME)
@@ -12,5 +13,5 @@ class AttributeFilterTest (TestCase):
         def get_secret_key():
             return artshow_settings.SECRET_KEY
         self.assertRaisesRegex(AttributeError,
-                                "AttributeFilter blocked access to 'SECRET_KEY'.*",
-                                get_secret_key)
+                               "AttributeFilter blocked access to 'SECRET_KEY'.*",
+                               get_secret_key)

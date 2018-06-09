@@ -11,6 +11,7 @@ from .forms import ArtistRegisterForm, LongerTextInput
 Person = apps.get_model(settings.ARTSHOW_PERSON_CLASS)
 User = get_user_model()
 
+
 class AgreementForm(forms.Form):
     electronic_signature = \
         forms.CharField(required=True,
@@ -19,6 +20,7 @@ class AgreementForm(forms.Form):
                                   "Please type in your full name here as your \"electronic signature\"." %
                                   settings.ARTSHOW_ARTIST_AGREEMENT_URL,
                         widget=LongerTextInput)
+
 
 class PersonForm(forms.ModelForm):
     name = forms.CharField(required=True, label="Real Name", help_text="Your real, legal name", widget=LongerTextInput)
@@ -77,12 +79,13 @@ def main(request):
             person.user = user
             person.save()
 
-            artist = Artist(person=person, publicname=artist_form.cleaned_data.get('artist_name',''))
+            artist = Artist(person=person, publicname=artist_form.cleaned_data.get('artist_name', ''))
             artist.save()
 
             send_password_reset_email(artist, user)
             return render(request, "artshow/manage_register_success.html",
-                {"new_user":user, "person":person, "artist":artist})
+                          {"new_user": user, "person": person,
+                           "artist": artist})
     else:
         artist_form = ArtistRegisterForm()
         person_form = PersonForm()
@@ -91,12 +94,3 @@ def main(request):
     return render(request, "artshow/manage_register_main.html",
                   {"artist_form": artist_form, "person_form": person_form,
                    "agreement_form": agreement_form})
-
-
-
-
-
-
-
-
-

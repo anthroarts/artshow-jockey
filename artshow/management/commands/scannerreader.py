@@ -25,19 +25,19 @@ class Command(BaseCommand):
         while True:
             data = []
             print("waiting for new data")
-            l = f.readline()
+            line = f.readline()
             print("\a")
             while True:
-                if not l:
+                if not line:
                     print("oops. no data to read. wtf?")
-                l = l.strip()
-                if l:
-                    data.append(l)
-                print(l)
+                line = line.strip()
+                if line:
+                    data.append(line)
+                print(line)
                 rlist, wlist, xlist = select.select([f], [], [f], 5.0)
                 if not rlist and not xlist:
                     break
-                l = f.readline()
+                line = f.readline()
             print("timed out")
             print("\a")
             data_str = "\n".join(data) + "\n"

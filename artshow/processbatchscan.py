@@ -52,13 +52,13 @@ def process_locations(data):
     state = StateL.start
     current_location = None
     lines = data.splitlines()
-    for lineno, l in enumerate(lines):
-        l = l.strip()
-        l = lines[lineno] = comments_re.sub('', l)
-        lines[lineno] = l
-        if l == "":
+    for lineno, line in enumerate(lines):
+        line = line.strip()
+        line = lines[lineno] = comments_re.sub('', line)
+        lines[lineno] = line
+        if line == "":
             continue
-        mo = location_scan_re.match(l)
+        mo = location_scan_re.match(line)
         if mo:
             if state not in [StateL.start, StateL.error_skipping]:
                 add_error(errors, lines, lineno, "previous block incomplete")
@@ -67,7 +67,7 @@ def process_locations(data):
         if not mo:
             if state == StateL.error_skipping:
                 continue
-            mo = piece_scan_re.match(l)
+            mo = piece_scan_re.match(line)
             if mo:
                 if state == StateL.read_location:
                     try:
@@ -83,7 +83,7 @@ def process_locations(data):
                 else:
                     add_error(errors, lines, lineno, "piece not found immediately after location")
         if not mo:
-            mo = end_location_scan_re.match(l)
+            mo = end_location_scan_re.match(line)
             if mo:
                 if state == StateL.read_location:
                     state = StateL.start
@@ -115,12 +115,12 @@ def process_bids(data, final_scan=False):
     current_bidder = None
     current_price = None
     lines = data.splitlines()
-    for lineno, l in enumerate(lines):
-        l = l.strip()
-        l = lines[lineno] = comments_re.sub('', l)
-        if l == "":
+    for lineno, line in enumerate(lines):
+        line = line.strip()
+        line = lines[lineno] = comments_re.sub('', line)
+        if line == "":
             continue
-        mo = piece_scan_re.match(l)
+        mo = piece_scan_re.match(line)
         if mo:
             if state not in [State.start, State.error_skipping]:
                 add_error(errors, lines, lineno, "previous block incomplete")
@@ -134,7 +134,7 @@ def process_bids(data, final_scan=False):
         if not mo:
             if state == State.error_skipping:
                 continue
-            mo = bidder_scan_re.match(l)
+            mo = bidder_scan_re.match(line)
             if mo:
                 if state == State.read_piece:
                     try:
@@ -148,7 +148,7 @@ def process_bids(data, final_scan=False):
                     add_error(errors, lines, lineno, "found bidder scan not immediately after piece")
                     state = State.error_skipping
         if not mo:
-            mo = price_scan_re.match(l)
+            mo = price_scan_re.match(line)
             if mo:
                 if state == State.read_bidder:
                     current_price = int(mo.group(1))
@@ -157,7 +157,7 @@ def process_bids(data, final_scan=False):
                     add_error(errors, lines, lineno, "found price not immediately after bidder")
                     state = State.error_skipping
         if not mo:
-            mo = normal_sale_scan_re.match(l)
+            mo = normal_sale_scan_re.match(line)
             if mo:
                 if state == State.start:
                     # Skipping extraneous Normal Sale, a common scanning error
@@ -184,7 +184,7 @@ def process_bids(data, final_scan=False):
                     add_error(errors, lines, lineno, "normal sale scan found not immediately after price")
                     state = State.error_skipping
         if not mo:
-            mo = buy_now_scan_re.match(l)
+            mo = buy_now_scan_re.match(line)
             if mo:
                 if state == State.read_price:
                     try:
@@ -208,7 +208,7 @@ def process_bids(data, final_scan=False):
                     add_error(errors, lines, lineno, "buy now scan found not immediately after price")
                     state = State.error_skipping
         if not mo:
-            mo = auction_sale_scan_re.match(l)
+            mo = auction_sale_scan_re.match(line)
             if mo:
                 if state == State.read_price:
                     try:
@@ -233,7 +233,7 @@ def process_bids(data, final_scan=False):
                     add_error(errors, lines, lineno, "auction sale scan found not immediately after price")
                     state = State.error_skipping
         if not mo:
-            mo = auction_complete_scan_re.match(l)
+            mo = auction_complete_scan_re.match(line)
             if mo:
                 if state == State.read_price:
                     try:
@@ -259,7 +259,7 @@ def process_bids(data, final_scan=False):
                     add_error(errors, lines, lineno, "auction sale scan found not immediately after price")
                     state = State.error_skipping
         if not mo:
-            mo = not_for_sale_scan_re.match(l)
+            mo = not_for_sale_scan_re.match(line)
             if mo:
                 if state == State.read_piece:
                     if not current_piece.not_for_sale:
@@ -275,7 +275,7 @@ def process_bids(data, final_scan=False):
                     add_error(errors, lines, lineno, "not for sale scan found not immediately after piece")
                     state = State.error_skipping
         if not mo:
-            mo = no_bids_scan_re.match(l)
+            mo = no_bids_scan_re.match(line)
             if mo:
                 if state == State.read_piece:
                     num_bids = current_piece.bid_set.count()
@@ -294,17 +294,17 @@ def process_bids(data, final_scan=False):
         if not mo:
             add_error(errors, lines, lineno, "unknown line")
             state = State.error_skipping
-    if state not in (State.start, State.error_skipping) :
+    if state not in (State.start, State.error_skipping):
         add_error(errors, lines, None, "block incomplete")
 
     data = "\n".join(lines)
     return data, errors
 
 
-
 class StateCB:
     start = 1
     read_person = 2
+
 
 @transaction.atomic
 def process_create_bidderids(data):
@@ -314,13 +314,13 @@ def process_create_bidderids(data):
     state = StateCB.start
     current_person = None
     lines = data.splitlines()
-    for lineno, l in enumerate(lines):
-        l = l.strip()
-        l = lines[lineno] = comments_re.sub('', l)
-        if l == "":
+    for lineno, line in enumerate(lines):
+        line = line.strip()
+        line = lines[lineno] = comments_re.sub('', line)
+        if line == "":
             continue
 
-        mo = person_scan_re.match(l)
+        mo = person_scan_re.match(line)
         if mo:
             if state != StateCB.start:
                 add_error(errors, lines, lineno, "was expecting bidder ID")
@@ -334,7 +334,7 @@ def process_create_bidderids(data):
             state = StateCB.read_person
             continue
 
-        mo = bidder_scan_re.match(l)
+        mo = bidder_scan_re.match(line)
         if mo:
             if state != StateCB.read_person:
                 add_error(errors, lines, lineno, "unexpected bidder id")

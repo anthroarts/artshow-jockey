@@ -37,11 +37,11 @@ class PRINT_GRID:
 
 
 def dotpad(s, max_length):
-    l = len(s)
-    if l >= max_length:
+    length = len(s)
+    if length >= max_length:
         return s
-    s += " " * ((max_length - l) % 4)
-    s += "  .." * ((max_length - l) / 4)
+    s += " " * ((max_length - length) % 4)
+    s += "  .." * ((max_length - length) / 4)
     return s
 
 

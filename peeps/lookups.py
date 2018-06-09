@@ -36,7 +36,7 @@ class PersonLookup(LookupChannel):
 
     def format_item_display(self, obj):
         """ (HTML) formatted item for displaying item in the selected deck area """
-        ## TODO - misusing the showAddAnotherPopup function only kinda works.
+        # TODO - misusing the showAddAnotherPopup function only kinda works.
         parts = [
             "<div><a href=\"%s\" class=\"ui-icon ui-icon-pencil\" onclick=\"return showAddAnotherPopup(this);\">E</a></div><div>%s</div>" %
             (reverse("admin:peeps_person_change", args=(obj.id,)), escape(obj.name))]

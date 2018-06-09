@@ -5,14 +5,6 @@
 Useful to construct text overlay boxes for printing to existing PDF forms.
 """
 
-cli_defaults = {
-    'lpi': 10,
-}
-cli_usage = "%prog [options] infile"
-cli_description = """\
-Read in a PDF file and overlay a 0.1" grid on top of it. Writes to stdout.
-"""
-
 import optparse
 import sys
 
@@ -22,6 +14,14 @@ from reportlab.lib.pagesizes import letter
 from pdfrw import PdfReader
 from pdfrw.buildxobj import pagexobj
 from pdfrw.toreportlab import makerl
+
+cli_defaults = {
+    'lpi': 10,
+}
+cli_usage = "%prog [options] infile"
+cli_description = """\
+Read in a PDF file and overlay a 0.1" grid on top of it. Writes to stdout.
+"""
 
 
 def grid_overlay(infile, outfile=sys.stdout, pagesize=letter, lpi=10):

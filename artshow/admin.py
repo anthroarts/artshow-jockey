@@ -39,7 +39,7 @@ class AgentInline(AjaxSelectAdminTabularInline):
     # TODO Ajax selects only works on forms visible at ready time.
     # Need to trigger 'init-autocomplete' each time "Add Another" is pressed.
     form = make_ajax_form(Agent,
-                          {'person':'person'},
+                          {'person': 'person'},
                           show_help_text=True)
     model = Agent
     extra = 1
@@ -65,7 +65,7 @@ class PieceInlineForm(forms.ModelForm):
     class Meta:
         model = Piece
         fields = ("pieceid", "name", "media", "adult", "not_for_sale", "min_bid", "buy_now", "location",
-                   "voice_auction", "status")
+                  "voice_auction", "status")
         widgets = {
             'pieceid': forms.TextInput(attrs={'size': 3}),
             'media': forms.TextInput(attrs={'size': 8}),
@@ -85,11 +85,11 @@ class PieceInline(admin.TabularInline):
     ordering = ('pieceid',)
 
 
-#class ProductInline ( admin.TabularInline ):
-#	fields = ("productid", "name", "adult", "price", "location")
-#	model = Product
-#	extra = 1
-#	ordering = ('productid',)
+# class ProductInline ( admin.TabularInline ):
+#     fields = ("productid", "name", "adult", "price", "location")
+#     model = Product
+#     extra = 1
+#     ordering = ('productid',)
 
 class PaymentInline(admin.TabularInline):
     model = Payment
@@ -113,7 +113,7 @@ def send_password_reset_email(artist, user, subject, body_template):
 class ArtistForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         if 'instance' not in kwargs:
-            kwargs.setdefault('initial',{})
+            kwargs.setdefault('initial', {})
             kwargs['initial']['artistid'] = \
                 (Artist.objects.aggregate(artistid=Max('artistid')).get('artistid', 0) or 0) + 1
         super(ArtistForm, self).__init__(*args, **kwargs)
@@ -188,7 +188,7 @@ class ArtistAdmin(AjaxSelectAdmin):
                             self.message_user(request, "Mail to %s succeeded" % email)
                         except smtplib.SMTPException as x:
                             # Note: ModelAdmin message_user only supports sending info-level messages.
-                            messages.error(request, "Mail to %s failed: %s" % ( email, x ))
+                            messages.error(request, "Mail to %s failed: %s" % (email, x))
                     return None
                 else:
                     for a in queryset:
@@ -231,13 +231,13 @@ class ArtistAdmin(AjaxSelectAdmin):
 
     print_mailing_labels.short_description = "Print Mailing Labels"
 
-    def print_control_forms( self, request, artists ):
+    def print_control_forms(self, request, artists):
         return render(request, 'artshow/control_form.html',
                       {'artists': artists})
 
     print_control_forms.short_description = "Print Control Forms"
 
-    def print_piece_stickers( self, request, artists ):
+    def print_piece_stickers(self, request, artists):
         pieces = Piece.objects.filter(artist__in=artists) \
                 .order_by('artist', 'pieceid')
         return render(request, 'artshow/piece_stickers.html',
@@ -278,10 +278,14 @@ class ArtistAdmin(AjaxSelectAdmin):
                     pass
             commission = total_winnings * decimal.Decimal(settings.ARTSHOW_COMMISSION)
             if total_pieces > 0:
-                payment = Payment(artist=a, amount=total_winnings, payment_type=pt_winning,
+                payment = Payment(artist=a, amount=total_winnings,
+                                  payment_type=pt_winning,
                                   description="%d piece%s, %d with bid%s" % (
-                                  total_pieces, total_pieces != 1 and "s" or "", pieces_with_bids,
-                                  pieces_with_bids != 1 and "s" or ""), date=datetime.datetime.now())
+                                      total_pieces,
+                                      total_pieces != 1 and "s" or "",
+                                      pieces_with_bids,
+                                      pieces_with_bids != 1 and "s" or ""),
+                                  date=datetime.datetime.now())
                 payment.save()
             if commission > 0:
                 payment = Payment(artist=a, amount=-commission, payment_type=pt_commission,
@@ -343,8 +347,9 @@ class ArtistAdmin(AjaxSelectAdmin):
                 else:
                     messages.warning(request,
                                      "Artist %s has email address %s, "
-                                     "but there is already a user with that address as a login." % (
-                                     artist, artist_email))
+                                     "but there is already a user with that "
+                                     "address as a login." % (
+                                         artist, artist_email))
                     continue
 
                 user = User(username=artist_email, email=artist_email, first_name=artist.person.name, password='')
@@ -427,7 +432,7 @@ class PieceAdmin(admin.ModelAdmin):
 
     print_bidsheets.short_description = "Print Bid Sheets"
 
-    def print_piece_stickers( self, request, queryset):
+    def print_piece_stickers(self, request, queryset):
         return render(request, 'artshow/piece_stickers.html',
                       {'pieces': queryset})
 
@@ -502,7 +507,7 @@ class PieceAdmin(admin.ModelAdmin):
 
 admin.site.register(Piece, PieceAdmin)
 
-#admin.site.register(Product)
+# admin.site.register(Product)
 
 
 class BidderIdInline(admin.TabularInline):
@@ -575,6 +580,7 @@ admin.site.register(BidderId, BidderIdAdmin)
 
 class EmailTemplateAdmin(admin.ModelAdmin):
     save_as = True
+
 
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 
@@ -659,17 +665,17 @@ class BatchScanAdmin(admin.ModelAdmin):
 
 admin.site.register(BatchScan, BatchScanAdmin)
 
-#admin.site.register(Event)
+# admin.site.register(Event)
 
-#class TaskAdmin ( admin.ModelAdmin ):
-#	def due_at_date ( self, task ):
-#		return task.due_at.auto_occur
-#	def due_occurred ( self, task ):
-#		return task.due_at.occurred
-#	list_display = ( 'summary', 'due_at', 'due_at_date', 'due_occurred', 'done', 'actor' )
-#	list_filter = ( 'done', 'actor' )
+# class TaskAdmin ( admin.ModelAdmin ):
+#     def due_at_date ( self, task ):
+#         return task.due_at.auto_occur
+#     def due_occurred ( self, task ):
+#         return task.due_at.occurred
+#     list_display = ( 'summary', 'due_at', 'due_at_date', 'due_occurred', 'done', 'actor' )
+#     list_filter = ( 'done', 'actor' )
 
-#admin.site.register(Task,TaskAdmin)
+# admin.site.register(Task,TaskAdmin)
 
 
 class ChequePaymentAdmin(admin.ModelAdmin):

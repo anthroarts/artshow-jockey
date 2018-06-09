@@ -112,7 +112,6 @@ def set_bids(piece, data):
             for i in range(len(bids), len(existing_bids)):
                 existing_bids[i].delete()
 
-
         return get_bids(piece)
     except ValidationError as e:
         return error_response('bid', e.message, i)

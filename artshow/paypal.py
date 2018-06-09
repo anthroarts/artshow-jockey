@@ -21,8 +21,8 @@ pdtzone = django.utils.timezone.get_fixed_timezone(-420)
 
 paypal_date_re = re.compile(r"(\d+:\d+:\d+ \w+ \d+, \d+) (\w+)")
 
-def convert_date(datestr):
 
+def convert_date(datestr):
     # PayPal uses dates in the format: HH:MM:SS Mmm DD, YYYY PST/PDT
     # We can't use %Z to match the timezone information as this ONLY works
     # if the local computer is in a PST/PDT timezone. (see strptime(3))
@@ -42,7 +42,6 @@ def convert_date(datestr):
     d = datetime.datetime.strptime(datepart, "%H:%M:%S %b %d, %Y")
     d = d.replace(tzinfo=tzinfo)
     return d
-
 
 
 # Example URL

@@ -13,7 +13,7 @@ from .models import (
 
 @permission_required('artshow.view_artist')
 def artists(request):
-    ## TODO - This depends on the Person structure, which we want to move out into the model itself.
+    # TODO - This depends on the Person structure, which we want to move out into the model itself.
 
     artists = Artist.objects.all().order_by('artistid')
     spaces = Space.objects.all()
@@ -78,15 +78,24 @@ def pieces(request):
             top_bid = p.top_bid()
         except Bid.DoesNotExist:
             top_bid = None
-        d = dict(artistid=p.artist.artistid, pieceid=p.pieceid, code=p.code, artistname=p.artist.artistname(),
-                 title=p.name, media=p.media, min_bid=p.min_bid, buy_now=p.buy_now, adult=p.adult and "Yes" or "No",
-                 not_for_sale=p.not_for_sale and "Yes" or "No",
-                 status=p.get_status_display(), top_bid=top_bid and top_bid.amount or "",
-                 bought_now=top_bid and (top_bid.buy_now_bid and "Yes" or "No") or "",
-                 voice_auction=p.voice_auction and "Yes" or "No",
-                 bidder_name=top_bid and top_bid.bidder.name or "",
-                 bidder_ids=top_bid and (", ".join(top_bid.bidder.bidder_ids()) or ""),
-        )
+        d = {
+            'artistid': p.artist.artistid,
+            'pieceid': p.pieceid,
+            'code': p.code,
+            'artistname': p.artist.artistname(),
+            'title': p.name,
+            'media': p.media,
+            'min_bid': p.min_bid,
+            'buy_now': p.buy_now,
+            'adult': p.adult and "Yes" or "No",
+            'not_for_sale': p.not_for_sale and "Yes" or "No",
+            'status': p.get_status_display(),
+            'top_bid': top_bid and top_bid.amount or "",
+            'bought_now': top_bid and (top_bid.buy_now_bid and "Yes" or "No") or "",
+            'voice_auction': p.voice_auction and "Yes" or "No",
+            'bidder_name': top_bid and top_bid.bidder.name or "",
+            'bidder_ids': top_bid and (", ".join(top_bid.bidder.bidder_ids()) or ""),
+        }
         c.writerow(d)
 
     return response
@@ -95,7 +104,7 @@ def pieces(request):
 # noinspection PyUnusedLocal
 @permission_required('artshow.view_bidder')
 def bidders(request):
-    ## TODO - This depends on the Person structure, which we want to move out into the model itself.
+    # TODO - This depends on the Person structure, which we want to move out into the model itself.
 
     bidders = Bidder.objects.all()
 

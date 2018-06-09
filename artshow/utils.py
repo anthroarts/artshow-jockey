@@ -32,7 +32,7 @@ class AttributeFilter(object):
         if self.__expression.match(name):
             return self.__target.__getattr__(name)
         else:
-            raise AttributeError("AttributeFilter blocked access to '%s' on object '%s'" % ( name, self.__target ))
+            raise AttributeError("AttributeFilter blocked access to '%s' on object '%s'" % (name, self.__target))
 
 
 artshow_settings = AttributeFilter(settings, r"ARTSHOW_|SITE_NAME$|SITE_ROOT_URL$")
@@ -93,7 +93,6 @@ def create_user_from_email(email):
 def send_password_reset_email(artist, user, subject=None, template=None):
     from django.contrib.auth.tokens import default_token_generator
     from artshow.email1 import wrap, default_wrap_cols
-
 
     if template is None:
         template = artshow_settings.ARTSHOW_PASSWORD_RESET_TEMPLATE

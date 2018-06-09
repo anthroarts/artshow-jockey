@@ -18,12 +18,12 @@ def escape(s):
 
 def text_to_pdf(text, output, lines_per_page=66):
     c = Canvas(output, pagesize=letter)
-    style = ParagraphStyle ( "default_style", fontName="Courier-Bold", fontSize=10, leading=11.1, alignment=TA_LEFT, allowWidows=1, allowOrphans=1 )
+    style = ParagraphStyle("default_style", fontName="Courier-Bold", fontSize=10, leading=11.1, alignment=TA_LEFT, allowWidows=1, allowOrphans=1)
     lines = text.splitlines()
     while lines:
         group = lines[:lines_per_page]
         lines = lines[lines_per_page:]
-        newtext = "<br/>".join ( escape(l) for l in group )
+        newtext = "<br/>".join(escape(l) for l in group)
         story = [Paragraph(newtext, style)]
         f = Frame(0.5*inch, 0.25*inch, 7.5*inch, 10.5*inch)
         f.addFromList(story, c)

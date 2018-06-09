@@ -13,7 +13,8 @@ def index(request):
         a.is_seen = a.is_seen_by(request.user)
 
     return render(request, "artshow/announcement_index.html",
-           {'artshow_settings': artshow_settings, 'announcements': announcements})
+                  {'artshow_settings': artshow_settings,
+                   'announcements': announcements})
 
 
 @login_required
@@ -27,5 +28,6 @@ def show(request, announcement_id):
         return redirect(index)
 
     return render(request, "artshow/announcement_show.html",
-        {'artshow_settings':artshow_settings, 'announcement': announcement,
-         'is_seen':is_seen})
+                  {'artshow_settings': artshow_settings,
+                   'announcement': announcement,
+                   'is_seen': is_seen})
