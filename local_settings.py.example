@@ -1,4 +1,4 @@
-from artshowjockey.common_settings import *
+from artshowjockey.common_settings import *  # noqa
 
 # This is, probably, the minimum set of settings attributes that
 # should be specified for your installation.
