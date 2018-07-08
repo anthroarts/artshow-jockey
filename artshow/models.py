@@ -65,7 +65,7 @@ class Space(models.Model):
         else:
             return data['requested'] - data['allocated']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -73,7 +73,7 @@ class Checkoff (models.Model):
     name = models.CharField(max_length=100)
     shortname = models.CharField(max_length=100)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s (%s)" % (self.name, self.shortname)
 
 
@@ -149,7 +149,7 @@ class Artist (models.Model):
         payment_remaining = max(deduction_remaining - self.balance(), 0)
         return total_requested_cost, deduction_to_date, deduction_remaining, payment_remaining
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s (%s)" % (self.artistname(), self.artistid)
 
     def chequename(self):
@@ -200,7 +200,7 @@ class Allocation(models.Model):
     def allocated_charge(self):
         return self.allocated * self.space.price
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s (%s) - %s/%s %s" % (self.artist.artistname(), self.artist.artistid,
                                        self.allocated, self.requested, self.space.name)
 
@@ -229,7 +229,7 @@ class Bidder (models.Model):
                 results.append(b)
         return results
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s (%s)" % (self.person.name, ", ".join(self.bidder_ids()))
 
     class Meta:
@@ -248,7 +248,7 @@ class BidderId (models.Model):
         except mod11codes.CheckDigitError:
             raise ValidationError("Bidder ID is not valid")
 
-    def __unicode__(self):
+    def __str__(self):
         name = self.bidder.person.name if self.bidder else "Unassigned"
         return "BidderId %s (%s)" % (self.id, name)
 
@@ -315,7 +315,7 @@ class Piece (models.Model):
         self.code = "%s-%s" % (self.artist.artistid, self.pieceid)
         super(Piece, self).save(*args, **kwargs)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s - \"%s\" by %s" % (self.code, self.name, self.artistname())
 
     def clean(self):
@@ -356,7 +356,7 @@ class Product (models.Model):
     def artistname(self):
         return self.artist.artistname()
 
-    def __unicode__(self):
+    def __str__(self):
         return "A%sR%s - %s by %s (%s)" % (self.artist.artistid, self.productid,
                                            self.name, self.artistname(), self.artist.artistid)
 
@@ -373,7 +373,7 @@ class Bid (models.Model):
         return self.piece.top_bid() == self
     is_top_bid = property(_is_top_bid)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s (%s) %s $%s on %s" % (self.bidder.name(), self.bidderid,
                                          "INVALID BID" if self.invalid else "bid", self.amount, self.piece)
 
@@ -421,7 +421,7 @@ class EmailTemplate (models.Model):
         "Use Django template language. " \
         "Available variables: artist, pieces_in_show, payments, signature, artshow_settings. "
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -429,14 +429,14 @@ class EmailSignature (models.Model):
     name = models.CharField(max_length=100)
     signature = models.TextField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
 class PaymentType (models.Model):
     name = models.CharField(max_length=40)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -447,7 +447,7 @@ class Payment (models.Model):
     description = models.CharField(max_length=100)
     date = models.DateField()
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s (%s) %s %s" % (self.artist.artistname(), self.artist.artistid, self.amount, self.date)
 
     class Meta:
@@ -505,7 +505,7 @@ class Invoice (models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     notes = models.TextField(blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return "Invoice %d for %s" % (self.id, self.payer)
 
     def get_absolute_url(self):
@@ -539,7 +539,7 @@ class InvoiceItem (models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=7, decimal_places=2)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s for $%s" % (self.invoice, self.price)
 
 
@@ -558,7 +558,7 @@ class BatchScan (models.Model):
     processed = models.BooleanField(default=False)
     processing_log = models.TextField(blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return "BatchScan %s" % self.id
 
 
@@ -567,7 +567,7 @@ class Event (models.Model):
     occurred = models.BooleanField(default=False)
     auto_occur = models.DateTimeField(blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -579,7 +579,7 @@ class Task (models.Model):
     actor = models.ForeignKey('auth.User', on_delete=models.CASCADE)
     done = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.summary
 
 

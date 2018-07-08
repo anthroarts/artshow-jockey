@@ -38,7 +38,7 @@ class Announcement(models.Model):
             ann_seen = AnnouncementSeen(announcement=self, user=user)
             ann_seen.save()
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s by %s" % (self.subject, self.author)
 
 
@@ -52,5 +52,5 @@ class AnnouncementSeen(models.Model):
         app_label = 'tinyannounce'
         unique_together = (('announcement', 'user'))
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s seen by %s" % (self.announcement.subject, self.user)

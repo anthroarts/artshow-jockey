@@ -17,7 +17,7 @@ class Person (models.Model):
     reg_id = models.CharField(max_length=40, blank=True, verbose_name="Reg ID")
     comment = models.CharField(max_length=100, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.reg_id or self.comment:
             return "%s (%s)" % (self.name, ",".join([x for x in (self.reg_id, self.comment) if x]))
         else:
