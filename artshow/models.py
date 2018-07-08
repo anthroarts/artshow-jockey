@@ -10,7 +10,8 @@ __all__ = ["Allocation", "Artist", "ArtistManager", "BatchScan", "Bid", "Bidder"
 from decimal import Decimal
 
 from django.db import models
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Value as V
+from django.db.models.functions import Coalesce
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.urls import reverse
@@ -115,10 +116,12 @@ class Artist (models.Model):
         return self.publicname or self.person.name
 
     def is_showing(self):
-        return self.allocation_set.aggregate(alloc=Sum('allocated'))['alloc'] > 0
+        return self.allocation_set.aggregate(
+            alloc=Coalesce(Sum('allocated'), V(0)))['alloc'] > 0
 
     def is_active(self):
-        return self.allocation_set.aggregate(req=Sum('requested'))['req'] > 0
+        return self.allocation_set.aggregate(
+            req=Coalesce(Sum('requested'), V(0)))['req'] > 0
 
     def used_locations(self):
         return [x[0] for x in self.piece_set.exclude(status__in=[Piece.StatusNotInShow, Piece.StatusNotInShowLocked])
