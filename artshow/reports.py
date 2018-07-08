@@ -3,7 +3,8 @@
 # See file COPYING for licence details
 from decimal import Decimal
 from django.shortcuts import render
-from django.db.models import Sum, Min, F, Count
+from django.db.models import Sum, Min, F, Count, Value as V
+from django.db.models.functions import Coalesce
 from django.contrib.auth.decorators import permission_required
 from .models import (
     Allocation, Artist, Bid, Bidder, Invoice, InvoiceItem, InvoicePayment,
@@ -127,8 +128,8 @@ def get_summary_statistics():
         if a.is_active():
             num_active_artists += 1
 
-    payment_types = PaymentType.objects.annotate(total_payments=Sum('payment__amount'))
-    total_payments = sum([(pt.total_payments or Decimal("0.0")) for pt in payment_types])
+    payment_types = PaymentType.objects.annotate(total_payments=Coalesce(Sum('payment__amount'), V(0)))
+    total_payments = sum([pt.total_payments for pt in payment_types])
 
     tax_paid = Invoice.objects.aggregate(tax_paid=Sum('tax_paid'))['tax_paid'] or Decimal(0)
     piece_charges = InvoiceItem.objects.aggregate(piece_charges=Sum('price'))['piece_charges'] or Decimal(0)
@@ -140,30 +141,51 @@ def get_summary_statistics():
         ip['payment_method_desc'] = payment_method_choice_dict[ip['payment_method']]
     total_invoice_payments = InvoicePayment.objects.aggregate(total=Sum('amount'))['total'] or Decimal(0)
 
-    spaces = Space.objects.annotate(requested=Sum('allocation__requested'), allocated2=Sum('allocation__allocated'))
-    total_spaces = {'available': 0, 'requested': 0, 'allocated': 0, 'requested_perc': 0, 'allocated_perc': 0}
+    spaces = Space.objects.annotate(
+        requested=Coalesce(Sum('allocation__requested'), V(0)),
+        allocated2=Coalesce(Sum('allocation__allocated'), V(0)))
+    total_spaces = {
+        'available': 0,
+        'requested': 0,
+        'allocated': 0,
+        'requested_perc': 0,
+        'allocated_perc': 0
+    }
     for s in spaces:
-        total_spaces['available'] += s.available or 0
-        total_spaces['requested'] += s.requested or 0
-        total_spaces['allocated'] += s.allocated2 or 0
+        total_spaces['available'] += s.available
+        total_spaces['requested'] += s.requested
+        total_spaces['allocated'] += s.allocated2
         if s.available:
-            s.requested_perc = s.requested / s.available * 100 if s.requested is not None and s.available > 0 else 0
-            s.allocated_perc = s.allocated2 / s.available * 100 if s.allocated2 is not None and s.available > 0 else 0
+            s.requested_perc = s.requested / s.available * 100
+            s.allocated_perc = s.allocated2 / s.available * 100
         else:
             s.requested_perc = 0
             s.allocated_perc = 0
     if total_spaces['available']:
-        total_spaces['requested_perc'] = total_spaces['requested'] / total_spaces['available'] * 100
-        total_spaces['allocated_perc'] = total_spaces['allocated'] / total_spaces['available'] * 100
+        total_spaces['requested_perc'] = \
+            total_spaces['requested'] / total_spaces['available'] * 100
+        total_spaces['allocated_perc'] = \
+            total_spaces['allocated'] / total_spaces['available'] * 100
 
     # all_invoices = Invoice.objects.aggregate ( Sum('tax_paid'), Sum('invoicepayment__amount') )
 
-    return {'all_stats': all_stats, 'general_stats': general_stats, 'adult_stats': adult_stats,
-            'num_showing_artists': num_showing_artists, 'payment_types': payment_types,
-            'total_payments': total_payments, 'tax_paid': tax_paid, 'piece_charges': piece_charges,
-            'total_charges': total_charges, 'total_invoice_payments': total_invoice_payments,
-            'invoice_payments': invoice_payments, 'spaces': spaces, 'total_spaces': total_spaces,
-            'num_artists': num_artists, 'num_active_artists': num_active_artists}
+    return {
+        'all_stats': all_stats,
+        'general_stats': general_stats,
+        'adult_stats': adult_stats,
+        'num_showing_artists': num_showing_artists,
+        'payment_types': payment_types,
+        'total_payments': total_payments,
+        'tax_paid': tax_paid,
+        'piece_charges': piece_charges,
+        'total_charges': total_charges,
+        'total_invoice_payments': total_invoice_payments,
+        'invoice_payments': invoice_payments,
+        'spaces': spaces,
+        'total_spaces': total_spaces,
+        'num_artists': num_artists,
+        'num_active_artists': num_active_artists
+    }
 
 
 @permission_required('artshow.is_artshow_staff')
