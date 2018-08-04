@@ -18,7 +18,7 @@ from django.db.models import Max, Sum
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
-from django.utils.html import escape
+from django.utils.html import format_html
 
 from . import email1
 from . import processbatchscan
@@ -439,15 +439,19 @@ class PieceAdmin(admin.ModelAdmin):
     print_piece_stickers.short_description = "Print Piece Stickers"
 
     def clickable_artist(self, obj):
-        return '<a href="%s">%s</a>' % (
-            reverse('admin:artshow_artist_change', args=(obj.artist.pk,)), escape(obj.artist.artistname()))
+        return format_html('<a href="{}">{}</a>',
+                           reverse('admin:artshow_artist_change',
+                                   args=(obj.artist.pk,)),
+                           obj.artist.artistname())
 
     clickable_artist.allow_tags = True
     clickable_artist.short_description = "artist"
 
     def clickable_invoice(self, obj):
-        return '<a href="%s">%s</a>' % (
-            reverse('admin:artshow_invoice_change', args=(obj.invoice.id,)), obj.invoice)
+        return format_html('<a href="{}">{}</a>',
+                           reverse('admin:artshow_invoice_change',
+                                   args=(obj.invoice.id,)),
+                           obj.invoice)
 
     clickable_invoice.allow_tags = True
     clickable_invoice.short_description = "invoice"
@@ -590,8 +594,10 @@ admin.site.register(EmailSignature)
 
 class PaymentAdmin(admin.ModelAdmin):
     def clickable_artist(self, obj):
-        return '<a href="%s">%s</a>' % (
-            reverse('admin:artshow_artist_change', args=(obj.artist.pk,)), escape(str(obj.artist)))
+        return format_html('<a href="{}">{}</a>',
+                           reverse('admin:artshow_artist_change',
+                                   args=(obj.artist.pk,)),
+                           str(obj.artist))
     clickable_artist.allow_tags = True
     clickable_artist.short_description = "artist"
 

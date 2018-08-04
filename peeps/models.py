@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
+from django.utils.html import format_html
 
 
 class Person (models.Model):
@@ -24,7 +25,8 @@ class Person (models.Model):
             return self.name
 
     def clickable_email(self):
-        return '<a href="mailto:%s">%s</a>' % (self.email, self.email)
+        return format_html('<a href="mailto:{}">{}</a>',
+                           self.email, self.email)
     clickable_email.allow_tags = True
 
     def mailing_label(self):
