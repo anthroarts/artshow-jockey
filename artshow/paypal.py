@@ -96,7 +96,7 @@ def process_ipn(sender, **kwargs):
         pipe = urlopen(verify_url)
         text = pipe.read(128)
 
-        if text != "VERIFIED":
+        if text != b"VERIFIED":
             raise IPNProcessingError("Paypal returned %s for verification" % text)
 
         params = parse_qs(query)
@@ -141,19 +141,18 @@ def process_ipn(sender, **kwargs):
         payment.save()
 
     except Exception as x:
-        paypal_logger.error("Error when getting validation for: %s", query)
+        paypal_logger.exception("Error when getting validation for: %s", query)
         if payment_id:
             paypal_logger.error("... during processing of payment_id: %s", payment_id)
-        paypal_logger.error("%s", x)
 
 
 @csrf_exempt
 def ipn_handler(request):
 
     if request.method == "POST":
-        query_string = request.body
+        query_string = request.body.decode('utf-8')
     else:
-        query_string = request.META['QUERY_STRING']
+        query_string = request.META['QUERY_STRING'].decode('utf-8')
 
     paypal_logger.debug("received IPN notification with query: %s ", query_string)
     ipn_received.send(None, query=query_string)
