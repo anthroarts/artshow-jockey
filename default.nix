@@ -6,6 +6,7 @@ stdenv.mkDerivation rec {
     python3
     pipenv
     python3Packages.pillow
+    python3Packages.reportlab
   ];
   shellHook = ''
   pipenv sync --dev
