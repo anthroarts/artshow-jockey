@@ -7,6 +7,7 @@ stdenv.mkDerivation rec {
     pipenv
     python3Packages.pillow
     python3Packages.reportlab
+    mysql.connector-c
   ];
   shellHook = ''
   pipenv sync --dev

@@ -4,11 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "*"
+django = "<2.1"
 django-ajax-selects = "*"
 django-appconf = "*"
 django-formtools = "*"
 django-nocaptcha-recaptcha = "*"
+django-ses = "*"
+gunicorn = "*"
 "num2words" = "*"
 pdfrw = "*"
 reportlab = "*"
