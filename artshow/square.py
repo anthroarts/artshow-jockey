@@ -23,6 +23,8 @@ def charge(payment, nonce):
             'amount': int(payment.amount * 100),
             'currency': 'USD'
         },
+        'buyer_email_address': payment.artist.person.email,
+        'note': 'Art Show space reservation for Artist #%d' % payment.artist.artistid,
     }
     try:
         api_response = api_instance.charge(location_id, body)
