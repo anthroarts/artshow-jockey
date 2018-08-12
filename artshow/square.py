@@ -4,7 +4,6 @@ import uuid
 import squareconnect
 from squareconnect.rest import ApiException
 from squareconnect.apis.transactions_api import TransactionsApi
-from squareconnect.apis.locations_api import LocationsApi
 
 from .conf import settings
 
@@ -12,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 squareconnect.configuration.access_token = settings.ARTSHOW_SQUARE_ACCESS_TOKEN
 location_id = settings.ARTSHOW_SQUARE_LOCATION_ID
+
 
 def charge(payment, nonce):
     api_instance = TransactionsApi()
