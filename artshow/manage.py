@@ -19,6 +19,7 @@ from django.forms.models import inlineformset_factory
 from django.http import HttpResponse
 from django.contrib import messages
 from .utils import artshow_settings
+from . import square
 from . import utils
 from .paypal import make_paypal_url, ipn_received
 import re
@@ -312,10 +313,9 @@ def person_details(request, artist_id):
                                                                   "artshow_settings": artshow_settings})
 
 
-class PaymentForm(forms.ModelForm):
-    class Meta:
-        model = Payment
-        fields = ("amount",)
+class PaymentForm(forms.Form):
+    amount = forms.DecimalField(required=True, max_digits=7, decimal_places=2)
+    nonce = forms.CharField(required=False)
 
     def clean_amount(self):
         amount = self.cleaned_data["amount"]
@@ -328,27 +328,40 @@ class PaymentForm(forms.ModelForm):
 @user_edits_allowable
 def make_payment(request, artist_id):
     artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
-    payment_pending = PaymentType(id=settings.ARTSHOW_PAYMENT_PENDING_PK)
     total_requested_cost, deduction_to_date, deduction_remaining, payment_remaining = \
         artist.payment_remaining_with_details()
 
     payment_remaining = Decimal(payment_remaining).quantize(Decimal('1.00'))
-    payment = Payment(artist=artist, amount=payment_remaining, payment_type=payment_pending,
-                      description="PayPal pending confirmation", date=now())
     if request.method == "POST":
-        form = PaymentForm(request.POST, instance=payment)
+        form = PaymentForm(request.POST)
         if form.is_valid():
-            via_mail = request.POST.get("via_mail", "")
-            if via_mail:
-                payment.description = "Mail-in pending receipt"
-            form.save()
-            if via_mail:
-                return redirect(reverse("artshow-manage-payment-mail", args=(artist_id,)))
-            else:
+            payment_pending = PaymentType(id=settings.ARTSHOW_PAYMENT_PENDING_PK)
+            payment_received = PaymentType(id=settings.ARTSHOW_PAYMENT_RECEIVED_PK)
+
+            payment = Payment(artist=artist,
+                              amount=form.cleaned_data["amount"],
+                              payment_type=payment_pending,
+                              description="",
+                              date=now())
+
+            via_paypal = request.POST.get("via_paypal", "")
+            if via_paypal:
+                payment.description = "PayPal pending confirmation"
+                payment.save()
                 url = make_paypal_url(request, payment)
                 return redirect(url)
+
+            transaction = square.charge(payment, form.cleaned_data["nonce"])
+            if transaction:
+                payment.payment_type = payment_received
+                payment.description = "Square " + transaction
+                payment.save()
+                return redirect(reverse("artshow-manage-payment-square",
+                                args=(artist_id,)))
+            else:
+                form.add_error(None, "Failed to charge payment.")
     else:
-        form = PaymentForm(instance=payment)
+        form = PaymentForm(initial={'amount': payment_remaining})
 
     context = {"form": form,
                "artist": artist,
@@ -357,7 +370,9 @@ def make_payment(request, artist_id):
                "deduction_to_date": deduction_to_date,
                "deduction_remaining": deduction_remaining,
                "account_balance": artist.balance(),
-               "payment_remaining": payment_remaining
+               "payment_remaining": payment_remaining,
+               "sq_application_id": settings.ARTSHOW_SQUARE_APPLICATION_ID,
+               "sq_location_id": settings.ARTSHOW_SQUARE_LOCATION_ID,
                }
 
     return render(request, "artshow/make_payment.html", context)
@@ -367,6 +382,12 @@ def make_payment(request, artist_id):
 def payment_made_mail(request, artist_id):
     artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
     return render(request, "artshow/payment_made_mail.html", {"artist": artist})
+
+
+@login_required
+def payment_made_square(request, artist_id):
+    artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
+    return render(request, "artshow/payment_made_square.html", {"artist": artist})
 
 
 @login_required
