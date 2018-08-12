@@ -84,6 +84,10 @@ class ArtshowAppConf(AppConf):
 
     PAYPAL_ACCOUNT = _UNCONFIGURED
 
+    SQUARE_APPLICATION_ID = _UNCONFIGURED
+    SQUARE_LOCATION_ID = _UNCONFIGURED
+    SQUARE_ACCESS_TOKEN = _UNCONFIGURED
+
     ARTIST_AGREEMENT_URL = _UNCONFIGURED
 
     # Change this if an offset has been applied to bidder ID MOD11 calculation.
