@@ -12,6 +12,7 @@ django-nocaptcha-recaptcha = "*"
 django-ses = "*"
 gunicorn = "*"
 "num2words" = "*"
+squareconnect = "*"
 pdfrw = "*"
 reportlab = "*"
 
@@ -20,3 +21,10 @@ reportlab = "*"
 
 [requires]
 python_version = "3.6"
+
+[scripts]
+gunicorn = "gunicorn wsgi"
+server = "python manage.py runserver"
+migrate = "python manage.py migrate"
+collectstatic = "python manage.py collectstatic --noinput"
+test = "python manage.py test"

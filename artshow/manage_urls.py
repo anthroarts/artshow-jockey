@@ -36,6 +36,8 @@ urlpatterns = [
     url(r'^artist/(?P<artist_id>\d+)/makepayment/cancelled/paypal/$',
         manage.payment_cancelled_paypal,
         name='artshow-manage-payment-paypal-cancelled'),
+    url(r'^artist/(?P<artist_id>\d+)/makepayment/complete/square/$',
+        manage.payment_made_square, name='artshow-manage-payment-square'),
     url(r'^register/$', register.main, name='artshow-register'),
     url(r'^ipn/$', paypal.ipn_handler),
     url(r'^announcement/$', announcement.index, name="view_announcements"),
