@@ -14,7 +14,8 @@ gunicorn = "*"
 "num2words" = "*"
 squareconnect = "*"
 pdfrw = "*"
-reportlab = "*"
+reportlab = "==3.5.2"
+"m2crypto" = "*"
 
 [dev-packages]
 "flake8" = "*"
