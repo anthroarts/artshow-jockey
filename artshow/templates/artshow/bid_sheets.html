@@ -73,14 +73,25 @@ body {
   grid-column: 1 / 4;
   width: 100%;
   display: grid;
-  grid-template-rows: repeat(3, 0.8in);
+  grid-template-rows: repeat(3, 1fr);
   grid-template-columns: repeat(2, 1fr);
   grid-auto-flow: column;
+  grid-gap: 5px;
 }
 
 .bid-sticker {
-  align-self: center;
+  display: table;
+  height: calc(2in / 3);
+  width: 1.75in;
   justify-self: center;
+  border: 1px dashed black;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.bid-sticker span {
+  display: table-cell;
+  vertical-align: middle;
 }
 
 .not-for-sale {
@@ -128,16 +139,23 @@ body {
     </div>
     {% else %}
     <div class="bid-stickers">
-      <div class="bid-sticker">Place 1st bid{% if piece.buy_now %} or AB{% endif %} here.</div>
-      <div class="bid-sticker">Place 2nd bid here.</div>
-      <div class="bid-sticker">Place 3rd bid here.</div>
-      <div class="bid-sticker">Place 4th bid here.</div>
-      <div class="bid-sticker">Place 5th bid here.</div>
-      <div class="bid-sticker">Place final bid here.</div>
+      <div class="bid-sticker"><span>Place 1st bid{% if piece.buy_now %} or auto-buy{% endif %} here.</span></div>
+      <div class="bid-sticker"><span>Place 2nd bid here.</span></div>
+      <div class="bid-sticker"><span>Place 3rd bid here.</span></div>
+      <div class="bid-sticker"><span>Place 4th bid here.</span></div>
+      <div class="bid-sticker"><span>Place 5th bid here.</span></div>
+      <div class="bid-sticker"><span>Place final bid here.</span></div>
     </div>
     <div class="instructions">
       A piece with 6 bids will be taken to voice auction.
       {% if piece.buy_now %}See a staff member to lock in an auto buy bid.{% endif %}
+    </div>
+    <div class="instructions">
+      {% if piece.reproduction_rights_included %}
+      This sale includes reproduction rights.
+      {% else %}
+      This sale <em>does not</em> include reproduction rights.
+      {% endif %}
     </div>
     {% endif %}
   </div>

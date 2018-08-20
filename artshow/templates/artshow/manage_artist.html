@@ -115,6 +115,7 @@
             <th>Title</th>
             <th>Media</th>
             <th>Adult?</th>
+            <th>Reproduction rights included?</th>
             <th>Not For Sale?</th>
             <th>Min Bid</th>
             <th>Buy Now</th>
@@ -125,6 +126,7 @@
                 <td>{{ p.name }}</td>
                 <td>{{ p.media }}</td>
                 <td>{{ p.adult|yesno }}</td>
+                <td>{{ p.reproduction_rights_included|yesno }}</td>
                 <td>{{ p.not_for_sale|yesno }}</td>
                 <td>{{ p.min_bid }}</td>
                 <td>{{ p.buy_now }}</td>

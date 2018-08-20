@@ -260,13 +260,22 @@ class Piece (models.Model):
     code = models.CharField(max_length=10, editable=False)
     name = models.CharField(max_length=100, verbose_name="title")
     media = models.CharField(max_length=100, blank=True)
-    other_artist = models.CharField(max_length=100, blank=True, help_text="Alternate artist name for this piece")
-    condition = models.CharField(max_length=100, blank=True, help_text="Condition of piece, if not \"perfect\".")
+    other_artist = models.CharField(
+        max_length=100, blank=True,
+        help_text="Alternate artist name for this piece")
+    condition = models.CharField(
+        max_length=100, blank=True,
+        help_text="Condition of piece, if not \"perfect\".")
     location = models.CharField(max_length=8, blank=True)
     not_for_sale = models.BooleanField(default=False)
     adult = models.BooleanField(default=False)
-    min_bid = models.DecimalField(max_digits=5, decimal_places=0, blank=True, null=True)
-    buy_now = models.DecimalField(max_digits=5, decimal_places=0, blank=True, null=True)
+    min_bid = models.DecimalField(
+        max_digits=5, decimal_places=0, blank=True, null=True)
+    buy_now = models.DecimalField(
+        max_digits=5, decimal_places=0, blank=True, null=True)
+    reproduction_rights_included = models.BooleanField(
+        default=False,
+        help_text="This sale includes reproduction rights to the piece.")
     voice_auction = models.BooleanField(default=False)
     bidsheet_scanned = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True)
@@ -288,7 +297,8 @@ class Piece (models.Model):
         (StatusSold, 'Sold'),
         (StatusReturned, 'Returned'),
     ]
-    status = models.IntegerField(choices=STATUS_CHOICES, default=StatusNotInShow)
+    status = models.IntegerField(
+        choices=STATUS_CHOICES, default=StatusNotInShow)
 
     PrintingNotPrinted = 0
     PrintingToBePrinted = 1
