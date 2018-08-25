@@ -1,44 +1,9 @@
+{% load static %}
 <html>
 <head>
 <title>Art Show Bidder Stickers</title>
-<style>
-body {
-  margin: 0;
-}
-
-.container {
-  width: 8.5in;
-  height: 11in;
-  box-sizing: border-box;
-  padding: 0.5in 0.3in;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(15, 1fr);
-  grid-auto-flow: column;
-  grid-gap: 0px 0.3in;
-  page-break-after: always;
-}
-
-.sticker {
-  height: calc(2in / 3);
-  width: 1.75in;
-  box-sizing: border-box;
-  padding: 15px 10px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.bidder-id {
-  text-align: center;
-  align-self: center;
-  justify-self: center;
-}
-
-.bid-amount {
-  border-bottom: 1px solid black;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="{% static 'artshow/bid_stickers.css' %}">
+</head>
 <body>
 <div>
 {% for bidder_id in bidder_ids %}

@@ -1,0 +1,62 @@
+body {
+  margin: 0;
+}
+
+.container {
+  width: 8.5in;
+  height: 11in;
+  box-sizing: border-box;
+  padding: 0.5in 0.3in;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(15, 1fr);
+  grid-auto-flow: column;
+  grid-gap: 0px 0.3in;
+  page-break-after: always;
+}
+
+.sticker {
+  height: calc(2in / 3);
+  width: 1.75in;
+  box-sizing: border-box;
+  padding: 5px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "artist piece_id"
+    "name   piece_id"
+    "media  piece_id";
+}
+
+.artist {
+  grid-area: artist;
+  font-size: 10pt;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.name {
+  grid-area: name;
+  font-size: 10pt;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.media {
+  grid-area: media;
+  font-size: 10pt;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.piece_id {
+  grid-area: piece_id;
+  font-size: 16pt;
+  align-self: center;
+  justify-self: center;
+  writing-mode: vertical-rl;
+}
