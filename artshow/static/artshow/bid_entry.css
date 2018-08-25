@@ -1,0 +1,56 @@
+.header {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 10px;
+  grid-auto-flow: column;
+}
+
+#load {
+  grid-column: 3;
+  grid-row: 1 / 3;
+}
+
+.bid_entry {
+  display: grid;
+  grid-template-columns: fit-content(25%) 1fr 1fr fit-content(25%);
+  grid-gap: 10px;
+  grid-auto-flow: row;
+}
+
+.location_label {
+  grid-column: 2;
+}
+
+#location {
+  grid-column: 3;
+}
+
+.bidder_label {
+  grid-column: 2;
+}
+
+.center {
+  align-self: center;
+}
+
+.status {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 10px;
+}
+
+.error {
+  border-color: red;
+}
+
+input[type="text"] {
+  font-size: 18pt;
+}
+
+input[type="checkbox"] {
+  transform: scale(2);
+}
+
+#save {
+  height: 40px;
+}
