@@ -496,7 +496,8 @@ class PieceAdmin(admin.ModelAdmin):
     # TODO put 'invoiceitem' back into the list. Waiting on bug #16433
     fields = (
         'artist', 'pieceid', 'name', 'media', 'other_artist', 'condition',
-        ('not_for_sale', 'adult', 'min_bid', 'buy_now'),
+        ('not_for_sale', 'adult', 'reproduction_rights_included', 'min_bid',
+         'buy_now'),
         ('status', 'location'),
         ('voice_auction', 'order'),
         'top_bid_detail', 'invoice_item_detail', 'updated',

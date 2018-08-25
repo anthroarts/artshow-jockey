@@ -1,74 +1,25 @@
+{% load static %}
 <html>
 <head>
 <title>Invoice {{ invoice_prefix }}{{ invoice.id }}</title>
-<style>
-.header {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-gap: 2px;
-}
-
-.show_title {
-  font-size: 18pt;
-  grid-column: 1 / 3;
-}
-
-.invoice_title {
-  font-size: 22pt;
-  font-variant: small-caps;
-  text-align: right;
-  grid-column: 3 / 5;
-  margin-bottom: 20px;
-}
-
-.right {
-  text-align: right;
-}
-
-table {
-  width: 100%;
-  border: 1px solid black;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-table th {
-  border-bottom: 1px solid black;
-  padding: 2px;
-}
-
-table td {
-  padding: 2px;
-}
-
-.total {
-  text-align: right;
-  font-weight: bold;
-}
-
-.tax {
-  text-align: right;
-  font-weight: italic;
-}
-
-table td:last-child, table th:last-child {
-  text-align: right;
-  border-left: 1px solid black;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="{% static 'artshow/invoice.css' %}">
 </head>
 <body>
+
+<!-- Merchant copy -->
+<div class="page">
+
 <div class="header">
-<div class="show_title">{{ showstr }}</div>
-<div class="invoice_title">Invoice</div>
-<div>To:</div>
-<div>{{ invoice.payer.name }}</div>
-<div class="right">Invoice:</div>
-<div class="right">{{ invoice_prefix }}{{ invoice.id }}</div>
-<div>Bidder ID{{ invoice.payer.bidder_ids|pluralize }}:</div>
-<div>{{ invoice.payer.bidder_ids|join:", " }}</div>
-<div class="right">Date:</div>
-<div class="right">{{ invoice.paid_date }}</div>
+  <div class="show_title">{{ showstr }}</div>
+  <div class="invoice_title">Invoice</div>
+  <div>Bidder name:</div>
+  <div>{{ invoice.payer.name }}</div>
+  <div class="right">Invoice:</div>
+  <div class="right">{{ invoice_prefix }}{{ invoice.id }}</div>
+  <div>Bidder ID{{ invoice.payer.bidder_ids|pluralize }}:</div>
+  <div>{{ invoice.payer.bidder_ids|join:", " }}</div>
+  <div class="right">Date:</div>
+  <div class="right">{{ invoice.paid_date }}</div>
 </div>
 <table>
   <tr>
@@ -77,14 +28,13 @@ table td:last-child, table th:last-child {
   </tr>
   {% for item in invoice.invoiceitems %}
   <tr>
-    <td>{{ item.piece }}{% if item.piece.location %} @ {{ item.piece.location }}{% endif %}</td>
+    <td>
+      {{ item.piece }}
+      {% if item.piece.reproduction_rights_included %}&dagger;{% endif %}
+    </td>
     <td>${{ item.price }}</td>
   </tr>
   {% endfor %}
-  <tr>
-    <td>Item count: {{ invoice.invoiceitems.count }}</td>
-    <td></td>
-  </tr>
   <tr>
     <td class="total">Sub-total</td>
     <td>${{ invoice.item_total }}</td>
@@ -98,6 +48,8 @@ table td:last-child, table th:last-child {
   </tr>
 </table>
 
+<p>Items: {{ invoice.invoiceitems.count }}</p>
+
 <table>
   <tr>
     <th>Payment</th>
@@ -110,5 +62,129 @@ table td:last-child, table th:last-child {
   </tr>
   {% endfor %}
 </table>
+
+<p>
+{% if has_reproduction_rights %}
+  This sale includes reproduction rights for the pieces listed above with the
+  (&dagger;) symbol. All other pieces <em>do not</em> include reproduction
+  rights.
+{% else %}
+  This transaction <em>does not</em> include reproduction rights to the pieces
+  sold.
+{% endif %}
+</p>
+
+<p>
+  By signing below I acknowledge that I have received all the items listed above
+  and that this sale is final.
+</p>
+<p class="signature">Signature: _______________________________________</p>
+
+</div>
+
+<!-- Customer copy -->
+<div class="page">
+
+<div class="header">
+  <div class="show_title">{{ showstr }}</div>
+  <div class="invoice_title">Customer Copy</div>
+  <div>Bidder name:</div>
+  <div>{{ invoice.payer.name }}</div>
+  <div class="right">Invoice:</div>
+  <div class="right">{{ invoice_prefix }}{{ invoice.id }}</div>
+  <div>Bidder ID{{ invoice.payer.bidder_ids|pluralize }}:</div>
+  <div>{{ invoice.payer.bidder_ids|join:", " }}</div>
+  <div class="right">Date:</div>
+  <div class="right">{{ invoice.paid_date }}</div>
+</div>
+
+<table>
+  <tr>
+    <th>Item</th>
+    <th>Amount</th>
+  </tr>
+  {% for item in invoice.invoiceitems %}
+  <tr>
+    <td>
+      {{ item.piece }}
+      {% if item.piece.reproduction_rights_included %}&dagger;{% endif %}
+    </td>
+    <td>${{ item.price }}</td>
+  </tr>
+  {% endfor %}
+  <tr>
+    <td class="total">Sub-total</td>
+    <td>${{ invoice.item_total }}</td>
+  <tr>
+    <td class="tax">{{ taxdescstr }}</td>
+    <td>${{ invoice.tax_paid }}</td>
+  </tr>
+  <tr>
+    <td class="total">Total</td>
+    <td>${{ invoice.total_paid }}</td>
+  </tr>
+</table>
+
+<p>Items: {{ invoice.invoiceitems.count }}</p>
+
+<table>
+  <tr>
+    <th>Payment</th>
+    <th>Amount</th>
+  </tr>
+  {% for payment in invoice.invoicepayment_set.all %}
+  <tr>
+    <td>{{ payment.get_payment_method_display }} {{ payment.notes }}</td>
+    <td>${{ payment.amount }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<p>
+{% if has_reproduction_rights %}
+  This sale includes reproduction rights for the pieces listed above with the
+  (&dagger;) symbol. All other pieces <em>do not</em> include reproduction
+  rights.
+{% else %}
+  This transaction <em>does not</em> include reproduction rights to the pieces
+  sold.
+{% endif %}
+</p>
+
+</div>
+
+<!-- Pick list -->
+<div class="page">
+
+<div class="header">
+  <div class="show_title">{{ showstr }}</div>
+  <div class="invoice_title">Pick List</div>
+  <div>Bidder name:</div>
+  <div>{{ invoice.payer.name }}</div>
+  <div class="right">Invoice:</div>
+  <div class="right">{{ invoice_prefix }}{{ invoice.id }}</div>
+  <div>Bidder ID{{ invoice.payer.bidder_ids|pluralize }}:</div>
+  <div>{{ invoice.payer.bidder_ids|join:", " }}</div>
+  <div class="right">Date:</div>
+  <div class="right">{{ invoice.paid_date }}</div>
+</div>
+
+<table>
+  <tr>
+    <th>Item</th>
+    <th>Location</th>
+  </tr>
+  {% for item in invoice.invoiceitems %}
+  <tr>
+    <td>{{ item.piece }}</td>
+    <td>{{ item.piece.location }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<p>Items: {{ invoice.invoiceitems.count }}</p>
+
+</div>
+
 </body>
 </html>
