@@ -195,8 +195,8 @@ def cashier_invoice(request, invoice_id):
 def cashier_print_invoice(request, invoice_id):
     invoice = get_object_or_404(Invoice, pk=invoice_id)
     has_reproduction_rights = invoice.invoiceitem_set \
-            .filter(piece__reproduction_rights_included=True) \
-            .exists()
+        .filter(piece__reproduction_rights_included=True) \
+        .exists()
     return render(request, 'artshow/invoice.html', {
         'showstr': settings.ARTSHOW_SHOW_NAME,
         'taxdescstr': settings.ARTSHOW_TAX_DESCRIPTION,
