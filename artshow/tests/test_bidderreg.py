@@ -27,26 +27,6 @@ class BidEntryTests(TestCase):
             '1-reg_id': '123-456',
             '1-cell_contact': '(800) 555-0001',
             '1-other_contact': 'Marriott 626',
-            '1-details_changed': False,
-        })
-        self.assertRedirects(response, reverse('artshow-bidderreg-final', args=(1,)))
-
-    def test_registration_details_changed(self):
-        self.client = Client()
-        self.client.login(username='test', password='test')
-
-        response = self.client.post(reverse('artshow-bidderreg-wizard'), {
-            'bidder_registration_wizard-current_step': 0,
-        })
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.post(reverse('artshow-bidderreg-wizard'), {
-            'bidder_registration_wizard-current_step': 1,
-            '1-name': 'Test Bidder',
-            '1-reg_id': '123-456',
-            '1-cell_contact': '(800) 555-0001',
-            '1-other_contact': 'Marriott 626',
-            '1-details_changed': True,
         })
         self.assertEqual(response.status_code, 200)
 
@@ -61,4 +41,5 @@ class BidEntryTests(TestCase):
             '2-phone': '(800) 555-5555',
             '2-email': 'bidder@example.com',
         })
-        self.assertRedirects(response, reverse('artshow-bidderreg-final', args=(1,)))
+        self.assertRedirects(
+                response, reverse('artshow-bidderreg-final', args=(1,)))

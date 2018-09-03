@@ -41,10 +41,6 @@ class BidderRegistrationForm1(forms.Form):
         max_length=100, required=False,
         help_text="Optionally, another way to contact you during the "
                   "convention, such as your hotel and room number.")
-    details_changed = forms.BooleanField(
-        initial=False, required=False,
-        help_text="When you registered at the convention, you provided your "
-                  "address and e-mail. Have these changed since then?")
 
     def clean(self):
         cleaned_data = super(BidderRegistrationForm1, self).clean()
@@ -115,8 +111,7 @@ class BidderRegistrationWizard(CookieWizardView):
                 at_con_contact = \
                     "\n".join((x for x in [cell_contact, other_contact] if x))
                 b = Bidder(
-                    at_con_contact=at_con_contact,
-                    details_changed=cleaned_data.get('details_changed', False)
+                    at_con_contact=at_con_contact
                 )
             elif isinstance(form, BidderRegistrationForm2):
                 p.address1 = cleaned_data.get('address1', '')
@@ -145,17 +140,12 @@ def final(request, pk):
         'agreement_url': reverse('artshow-bidder-agreement', args=(pk,))})
 
 
-def process_step_2(wizard):
-    cleaned_data = wizard.get_cleaned_data_for_step('1') or {}
-    return cleaned_data.get('details_changed', False)
-
-
 wizard_view = permission_required('artshow.is_artshow_kiosk')(
     BidderRegistrationWizard.as_view([
         BidderRegistrationForm0,
         BidderRegistrationForm1,
         BidderRegistrationForm2
-    ], condition_dict={'2': process_step_2}))
+    ]))
 
 
 @permission_required('artshow.is_artshow_kiosk')

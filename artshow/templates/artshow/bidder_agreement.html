@@ -7,8 +7,8 @@
 <body>
 <h1>{{ SITE_NAME }} Bidder Agreement</h1>
 <p class="notice">
-  You must complete and sign this form before you can place a bid. Your
-  convention registration cannot be used to place bids.
+  You must complete and sign this form before you can place a bid.<br>
+  Your convention registration cannot be used to place bids.
 </p>
 <h2>Rules</h2>
 <ol>
@@ -33,7 +33,7 @@
 </ol>
 <div class="fields">
   <div class="field full-width-field">
-    <div class="field-label">Real name:</div>
+    <div class="field-label">Legal name:</div>
     <div class="field-line">{{ bidder.name|default:"&nbsp;" }}</div>
   </div>
   <div class="field">
@@ -56,19 +56,12 @@
     <div class="field-line">{{ bidder.person.reg_id|default:"&nbsp" }}</div>
   </div>
   <div class="field">
-    <div class="field-label">New address:</div>
-    <div class="option">
-      {% if bidder.details_changed %}&#x2611;{% else %}&#x2610;{% endif %} Yes
-      {% if bidder.details_changed %}&#x2610;{% else %}&#x2611;{% endif %} No
-    </div>
-  </div>
-  <div class="field">
     <div class="field-label">Staff initials:</div>
     <div class="field-line">&nbsp;</div>
   </div>
-  <div class="bidder-label">Place 1st bidder ID here.</div>
-  <div class="bidder-label">Place 2nd bidder ID here.</div>
-  <div class="bidder-label">Place 3rd bidder ID here.</div>
+  <div class="bid-sticker"><span>1st bid sticker</span></div>
+  <div class="bid-sticker"><span>2nd bid sticker</span></div>
+  <div class="bid-sticker"><span>3rd bid sticker</span></div>
 </div>
 </body>
 </html>
