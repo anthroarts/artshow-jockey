@@ -172,8 +172,9 @@ def finalize_bid(stage, piece, bid_type):
     if stage in ('close', 'final'):
         piece.bidsheet_scanned = True
 
-    if (piece.status == Piece.StatusInShow and
-            (stage == 'final' or (stage == 'close' and bid_type in ('normal', 'buynow')))):
+    if (piece.status == Piece.StatusInShow
+        and (stage == 'final'
+             or (stage == 'close' and bid_type in ('normal', 'buynow')))):
         piece.status = Piece.StatusWon
 
     piece.save()

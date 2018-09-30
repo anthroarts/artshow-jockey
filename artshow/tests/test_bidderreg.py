@@ -42,4 +42,4 @@ class BidEntryTests(TestCase):
             '2-email': 'bidder@example.com',
         })
         self.assertRedirects(
-                response, reverse('artshow-bidderreg-final', args=(1,)))
+            response, reverse('artshow-bidderreg-final', args=(1,)))

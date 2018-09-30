@@ -140,7 +140,7 @@ def process_ipn(sender, **kwargs):
         payment.date = payment_date
         payment.save()
 
-    except Exception as x:
+    except Exception:
         paypal_logger.exception("Error when getting validation for: %s", query)
         if payment_id:
             paypal_logger.error("... during processing of payment_id: %s", payment_id)

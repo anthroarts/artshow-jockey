@@ -86,7 +86,7 @@ class Command(BaseCommand):
     targets = ("name", "address1", "address2", "city", "state", "country",
                "postcode", "phone", "email", "reg_id", "comment")
 
-    map_re = re.compile("(?P<source>[\w ]+)=(?P<target>\w+)$")
+    map_re = re.compile(r"(?P<source>[\w ]+)=(?P<target>\w+)$")
 
     option_list = BaseCommand.option_list + (
         make_option("--map", type="string", action="append", default=default_map,
@@ -194,8 +194,8 @@ class Command(BaseCommand):
                         else:
                             print("Invalid Option")
                     print()
-                if not (person.address1 or person.address2 or person.city or
-                        person.state or person.country or person.postcode):
+                if not (person.address1 or person.address2 or person.city
+                        or person.state or person.country or person.postcode):
                     person.address1 = csv_person.address1
                     person.address2 = csv_person.address2
                     person.city = csv_person.city
