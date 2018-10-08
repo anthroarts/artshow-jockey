@@ -23,6 +23,7 @@
 
 #location {
   grid-column: 3;
+  text-transform: uppercase;
 }
 
 .bidder_label {

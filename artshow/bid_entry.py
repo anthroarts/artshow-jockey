@@ -69,7 +69,7 @@ def set_bids(piece, data):
         with transaction.atomic():
             # Update piece first so that it is marked as InShow.
             piece.bids_updated = timezone.now()
-            piece.location = data['location']
+            piece.location = data['location'].upper()
             if piece.location and piece.status == Piece.StatusNotInShow:
                 piece.status = Piece.StatusInShow
             if not piece.location and piece.status == Piece.StatusInShow:

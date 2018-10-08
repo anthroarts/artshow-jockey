@@ -126,11 +126,11 @@ class BidEntryTests(TestCase):
                  'bid': 10,
                  'buy_now_bid': False},
             ],
-            'location': '1A',
+            'location': '1a',
         }
         response = self.postJson('/artshow/entry/bids/1/1/', expected)
         self.assertEqual(response.json()['bids'], expected['bids'])
-        self.assertEqual(response.json()['location'], expected['location'])
+        self.assertEqual(response.json()['location'], '1A')  # '1a' upper cased
         self.assertIsNotNone(response.json()['last_updated'])
 
     def test_replace_bids(self):
