@@ -21,6 +21,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadButton.addEventListener('click', load);
   saveButton.addEventListener('click', save);
+  artistIdField.addEventListener('input', () => {
+    pieceIdField.value = '';
+    clearFields();
+  });
+  pieceIdField.addEventListener('input', clearFields);
+  locationField.addEventListener('input', setNotSaved);
+  for (var i = 0; i < bidderFields.length; ++i) {
+    bidderFields[i].addEventListener('input', setNotSaved);
+    bidFields[i].addEventListener('input', setNotSaved);
+    buyNowBidCheckboxes[i].addEventListener('input', setNotSaved);
+  }
 });
 
 function updateBids(json, newStatus) {
@@ -66,15 +77,23 @@ function clearErrors() {
   }
 }
 
-function load() {
-  clearErrors();
+function setNotSaved() {
+  statusText.textContent = 'Unsaved changes.'
+}
 
+function clearFields() {
   for (var i = 0; i < bidderFields.length; ++i) {
     bidderFields[i].value = '';
     bidFields[i].value = '';
     buyNowBidCheckboxes[i].checked = false;
   }
   locationField.value = '';
+  statusText.textContent = '';
+}
+
+function load() {
+  clearErrors();
+  clearFields();
 
   statusText.textContent = 'Loading...';
   fetch(`../${artistIdField.value}/${pieceIdField.value}/`, {
