@@ -1,0 +1,35 @@
+{% extends "artshow/base_generic.html" %}
+{% block breadcrumbs %}
+    <ul class="breadcrumbs">
+      <li><a href="{% url 'artshow-home' %}">Home</a></li>
+      <li><a href="{% url 'artshow-dataentry' %}">Data Entry</a></li>
+      <li><a href="{% url 'artshow-entry-bidder-lookup' %}">Assign Bidder IDs</a></li>
+        <li class="current">Find Bidder</li>
+    </ul>
+{% endblock %}
+{% block content %}
+    <p>Please ask for the bidder's name.</p>
+    <form method="post">{% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Submit"/>
+    </form>
+    {% if bidders %}
+        <hr>
+        <p>Verify the bidder's identification, and click on the appropriate bidder below, or search again.</p>
+        <table>
+        <tr>
+            <th>Name</th>
+            <th>Bidder IDs</th>
+        </tr>
+        {% for b in bidders %}
+            <tr>
+                <td><a href="{% url "artshow-entry-bidder" pk=b.pk %}">{{ b.name }}</a></td>
+                <td>{{ b.bidder_ids|join:", " }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+    {% elif search_executed %}
+        <p>Nothing was found. Please check the spelling and try again.</p>
+    {% endif %}
+{% endblock %}
+

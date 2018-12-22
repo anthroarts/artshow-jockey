@@ -4,7 +4,7 @@
 from django.apps import apps
 from django.contrib import messages
 from django.db.transaction import atomic
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from .models import Bidder, BidderId, Piece, Bid
 from django import forms
 from django.core.exceptions import ValidationError
@@ -205,3 +205,64 @@ def bid_bulk_add(request):
         formset = BidAddFormSet(prefix="bids")
         optionsform = BidAddOptionsForm(prefix="options")
     return render(request, 'artshow/bidbulkadd.html', dict(formset=formset, optionsform=optionsform))
+
+
+class BidderSearchForm(forms.Form):
+    text = forms.CharField(label="Search Text")
+
+
+@permission_required('artshow.add_bidder_id')
+def find_bidder(request):
+    search_executed = False
+    if request.method == "POST":
+        form = BidderSearchForm(request.POST)
+        if form.is_valid():
+            text = form.cleaned_data['text']
+            bidders = Bidder.objects.filter(person__name__icontains=text)
+            search_executed = True
+        else:
+            bidders = []
+    else:
+        form = BidderSearchForm()
+        bidders = []
+
+    c = {"form": form, "bidders": bidders, "search_executed": search_executed}
+    return render(request, 'artshow/entry_find_bidder.html', c)
+
+
+def is_valid_and_unassigned(value):
+    mod11check(value)
+    try:
+        bidder_id = BidderId.objects.get(id=value)
+        if bidder_id.bidder:
+            raise ValidationError("ID has already been assigned to a bidder")
+    except BidderId.DoesNotExist:
+        raise ValidationError("ID is not in the database")
+
+
+class BidderIdAddForm(forms.Form):
+    bidderid = forms.CharField(max_length=8,
+                               validators=[is_valid_and_unassigned])
+
+
+BidderIdAddFormSet = formset_factory(BidderIdAddForm)
+
+
+@permission_required('artshow.add_bidder_id')
+def bidder_detail(request, pk):
+    bidder = get_object_or_404(Bidder, pk=pk)
+
+    if request.method == 'POST':
+        formset = BidderIdAddFormSet(request.POST)
+        if formset.is_valid():
+            for form in formset:
+                bidder_id = BidderId.objects.get(id=form.cleaned_data['bidderid'])
+                bidder_id.bidder = bidder
+                bidder_id.save()
+            # Clear the form before rendering the results page.
+            formset = BidderIdAddFormSet()
+    else:
+        formset = BidderIdAddFormSet()
+
+    c = {'formset': formset, 'bidder': bidder}
+    return render(request, 'artshow/entry_bidder_detail.html', c)

@@ -1,0 +1,35 @@
+{% extends "artshow/base_generic.html" %}
+{% block breadcrumbs %}
+    <ul class="breadcrumbs">
+      <li><a href="{% url 'artshow-home' %}">Home</a></li>
+      <li><a href="{% url 'artshow-dataentry' %}">Data Entry</a></li>
+      <li><a href="{% url 'artshow-entry-bidder-lookup' %}">Assign Bidder IDs</a></li>
+      <li class="current">Bidder: {{ bidder.name }}</li>
+    </ul>
+{% endblock %}
+{% block content %}
+
+<p>
+  <strong>Name:</strong> {{ bidder.name }}<br>
+  <strong>Reg ID:</strong> {{ bidder.person.reg_id }}<br>
+</p>
+
+<form method="post">
+{% csrf_token %}
+{{ formset.management_form }}
+<table>
+<tr><th>Bidder IDs</th></tr>
+{% for id in bidder.bidder_ids %}
+<tr>
+  <td>{{ id }}</td>
+</tr>
+{% endfor %}
+{% for form in formset %}
+<tr>
+  <td>{{ form.bidderid.errors }}{{ form.bidderid }}</td>
+</tr>
+{% endfor %}
+</table>
+<input type="submit" value="Add IDs" />
+</form>
+{% endblock %}
