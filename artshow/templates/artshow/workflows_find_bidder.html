@@ -2,8 +2,8 @@
 {% block breadcrumbs %}
     <ul class="breadcrumbs">
       <li><a href="{% url 'artshow-home' %}">Home</a></li>
-      <li><a href="{% url 'artshow-dataentry' %}">Data Entry</a></li>
-      <li><a href="{% url 'artshow-entry-bidder-lookup' %}">Assign Bidder IDs</a></li>
+      <li><a href="{% url 'artshow-workflows' %}">Workflows</a></li>
+      <li><a href="{% url 'artshow-workflow-bidder-lookup' %}">Assign Bidder IDs</a></li>
         <li class="current">Find Bidder</li>
     </ul>
 {% endblock %}
@@ -23,7 +23,7 @@
         </tr>
         {% for b in bidders %}
             <tr>
-                <td><a href="{% url "artshow-entry-bidder" pk=b.pk %}">{{ b.name }}</a></td>
+                <td><a href="{% url "artshow-workflow-bidder" pk=b.pk %}">{{ b.name }}</a></td>
                 <td>{{ b.bidder_ids|join:", " }}</td>
             </tr>
         {% endfor %}

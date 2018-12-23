@@ -227,7 +227,7 @@ def find_bidder(request):
         bidders = []
 
     c = {"form": form, "bidders": bidders, "search_executed": search_executed}
-    return render(request, 'artshow/entry_find_bidder.html', c)
+    return render(request, 'artshow/workflows_find_bidder.html', c)
 
 
 def is_valid_and_unassigned(value):
@@ -265,4 +265,4 @@ def bidder_detail(request, pk):
         formset = BidderIdAddFormSet()
 
     c = {'formset': formset, 'bidder': bidder}
-    return render(request, 'artshow/entry_bidder_detail.html', c)
+    return render(request, 'artshow/workflows_bidder_detail.html', c)
