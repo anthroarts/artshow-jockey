@@ -16,4 +16,15 @@
   </div>
 {% endfor %}
 </div>
+{% if print %}
+<script>
+{% if redirect %}
+window.addEventListener('afterprint', () => {
+  document.location = "{{ redirect }}";
+});
+{% endif %}
+window.print();
+</script>
+{% endif %}
 </body>
+</html>

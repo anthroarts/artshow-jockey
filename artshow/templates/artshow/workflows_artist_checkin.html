@@ -1,0 +1,53 @@
+{% extends "artshow/base_generic.html" %}
+{% block title %}{{ artist.name }} ({{ artist.artistid }}){% endblock %}
+{% block breadcrumbs %}
+    <ul class="breadcrumbs">
+      <li><a href="{% url 'artshow-home' %}">Home</a></li>
+      <li><a href="{% url 'artshow-workflows' %}">Workflows</a></li>
+      <li><a href="{% url 'artshow-workflow-bidder-lookup' %}">Artist Check-in</a></li>
+      <li class="current">{{ artist.name }} ({{ artist.artistid }})</li>
+    </ul>
+{% endblock %}
+{% block content %}
+
+<form method="post">{% csrf_token %}
+  {{ formset.management_form }}
+  <table>
+    <tr>
+      <th>Print</th>
+      <th>Piece ID</th>
+      <th>Name/Title</th>
+      <th>Media</th>
+      <th>Adult?</th>
+      <th>Reproduction rights included?</th>
+      <th>Not For Sale</th>
+      <th>Min Bid</th>
+      <th>Buy Now</th>
+    </tr>
+    {% for form in formset %}
+    {% if form.non_field_errors %}
+    <tr>
+        <td colspan="8">{{ form.non_field_errors }}</td>
+    </tr>
+    {% endif %}
+    <tr>{{ form.id.errors }}{{ form.id }}{{ form.artist.errors }}{{ form.artist }}
+      <td>{{ form.print_item.errors }}{{ form.print_item }}</td>
+      <td>{{ form.pieceid.errors }}{{ form.pieceid }}</td>
+      <td>{{ form.name.errors }}{{ form.name }}</td>
+      <td>{{ form.media.errors }}{{ form.media }}</td>
+      <td>{{ form.adult.errors }}{{ form.adult }}</td>
+      <td>{{ form.reproduction_rights_included.errors }}{{ form.reproduction_rights_included }}</td>
+      <td>{{ form.not_for_sale.errors }}{{ form.not_for_sale }}</td>
+      <td>{{ form.min_bid.errors }}{{ form.min_bid }}</td>
+      <td>{{ form.buy_now.errors }}{{ form.buy_now }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p>
+    <button type="submit" formaction="{% url 'artshow-workflow-artist-control-form' artistid=artist.artistid %}">Save & Print Control Form</button>
+    <button type="submit" formaction="{% url 'artshow-workflow-artist-bid-sheets' artistid=artist.artistid %}">Save & Print Bid Sheets</button>
+    <button type="submit" formaction="{% url 'artshow-workflow-artist-piece-stickers' artistid=artist.artistid %}">Save & Print Piece Stickers</button>
+    <button type="submit" formaction="{% url 'artshow-workflow-artist-checkin' artistid=artist.artistid %}">Save</button>
+  </p>
+</form>
+{% endblock %}

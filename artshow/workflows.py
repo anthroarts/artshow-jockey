@@ -1,9 +1,14 @@
-from django.contrib.auth.decorators import permission_required
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django import forms
 from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
+from django.db.models import Q
+from django.forms.models import inlineformset_factory
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.views.decorators.http import require_POST
 
-from .models import Piece
+from .models import Artist, Piece
 
 
 @permission_required('artshow.is_artshow_staff')
@@ -65,3 +70,154 @@ def printing(request):
     }
 
     return render(request, 'artshow/workflows_printing.html', context)
+
+
+class ArtistSearchForm(forms.Form):
+    text = forms.CharField(label="Search Text")
+
+
+@permission_required('artshow.is_artshow_staff')
+def find_artist_checkin(request):
+    search_executed = False
+    if request.method == "POST":
+        form = ArtistSearchForm(request.POST)
+        if form.is_valid():
+            text = form.cleaned_data['text']
+            query = (Q(person__name__icontains=text)
+                     | Q(publicname__icontains=text))
+            try:
+                artistid = int(text)
+                query = query | Q(artistid=artistid)
+            except ValueError:
+                pass
+            artists = Artist.objects.filter(query)
+            search_executed = True
+        else:
+            artists = []
+    else:
+        form = ArtistSearchForm()
+        artists = []
+
+    c = {"form": form, "artists": artists, "search_executed": search_executed}
+    return render(request, 'artshow/workflows_artist_checkin_lookup.html', c)
+
+
+class PieceForm(forms.ModelForm):
+    print_item = forms.BooleanField(label='Print', initial=False, required=False)
+
+    class Meta:
+        model = Piece
+        fields = (
+            'print_item', 'pieceid', 'name', 'media', 'adult',
+            'reproduction_rights_included', 'not_for_sale', 'min_bid',
+            'buy_now',
+        )
+        widgets = {
+            'pieceid': forms.TextInput(attrs={'size': 4}),
+            'name': forms.TextInput(attrs={'size': 40}),
+            'media': forms.TextInput(attrs={'size': 40}),
+            'min_bid': forms.TextInput(attrs={'size': 5}),
+            'buy_now': forms.TextInput(attrs={'size': 5}),
+        }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.instance.id is not None:
+            self.fields['print_item'].initial = True
+
+
+PieceFormSet = inlineformset_factory(Artist, Piece, form=PieceForm,
+                                     extra=3, can_delete=False)
+
+
+@permission_required('artshow.is_artshow_staff')
+def artist_checkin(request, artistid):
+    artist = get_object_or_404(Artist, artistid=artistid)
+    if request.method == 'POST':
+        formset = PieceFormSet(request.POST,
+                               queryset=artist.piece_set.order_by('pieceid'),
+                               instance=artist)
+        if formset.is_valid():
+            formset.save()
+            # Create a fresh formset for further edits.
+            formset = PieceFormSet(queryset=artist.piece_set.order_by('pieceid'),
+                                   instance=artist)
+    else:
+        formset = PieceFormSet(queryset=artist.piece_set.order_by('pieceid'),
+                               instance=artist)
+
+    c = {'artist': artist, 'formset': formset}
+    return render(request, 'artshow/workflows_artist_checkin.html', c)
+
+
+@permission_required('artshow.is_artshow_staff')
+@require_POST
+def artist_print_control_form(request, artistid):
+    artist = get_object_or_404(Artist, artistid=artistid)
+    formset = PieceFormSet(request.POST,
+                           queryset=artist.piece_set.order_by('pieceid'),
+                           instance=artist)
+    if not formset.is_valid():
+        c = {'artist': artist, 'formset': formset}
+        return render(request, 'artshow/workflows_artist_checkin.html', c)
+    formset.save()
+
+    c = {
+        'artists': [artist],
+        'print': True,
+        'redirect': reverse('artshow-workflow-artist-checkin',
+                            kwargs={'artistid': artist.artistid}),
+    }
+    return render(request, 'artshow/control_form.html', c)
+
+
+@permission_required('artshow.is_artshow_staff')
+@require_POST
+def artist_print_bid_sheets(request, artistid):
+    artist = get_object_or_404(Artist, artistid=artistid)
+    formset = PieceFormSet(request.POST,
+                           queryset=artist.piece_set.order_by('pieceid'),
+                           instance=artist)
+    if not formset.is_valid():
+        c = {'artist': artist, 'formset': formset}
+        return render(request, 'artshow/workflows_artist_checkin.html', c)
+    formset.save()
+
+    pieces = []
+    for form in formset:
+        if 'print_item' in form.cleaned_data and form.cleaned_data['print_item']:
+            pieces.append(form.instance)
+
+    c = {
+        'pieces': pieces,
+        'print': True,
+        'redirect': reverse('artshow-workflow-artist-checkin',
+                            kwargs={'artistid': artist.artistid}),
+    }
+    return render(request, 'artshow/bid_sheets.html', c)
+
+
+@permission_required('artshow.is_artshow_staff')
+@require_POST
+def artist_print_piece_stickers(request, artistid):
+    artist = get_object_or_404(Artist, artistid=artistid)
+    formset = PieceFormSet(request.POST,
+                           queryset=artist.piece_set.order_by('pieceid'),
+                           instance=artist)
+    if not formset.is_valid():
+        c = {'artist': artist, 'formset': formset}
+        return render(request, 'artshow/workflows_artist_checkin.html', c)
+    formset.save()
+
+    pieces = []
+    for form in formset:
+        if 'print_item' in form.cleaned_data and form.cleaned_data['print_item']:
+            pieces.append(form.instance)
+
+    c = {
+        'pieces': pieces,
+        'print': True,
+        'redirect': reverse('artshow-workflow-artist-checkin',
+                            kwargs={'artistid': artist.artistid}),
+    }
+    return render(request, 'artshow/piece_stickers.html', c)

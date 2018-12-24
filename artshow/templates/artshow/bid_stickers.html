@@ -16,4 +16,13 @@
 {% endfor %}
 {% endfor %}
 </div>
+{% if print %}
+<script>
+window.addEventListener('afterprint', () => {
+  window.history.back();
+});
+window.print();
+</script>
+{% endif %}
 </body>
+</html>
