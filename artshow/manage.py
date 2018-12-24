@@ -53,9 +53,9 @@ def artist(request, artist_id):
     pieces = artist.piece_set.order_by("pieceid")
     payments = artist.payment_set.order_by("date", "id")
     payments_total = payments.aggregate(payments_total=Sum('amount'))['payments_total'] or Decimal(0)
-    total_requested_cost, deduction_to_date, deduction_remaining, payment_remaining = \
-        artist.payment_remaining_with_details()
-    payments_total -= payment_remaining
+    total_requested_cost, deduction_to_date, deduction_remaining = \
+        artist.deduction_remaining_with_details()
+    payments_total -= deduction_remaining
 
     allocations = artist.allocation_set.order_by("space__id")
 
@@ -70,7 +70,7 @@ def artist(request, artist_id):
     return render(request, "artshow/manage_artist.html",
                   {'artist': artist, 'pieces': pieces, 'allocations': allocations,
                    'payments': payments, 'payments_total': payments_total,
-                   'payment_remaining': payment_remaining,
+                   'deduction_remaining': deduction_remaining,
                    'can_edit_personal_details': can_edit_personal_details,
                    'can_edit_artist_details': can_edit_artist_details,
                    'can_edit_piece_details': can_edit_piece_details,
