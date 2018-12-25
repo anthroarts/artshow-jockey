@@ -2,13 +2,13 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.db.models import Q
-from django.forms.models import inlineformset_factory
+from django.forms.models import inlineformset_factory, modelformset_factory
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
-from .models import Artist, Piece
+from .models import Artist, ChequePayment, Piece
 
 
 @permission_required('artshow.is_artshow_staff')
@@ -102,8 +102,9 @@ def find_artist_checkin(request):
     return render(request, 'artshow/workflows_artist_checkin_lookup.html', c)
 
 
-class PieceForm(forms.ModelForm):
-    print_item = forms.BooleanField(label='Print', initial=False, required=False)
+class PieceCheckinForm(forms.ModelForm):
+    print_item = forms.BooleanField(label='Print', initial=False,
+                                    required=False)
 
     class Meta:
         model = Piece
@@ -126,25 +127,24 @@ class PieceForm(forms.ModelForm):
             self.fields['print_item'].initial = True
 
 
-PieceFormSet = inlineformset_factory(Artist, Piece, form=PieceForm,
-                                     extra=3, can_delete=False)
+PieceCheckinFormSet = inlineformset_factory(Artist, Piece,
+                                            form=PieceCheckinForm,
+                                            extra=3, can_delete=False)
 
 
 @permission_required('artshow.is_artshow_staff')
 def artist_checkin(request, artistid):
     artist = get_object_or_404(Artist, artistid=artistid)
+    queryset = artist.piece_set.order_by('pieceid')
     if request.method == 'POST':
-        formset = PieceFormSet(request.POST,
-                               queryset=artist.piece_set.order_by('pieceid'),
-                               instance=artist)
+        formset = PieceCheckinFormSet(request.POST, queryset=queryset,
+                                      instance=artist)
         if formset.is_valid():
             formset.save()
             # Create a fresh formset for further edits.
-            formset = PieceFormSet(queryset=artist.piece_set.order_by('pieceid'),
-                                   instance=artist)
+            formset = PieceCheckinFormSet(queryset=queryset, instance=artist)
     else:
-        formset = PieceFormSet(queryset=artist.piece_set.order_by('pieceid'),
-                               instance=artist)
+        formset = PieceCheckinFormSet(queryset=queryset, instance=artist)
 
     c = {'artist': artist, 'formset': formset}
     return render(request, 'artshow/workflows_artist_checkin.html', c)
@@ -152,11 +152,11 @@ def artist_checkin(request, artistid):
 
 @permission_required('artshow.is_artshow_staff')
 @require_POST
-def artist_print_control_form(request, artistid):
+def artist_print_checkin_control_form(request, artistid):
     artist = get_object_or_404(Artist, artistid=artistid)
-    formset = PieceFormSet(request.POST,
-                           queryset=artist.piece_set.order_by('pieceid'),
-                           instance=artist)
+    queryset = artist.piece_set.order_by('pieceid')
+    formset = PieceCheckinFormSet(request.POST, queryset=queryset,
+                                  instance=artist)
     if not formset.is_valid():
         c = {'artist': artist, 'formset': formset}
         return render(request, 'artshow/workflows_artist_checkin.html', c)
@@ -175,9 +175,9 @@ def artist_print_control_form(request, artistid):
 @require_POST
 def artist_print_bid_sheets(request, artistid):
     artist = get_object_or_404(Artist, artistid=artistid)
-    formset = PieceFormSet(request.POST,
-                           queryset=artist.piece_set.order_by('pieceid'),
-                           instance=artist)
+    queryset = artist.piece_set.order_by('pieceid')
+    formset = PieceCheckinFormSet(request.POST, queryset=queryset,
+                                  instance=artist)
     if not formset.is_valid():
         c = {'artist': artist, 'formset': formset}
         return render(request, 'artshow/workflows_artist_checkin.html', c)
@@ -185,7 +185,8 @@ def artist_print_bid_sheets(request, artistid):
 
     pieces = []
     for form in formset:
-        if 'print_item' in form.cleaned_data and form.cleaned_data['print_item']:
+        if 'print_item' in form.cleaned_data \
+                and form.cleaned_data['print_item']:
             pieces.append(form.instance)
 
     c = {
@@ -201,9 +202,9 @@ def artist_print_bid_sheets(request, artistid):
 @require_POST
 def artist_print_piece_stickers(request, artistid):
     artist = get_object_or_404(Artist, artistid=artistid)
-    formset = PieceFormSet(request.POST,
-                           queryset=artist.piece_set.order_by('pieceid'),
-                           instance=artist)
+    queryset = artist.piece_set.order_by('pieceid')
+    formset = PieceCheckinFormSet(request.POST, queryset=queryset,
+                                  instance=artist)
     if not formset.is_valid():
         c = {'artist': artist, 'formset': formset}
         return render(request, 'artshow/workflows_artist_checkin.html', c)
@@ -211,7 +212,8 @@ def artist_print_piece_stickers(request, artistid):
 
     pieces = []
     for form in formset:
-        if 'print_item' in form.cleaned_data and form.cleaned_data['print_item']:
+        if 'print_item' in form.cleaned_data \
+                and form.cleaned_data['print_item']:
             pieces.append(form.instance)
 
     c = {
@@ -221,3 +223,96 @@ def artist_print_piece_stickers(request, artistid):
                             kwargs={'artistid': artist.artistid}),
     }
     return render(request, 'artshow/piece_stickers.html', c)
+
+
+@permission_required('artshow.is_artshow_staff')
+def find_artist_checkout(request):
+    search_executed = False
+    if request.method == "POST":
+        form = ArtistSearchForm(request.POST)
+        if form.is_valid():
+            text = form.cleaned_data['text']
+            query = (Q(person__name__icontains=text)
+                     | Q(publicname__icontains=text))
+            try:
+                artistid = int(text)
+                query = query | Q(artistid=artistid)
+            except ValueError:
+                pass
+            artists = Artist.objects.filter(query)
+            search_executed = True
+        else:
+            artists = []
+    else:
+        form = ArtistSearchForm()
+        artists = []
+
+    c = {"form": form, "artists": artists, "search_executed": search_executed}
+    return render(request, 'artshow/workflows_artist_checkout_lookup.html', c)
+
+
+class PieceCheckoutForm(forms.ModelForm):
+    returned = forms.BooleanField(label='Returned',
+                                  initial=False,
+                                  required=False)
+
+    class Meta:
+        model = Piece
+        fields = ()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.instance.status is Piece.StatusReturned:
+            self.fields['returned'].initial = True
+
+
+PieceCheckoutFormSet = modelformset_factory(Piece, form=PieceCheckoutForm,
+                                            extra=0, can_delete=False)
+
+
+@permission_required('artshow.is_artshow_staff')
+def artist_checkout(request, artistid):
+    artist = get_object_or_404(Artist, artistid=artistid)
+    queryset = artist.piece_set.filter(Q(status=Piece.StatusInShow)
+                                       | Q(status=Piece.StatusReturned)) \
+        .exclude(voice_auction=True).order_by('pieceid')
+    if request.method == 'POST':
+        formset = PieceCheckoutFormSet(request.POST, queryset=queryset)
+        if formset.is_valid():
+            for form in formset:
+                if form.cleaned_data['returned']:
+                    form.instance.status = Piece.StatusReturned
+                else:
+                    form.instance.status = Piece.StatusInShow
+                form.instance.save()
+    else:
+        formset = PieceCheckoutFormSet(queryset=queryset)
+
+    sold_pieces = artist.piece_set.filter(
+        Q(status=Piece.StatusWon)
+        | Q(status=Piece.StatusSold)).order_by('pieceid')
+    voice_auction = artist.piece_set.filter(status=Piece.StatusInShow,
+                                            voice_auction=True) \
+        .order_by('pieceid')
+    cheques = ChequePayment.objects.filter(artist=artist)
+
+    c = {
+        'artist': artist,
+        'formset': formset,
+        'sold_pieces': sold_pieces,
+        'voice_auction': voice_auction,
+        'cheques': cheques,
+    }
+    return render(request, 'artshow/workflows_artist_checkout.html', c)
+
+
+@permission_required('artshow.is_artshow_staff')
+def artist_print_checkout_control_form(request, artistid):
+    artist = get_object_or_404(Artist, artistid=artistid)
+    c = {
+        'artists': [artist],
+        'print': True,
+        'redirect': reverse('artshow-workflow-artist-checkout',
+                            kwargs={'artistid': artist.artistid}),
+    }
+    return render(request, 'artshow/control_form.html', c)

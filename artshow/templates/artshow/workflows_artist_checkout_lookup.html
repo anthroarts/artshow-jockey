@@ -1,0 +1,35 @@
+{% extends "artshow/base_generic.html" %}
+{% block title %}Artist Check-out{% endblock %}
+{% block breadcrumbs %}
+    <ul class="breadcrumbs">
+      <li><a href="{% url 'artshow-home' %}">Home</a></li>
+      <li><a href="{% url 'artshow-workflows' %}">Workflows</a></li>
+      <li><a href="{% url 'artshow-workflow-artist-checkout-lookup' %}">Artist Check-out</a></li>
+      <li class="current">Find Artist</li>
+    </ul>
+{% endblock %}
+{% block content %}
+    <p>Please ask for the artist's name.</p>
+    <form method="post">{% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Submit"/>
+    </form>
+    {% if artists %}
+        <hr>
+        <p>Verify the artist's identification, and click on the appropriate artist below, or search again.</p>
+        <table>
+        <tr>
+            <th>Name (ID)</th>
+            <th>Public Name</th>
+        </tr>
+        {% for a in artists %}
+            <tr>
+              <td><a href="{% url "artshow-workflow-artist-checkout" artistid=a.artistid %}">{{ a.name }} ({{ a.artistid }})</a></td>
+                <td>{{ a.publicname }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+    {% elif search_executed %}
+        <p>Nothing was found. Please check the spelling and try again.</p>
+    {% endif %}
+{% endblock %}

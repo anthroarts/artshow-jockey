@@ -4,7 +4,7 @@
     <ul class="breadcrumbs">
       <li><a href="{% url 'artshow-home' %}">Home</a></li>
       <li><a href="{% url 'artshow-workflows' %}">Workflows</a></li>
-      <li><a href="{% url 'artshow-workflow-bidder-lookup' %}">Artist Check-in</a></li>
+      <li><a href="{% url 'artshow-workflow-artist-checkin-lookup' %}">Artist Check-in</a></li>
       <li class="current">{{ artist.name }} ({{ artist.artistid }})</li>
     </ul>
 {% endblock %}
@@ -44,7 +44,7 @@
     {% endfor %}
   </table>
   <p>
-    <button type="submit" formaction="{% url 'artshow-workflow-artist-control-form' artistid=artist.artistid %}">Save & Print Control Form</button>
+    <button type="submit" formaction="{% url 'artshow-workflow-artist-checkin-control-form' artistid=artist.artistid %}">Save & Print Control Form</button>
     <button type="submit" formaction="{% url 'artshow-workflow-artist-bid-sheets' artistid=artist.artistid %}">Save & Print Bid Sheets</button>
     <button type="submit" formaction="{% url 'artshow-workflow-artist-piece-stickers' artistid=artist.artistid %}">Save & Print Piece Stickers</button>
     <button type="submit" formaction="{% url 'artshow-workflow-artist-checkin' artistid=artist.artistid %}">Save</button>

@@ -1,0 +1,83 @@
+{% extends "artshow/base_generic.html" %}
+{% block title %}{{ artist.name }} ({{ artist.artistid }}){% endblock %}
+{% block breadcrumbs %}
+    <ul class="breadcrumbs">
+      <li><a href="{% url 'artshow-home' %}">Home</a></li>
+      <li><a href="{% url 'artshow-workflows' %}">Workflows</a></li>
+      <li><a href="{% url 'artshow-workflow-artist-checkout-lookup' %}">Artist Check-out</a></li>
+      <li class="current">{{ artist.name }} ({{ artist.artistid }})</li>
+    </ul>
+{% endblock %}
+{% block content %}
+
+<form method="post">{% csrf_token %}
+  {{ formset.management_form }}
+  <p>Sold pieces:</p>
+  <table>
+    <tr>
+      <th>Piece ID</th>
+      <th>Name/Title</th>
+      <th>Winning Bid</th>
+    </tr>
+    {% for piece in sold_pieces %}
+    <tr>
+      <td>{{ piece.pieceid }}</td>
+      <td>{{ piece.name }}</td>
+      <td>{{ piece.top_bid.amount }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  {% if voice_auction %}
+  <p>Pieces awaiting voice auction:</p>
+  <table>
+    <tr>
+      <th>Piece ID</th>
+      <th>Name/Title</th>
+      <th>Top Bid</th>
+    </tr>
+    {% for piece in voice_auction %}
+    <tr>
+      <td>{{ piece.pieceid }}</td>
+      <td>{{ piece.name }}</td>
+      <td>{{ piece.top_bid.amount }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  <p>Unsold pieces:</p>
+  <table>
+    <tr>
+      <th>Piece ID</th>
+      <th>Name/Title</th>
+      <th>Location</th>
+      <th>Returned</th>
+    </tr>
+    {% for form in formset %}
+    {% if form.non_field_errors %}
+    <tr>
+        <td colspan="8">{{ form.non_field_errors }}</td>
+    </tr>
+    {% endif %}
+    <tr>{{ form.id.errors }}{{ form.id }}
+      <td>{{ form.instance.pieceid }}</td>
+      <td>{{ form.instance.name }}</td>
+      <td>{{ form.instance.location }}</td>
+      <td>{{ form.returned.errors }}{{ form.returned }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  {% if cheques %}
+  <p>Artist check is ready.</p>
+  {% else %}
+  <p>Artist check is not ready.</p>
+  {% endif %}
+
+  <p>
+    <button type="submit" formaction="{% url 'artshow-workflow-artist-checkout-control-form' artistid=artist.artistid %}">Print Control Form</button>
+    <button type="submit" formaction="{% url 'artshow-workflow-artist-checkout' artistid=artist.artistid %}">Save</button>
+  </p>
+</form>
+{% endblock %}
