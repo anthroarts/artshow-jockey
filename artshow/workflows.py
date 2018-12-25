@@ -111,7 +111,7 @@ class PieceCheckinForm(forms.ModelForm):
         fields = (
             'print_item', 'pieceid', 'name', 'media', 'adult',
             'reproduction_rights_included', 'not_for_sale', 'min_bid',
-            'buy_now',
+            'buy_now', 'location',
         )
         widgets = {
             'pieceid': forms.TextInput(attrs={'size': 4}),
@@ -119,6 +119,7 @@ class PieceCheckinForm(forms.ModelForm):
             'media': forms.TextInput(attrs={'size': 40}),
             'min_bid': forms.TextInput(attrs={'size': 5}),
             'buy_now': forms.TextInput(attrs={'size': 5}),
+            'location': forms.TextInput(attrs={'size': 5}),
         }
 
     def __init__(self, **kwargs):

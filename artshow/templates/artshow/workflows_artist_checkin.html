@@ -23,6 +23,7 @@
       <th>Not For Sale</th>
       <th>Min Bid</th>
       <th>Buy Now</th>
+      <th>Location</th>
     </tr>
     {% for form in formset %}
     {% if form.non_field_errors %}
@@ -40,6 +41,7 @@
       <td>{{ form.not_for_sale.errors }}{{ form.not_for_sale }}</td>
       <td>{{ form.min_bid.errors }}{{ form.min_bid }}</td>
       <td>{{ form.buy_now.errors }}{{ form.buy_now }}</td>
+      <td>{{ form.location.errors }}{{ form.location }}</td>
     </tr>
     {% endfor %}
   </table>
