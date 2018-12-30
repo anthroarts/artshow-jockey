@@ -15,7 +15,6 @@ gunicorn = "*"
 squareconnect = "*"
 pdfrw = "*"
 reportlab = "==3.5.2"
-"m2crypto" = "*"
 requests = "*"
 
 [dev-packages]
