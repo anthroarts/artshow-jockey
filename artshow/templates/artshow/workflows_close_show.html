@@ -19,6 +19,10 @@
     <td>{{ pieces_in_show }}</td>
   </tr>
   <tr>
+    <td>Awaiting Voice Auction</td>
+    <td>{{ pieces_awaiting_voice_auction }}</td>
+  </tr>
+  <tr>
     <td>Won</td>
     <td>{{ pieces_won }}</td>
   </tr>
@@ -34,16 +38,16 @@
 <p>Artists:</p>
 <table>
   <tr>
+    <td>Unprocessed</td>
+    <td>{{ artists_remaining }}</td>
+  </tr>
+  <tr>
     <td>Awaiting Voice Auction</td>
     <td>{{ voice_auction_remaining }}</td>
   </tr>
   <tr>
     <td>Processed</td>
     <td>{{ artists_processed }}</td>
-  </tr>
-  <tr>
-    <td>Remaining</td>
-    <td>{{ artists_remaining }}</td>
   </tr>
   <tr>
     <td><strong>Total</strong></td>

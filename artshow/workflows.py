@@ -359,7 +359,11 @@ def close_show(request):
         'pieces_not_in_show':
             Piece.objects.filter(status=Piece.StatusNotInShow).count(),
         'pieces_in_show':
-            Piece.objects.filter(status=Piece.StatusInShow).count(),
+            Piece.objects.filter(status=Piece.StatusInShow,
+                                 voice_auction=False).count(),
+        'pieces_awaiting_voice_auction':
+            Piece.objects.filter(status=Piece.StatusInShow,
+                                 voice_auction=True).count(),
         'pieces_won':
             Piece.objects.filter(status=Piece.StatusWon).count(),
         'pieces_sold':
