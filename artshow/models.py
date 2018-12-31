@@ -7,6 +7,7 @@ __all__ = ["Allocation", "Artist", "ArtistManager", "BatchScan", "Bid", "Bidder"
            "InvoicePayment", "Payment", "PaymentType", "Piece", "Product", "Space", "Task",
            "Agent", "validate_space", "validate_space_increments"]
 
+from datetime import datetime
 from decimal import Decimal
 
 from django.db import models
@@ -176,6 +177,66 @@ class Artist (models.Model):
                 self.artistid = 1
         super(Artist, self).save(**kwargs)
 
+    def apply_space_fees(self):
+        payment_type = PaymentType.objects.get(pk=settings.ARTSHOW_SPACE_FEE_PK)
+        self.payment_set.filter(payment_type=payment_type).delete()
+        total = 0
+        for alloc in self.allocation_set.all():
+            total += alloc.space.price * alloc.allocated
+        if total > 0:
+            allocated_spaces_str = ", ".join(
+                "%s:%s" % (al.space.shortname, al.allocated)
+                for al in self.allocation_set.all())
+            payment = Payment(artist=self, amount=-total,
+                              payment_type=payment_type,
+                              description=allocated_spaces_str,
+                              date=datetime.now())
+            payment.save()
+
+    def apply_winnings_and_commission(self):
+        pt_winning = PaymentType.objects.get(pk=settings.ARTSHOW_SALES_PK)
+        pt_commission = PaymentType.objects.get(pk=settings.ARTSHOW_COMMISSION_PK)
+        self.payment_set.filter(payment_type__in=(pt_winning, pt_commission)).delete()
+        total_winnings = 0
+        total_pieces = 0
+        pieces_with_bids = 0
+        for piece in self.piece_set.all():
+            if piece.status != Piece.StatusNotInShow:
+                total_pieces += 1
+            try:
+                top_bid = piece.top_bid()
+                total_winnings += top_bid.amount
+                pieces_with_bids += 1
+            except Bid.DoesNotExist:
+                pass
+        commission = total_winnings * Decimal(settings.ARTSHOW_COMMISSION)
+        if total_pieces > 0:
+            payment = Payment(artist=self, amount=total_winnings,
+                              payment_type=pt_winning,
+                              description="%d piece%s, %d with bid%s" % (
+                                  total_pieces,
+                                  total_pieces != 1 and "s" or "",
+                                  pieces_with_bids,
+                                  pieces_with_bids != 1 and "s" or ""),
+                              date=datetime.now())
+            payment.save()
+        if commission > 0:
+            payment = Payment(artist=self, amount=-commission,
+                              payment_type=pt_commission,
+                              description="%s%% of sales" % (
+                                  Decimal(settings.ARTSHOW_COMMISSION) * 100),
+                              date=datetime.now())
+            payment.save()
+
+    def create_cheque(self):
+        pt_paymentsent = PaymentType.objects.get(pk=settings.ARTSHOW_PAYMENT_SENT_PK)
+        balance = self.payment_set.aggregate(balance=Sum('amount'))['balance']
+        if balance > 0:
+            chq = ChequePayment(artist=self, payment_type=pt_paymentsent,
+                                amount=-balance, date=datetime.now())
+            chq.clean()
+            chq.save()
+
     class Meta:
         permissions = (
             ('view_artist', 'Can view Piece details outside of Admin system.'),
@@ -344,6 +405,15 @@ class Piece (models.Model):
             raise ValidationError("A Piece must either be Not For Sale or have a Minimum Bid")
         if self.min_bid and self.buy_now and self.min_bid >= self.buy_now:
             raise ValidationError("Buy Now must be empty, or greater than Minimum Bid")
+
+    def apply_won_status(self):
+        if self.status == Piece.StatusInShow:
+            bid_count = self.bid_set.exclude(invalid=True).count()
+            if bid_count > 0:
+                self.voice_auction = bid_count >= 6
+                if not self.voice_auction:
+                    self.status = Piece.StatusWon
+                self.save()
 
     class Meta:
         permissions = (

@@ -1,0 +1,41 @@
+{% extends "artshow/base_generic.html" %}
+{% block title %}Close Show{% endblock %}
+{% block breadcrumbs %}
+    <ul class="breadcrumbs">
+      <li><a href="{% url 'artshow-home' %}">Home</a></li>
+      <li><a href="{% url 'artshow-workflows' %}">Workflows</a></li>
+      <li class="current">Print Cheques</li>
+    </ul>
+{% endblock %}
+{% block content %}
+
+<form method="post">{% csrf_token %}
+  {{ formset.management_form }}
+  <table>
+    <tr>
+      <th>Payee</th>
+      <th>Amount</th>
+      <th>Number</th>
+    </tr>
+    {% for cheque in printed_cheques %}
+    <tr>
+      <td>{{ cheque.artist.name }}</td>
+      <td>${{ cheque.amount_string }}</td>
+      <td>{{ cheque.number }}</td>
+    </tr>
+    {% endfor %}
+    {% for form in formset %}
+    <tr>{{ form.payment_ptr.errors }}{{ form.payment_ptr }}
+      <td>{{ form.instance.artist.name }}</td>
+      <td>${{ form.instance.amount_string }}</td>
+      <td>{{ form.number.errors }}{{ form.number }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <button type="submit">Save</button>
+</form>
+
+<form method="post" action="{% url 'artshow-workflow-print-cheques-print' %}">{% csrf_token %}
+  <button type="submit">Print</button>
+</form>
+{% endblock %}

@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
+from .conf import settings
 from .models import Artist, ChequePayment, Piece
 
 
@@ -317,3 +318,91 @@ def artist_print_checkout_control_form(request, artistid):
                             kwargs={'artistid': artist.artistid}),
     }
     return render(request, 'artshow/control_form.html', c)
+
+
+@permission_required('artshow.is_artshow_staff')
+def close_show(request):
+    if request.method == 'POST':
+        # Apply won/voice auction status.
+        for piece in Piece.objects.filter(status=Piece.StatusInShow):
+            piece.apply_won_status()
+
+    artists_total = 0
+    voice_auction_remaining = 0
+    artists_processed = 0
+    artists_remaining = 0
+    for artist in Artist.objects.all():
+        artists_total += 1
+
+        # Skip artists who still have pieces in voice auction.
+        if artist.piece_set.filter(status=Piece.StatusInShow,
+                                   voice_auction=True).exists():
+            voice_auction_remaining += 1
+            continue
+
+        if artist.payment_set.filter(
+                payment_type__pk__in=(settings.ARTSHOW_SPACE_FEE_PK,
+                                      settings.ARTSHOW_COMMISSION_PK,
+                                      settings.ARTSHOW_SALES_PK)).exists():
+            artists_processed += 1
+            continue
+
+        if request.method == 'POST':
+            artist.apply_space_fees()
+            artist.apply_winnings_and_commission()
+            artist.create_cheque()
+            artists_processed += 1
+        else:
+            artists_remaining += 1
+
+    c = {
+        'pieces_not_in_show':
+            Piece.objects.filter(status=Piece.StatusNotInShow).count(),
+        'pieces_in_show':
+            Piece.objects.filter(status=Piece.StatusInShow).count(),
+        'pieces_won':
+            Piece.objects.filter(status=Piece.StatusWon).count(),
+        'pieces_sold':
+            Piece.objects.filter(status=Piece.StatusSold).count(),
+        'pieces_returned':
+            Piece.objects.filter(status=Piece.StatusReturned).count(),
+        'artists_total': artists_total,
+        'voice_auction_remaining': voice_auction_remaining,
+        'artists_processed': artists_processed,
+        'artists_remaining': artists_remaining,
+    }
+    return render(request, 'artshow/workflows_close_show.html', c)
+
+
+ChequeFormSet = modelformset_factory(ChequePayment, fields=('number',),
+                                     extra=0, can_delete=False)
+
+
+@permission_required('artshow.is_artshow_staff')
+def print_cheques(request):
+    queryset = ChequePayment.objects.filter(number='')
+    if request.method == 'POST':
+        formset = ChequeFormSet(request.POST, queryset=queryset)
+        if formset.is_valid():
+            formset.save()
+            formset = ChequeFormSet(queryset=queryset)
+    else:
+        formset = ChequeFormSet(queryset=queryset)
+
+    printed_cheques = ChequePayment.objects.exclude(number='')
+
+    c = {'formset': formset, 'printed_cheques': printed_cheques}
+    return render(request, 'artshow/workflows_print_cheques.html', c)
+
+
+@permission_required('artshow.is_artshow_staff')
+@require_POST
+def print_cheques_print(request):
+    cheques = ChequePayment.objects.filter(number='')
+
+    c = {
+        'cheques': cheques,
+        'print': True,
+        'redirect': reverse('artshow-workflow-print-cheques'),
+    }
+    return render(request, 'artshow/cheque.html', c)

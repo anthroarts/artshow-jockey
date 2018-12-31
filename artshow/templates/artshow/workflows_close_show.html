@@ -1,0 +1,58 @@
+{% extends "artshow/base_generic.html" %}
+{% block title %}Close Show{% endblock %}
+{% block breadcrumbs %}
+    <ul class="breadcrumbs">
+      <li><a href="{% url 'artshow-home' %}">Home</a></li>
+      <li><a href="{% url 'artshow-workflows' %}">Workflows</a></li>
+      <li class="current">Close Show</li>
+    </ul>
+{% endblock %}
+{% block content %}
+<p>Pieces:</p>
+<table>
+  <tr>
+    <td>Not In Show</td>
+    <td>{{ pieces_not_in_show }}</td>
+  </tr>
+  <tr>
+    <td>In Show</td>
+    <td>{{ pieces_in_show }}</td>
+  </tr>
+  <tr>
+    <td>Won</td>
+    <td>{{ pieces_won }}</td>
+  </tr>
+  <tr>
+    <td>Sold</td>
+    <td>{{ pieces_sold }}</td>
+  </tr>
+  <tr>
+    <td>Returned</td>
+    <td>{{ pieces_returned }}</td>
+  </tr>
+</table>
+<p>Artists:</p>
+<table>
+  <tr>
+    <td>Awaiting Voice Auction</td>
+    <td>{{ voice_auction_remaining }}</td>
+  </tr>
+  <tr>
+    <td>Processed</td>
+    <td>{{ artists_processed }}</td>
+  </tr>
+  <tr>
+    <td>Remaining</td>
+    <td>{{ artists_remaining }}</td>
+  </tr>
+  <tr>
+    <td><strong>Total</strong></td>
+    <td>{{ artists_total }}</td>
+  </tr>
+</table>
+<p>
+  <form method="post">{% csrf_token %}
+    <button type="submit">Close Show</button>
+  </form>
+</p>
+{% endblock %}

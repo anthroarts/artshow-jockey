@@ -1,8 +1,6 @@
 # Artshow Jockey
 # Copyright (C) 2009, 2010 Chris Cogdon
 # See file COPYING for licence details
-import datetime
-import decimal
 import smtplib
 
 from ajax_select import make_ajax_form
@@ -14,7 +12,7 @@ from django.contrib import admin, messages
 from django.contrib.admin import helpers
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
-from django.db.models import Max, Sum
+from django.db.models import Max
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -246,63 +244,16 @@ class ArtistAdmin(AjaxSelectAdmin):
     print_piece_stickers.short_description = "Print Piece Stickers"
 
     def apply_space_fees(self, request, artists):
-        payment_type = PaymentType.objects.get(pk=settings.ARTSHOW_SPACE_FEE_PK)
         for a in artists:
-            Payment.objects.filter(artist=a, payment_type=payment_type).delete()
-            total = 0
-            for alloc in a.allocation_set.all():
-                total += alloc.space.price * alloc.allocated
-            if total > 0:
-                allocated_spaces_str = ", ".join(
-                    "%s:%s" % (al.space.shortname, al.allocated) for al in a.allocation_set.all())
-                payment = Payment(artist=a, amount=-total, payment_type=payment_type, description=allocated_spaces_str,
-                                  date=datetime.datetime.now())
-                payment.save()
+            a.apply_space_fees()
 
     def apply_winnings_and_commission(self, request, artists):
-        pt_winning = PaymentType.objects.get(pk=settings.ARTSHOW_SALES_PK)
-        pt_commission = PaymentType.objects.get(pk=settings.ARTSHOW_COMMISSION_PK)
         for a in artists:
-            Payment.objects.filter(artist=a, payment_type__in=(pt_winning, pt_commission)).delete()
-            total_winnings = 0
-            total_pieces = 0
-            pieces_with_bids = 0
-            for piece in a.piece_set.all():
-                if piece.status != Piece.StatusNotInShow:
-                    total_pieces += 1
-                try:
-                    top_bid = piece.top_bid()
-                    total_winnings += top_bid.amount
-                    pieces_with_bids += 1
-                except Bid.DoesNotExist:
-                    pass
-            commission = total_winnings * decimal.Decimal(settings.ARTSHOW_COMMISSION)
-            if total_pieces > 0:
-                payment = Payment(artist=a, amount=total_winnings,
-                                  payment_type=pt_winning,
-                                  description="%d piece%s, %d with bid%s" % (
-                                      total_pieces,
-                                      total_pieces != 1 and "s" or "",
-                                      pieces_with_bids,
-                                      pieces_with_bids != 1 and "s" or ""),
-                                  date=datetime.datetime.now())
-                payment.save()
-            if commission > 0:
-                payment = Payment(artist=a, amount=-commission, payment_type=pt_commission,
-                                  description="%s%% of sales" % (decimal.Decimal(settings.ARTSHOW_COMMISSION) * 100),
-                                  date=datetime.datetime.now())
-                payment.save()
+            a.apply_winnings_and_commission()
 
-    # noinspection PyUnusedLocal
     def create_cheques(self, request, artists):
-        pt_paymentsent = PaymentType.objects.get(pk=settings.ARTSHOW_PAYMENT_SENT_PK)
         for a in artists:
-            balance = a.payment_set.aggregate(balance=Sum('amount'))['balance']
-            if balance > 0:
-                chq = ChequePayment(artist=a, payment_type=pt_paymentsent, amount=-balance,
-                                    date=datetime.datetime.now())
-                chq.clean()
-                chq.save()
+            a.create_cheque()
 
     # noinspection PyUnusedLocal
     def allocate_spaces(self, request, artists):
@@ -414,12 +365,7 @@ class PieceAdmin(admin.ModelAdmin):
     def apply_won_status(self, request, pieces):
         # This code is duplicated in the management code
         for p in pieces.filter(status=Piece.StatusInShow):
-            bid_count = p.bid_set.exclude(invalid=True).count()
-            if bid_count > 0:
-                p.voice_auction = bid_count >= 6
-                if not p.voice_auction:
-                    p.status = Piece.StatusWon
-                p.save()
+            p.apply_won_status()
         self.message_user(request, "Pieces with bids marked as 'In Show' have been marked 'Won' or sent to voice auction.")
 
     def apply_returned_status(self, request, pieces):

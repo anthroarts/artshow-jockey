@@ -9,8 +9,10 @@
 {% block content %}
     <ul>
       <li><a href="{% url "artshow-workflow-printing" %}">Bid Sheet and Control Form Printing</a></li>
-      <li><a href="{% url 'artshow-workflow-bidder-lookup' %}">Assign Bidder IDs</a></li>
       <li><a href="{% url 'artshow-workflow-artist-checkin-lookup' %}">Artist Check-in</a></li>
+      <li><a href="{% url 'artshow-workflow-bidder-lookup' %}">Assign Bidder IDs</a></li>
+      <li><a href="{% url 'artshow-workflow-close-show' %}">Close Show</a></li>
+      <li><a href="{% url 'artshow-workflow-print-cheques' %}">Print Cheques</a></li>
       <li><a href="{% url 'artshow-workflow-artist-checkout-lookup' %}">Artist Check-out</a></li>
     </ul>
 {% endblock %}
