@@ -6,6 +6,7 @@ body {
   position: relative;
   width: 8.5in;
   height: 11in;
+  overflow: hidden;
   page-break-after: always;
 }
 
@@ -24,7 +25,7 @@ body {
 .cheque_amount {
   position: absolute;
   left: 7.5in;
-  top: 1.45in;
+  top: 1.3875in;
 }
 
 .cheque_amount_words {
@@ -47,15 +48,17 @@ body {
   position: absolute;
   left: 0in;
   top: 3.5in;
-  margin: 0.5in;
+  box-sizing: border-box;
+  padding: 0.5in;
   width: 100%;
 }
 
 .summary {
   position: absolute;
   left: 0in;
-  top: 7.25in;
-  margin: 0.5in;
+  top: 7.125in;
+  box-sizing: border-box;
+  padding: 0.5in;
   width: 100%;
 }
 
