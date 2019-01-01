@@ -84,9 +84,14 @@ def find_artist_checkin(request):
         form = ArtistSearchForm(request.POST)
         if form.is_valid():
             text = form.cleaned_data['text']
-            artists = Artist.objects.filter(Q(person__name__icontains=text)
-                                            | Q(publicname__icontains=text)
-                                            | Q(artistid=text))
+            query = (Q(person__name__icontains=text)
+                     | Q(publicname__icontains=text))
+            try:
+                artistid = int(text)
+                query = query | Q(artistid=artistid)
+            except ValueError:
+                pass
+            artists = Artist.objects.filter(query)
             search_executed = True
         else:
             artists = []
