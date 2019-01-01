@@ -8,7 +8,7 @@
     </ul>
 {% endblock %}
 {% block content %}
-    <p>Please ask for the bidder's name.</p>
+    <p>Please ask for the bidder's name, registration ID or bidder ID.</p>
     <form method="post">{% csrf_token %}
         {{ form.as_p }}
         <input type="submit" value="Submit"/>
@@ -19,11 +19,13 @@
         <table>
         <tr>
             <th>Name</th>
+            <th>Reg ID</th>
             <th>Bidder IDs</th>
         </tr>
         {% for b in bidders %}
             <tr>
                 <td><a href="{% url "artshow-workflow-bidder" pk=b.pk %}">{{ b.name }}</a></td>
+                <td>{{ b.person.reg_id }}</td>
                 <td>{{ b.bidder_ids|join:", " }}</td>
             </tr>
         {% endfor %}

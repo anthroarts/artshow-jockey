@@ -3,6 +3,7 @@
 # See file COPYING for licence details
 from django.apps import apps
 from django.contrib import messages
+from django.db.models import Q
 from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404, render, redirect
 from .models import Bidder, BidderId, Piece, Bid
@@ -218,7 +219,9 @@ def find_bidder(request):
         form = BidderSearchForm(request.POST)
         if form.is_valid():
             text = form.cleaned_data['text']
-            bidders = Bidder.objects.filter(person__name__icontains=text)
+            bidders = Bidder.objects.filter(Q(person__name__icontains=text)
+                                            | Q(person__reg_id__icontains=text)
+                                            | Q(bidderid__id=text)).distinct()
             search_executed = True
         else:
             bidders = []
