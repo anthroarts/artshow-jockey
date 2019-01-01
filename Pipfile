@@ -14,7 +14,8 @@ gunicorn = "*"
 "num2words" = "*"
 squareconnect = "*"
 pdfrw = "*"
-reportlab = "==3.5.2"
+Pillow = "==5.2.0"
+reportlab = "==3.5.9"
 requests = "*"
 
 [dev-packages]
