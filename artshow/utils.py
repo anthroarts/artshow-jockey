@@ -1,6 +1,5 @@
 import re
 import csv
-import codecs
 import io
 from django.contrib.auth import get_user_model
 from decimal import Decimal
@@ -40,24 +39,19 @@ artshow_settings = AttributeFilter(settings, r"ARTSHOW_|SITE_NAME$|SITE_ROOT_URL
 
 class UnicodeCSVWriter:
     """
-    A CSV writer which will write rows to CSV file "f",
-    which is encoded in the given encoding.
+    A CSV writer which will write rows to CSV file "f".
     """
 
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
+    def __init__(self, f, dialect=csv.excel, **kwds):
         # Redirect output to a queue
         self.queue = io.StringIO()
         self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
         self.stream = f
-        self.encoder = codecs.getincrementalencoder(encoding)()
 
     def writerow(self, row):
-        self.writer.writerow([str(s).encode("utf-8") for s in row])
-        # Fetch UTF-8 output from the queue ...
+        self.writer.writerow(row)
+        # Fetch output from the queue ...
         data = self.queue.getvalue()
-        data = data.decode("utf-8")
-        # ... and reencode it into the target encoding
-        data = self.encoder.encode(data)
         # write to the target stream
         self.stream.write(data)
         # empty queue
