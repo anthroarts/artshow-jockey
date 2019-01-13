@@ -10,7 +10,7 @@ import json
 from .models import Artist, Bid, BidderId, Piece
 
 
-@permission_required('artshow.add_bid')
+@permission_required('artshow.is_artshow_staff')
 def bid_entry(request):
     return render(request, 'artshow/bid_entry.html',
                   {'bid_slots': list(range(1, 7))})
@@ -26,7 +26,7 @@ def error_response(field, message, index=None):
     return JsonResponse({'error': error})
 
 
-@permission_required('artshow.add_bid')
+@permission_required('artshow.is_artshow_staff')
 def bids(request, artist_id, piece_id):
     try:
         piece = Piece.objects.get(artist__artistid=artist_id,

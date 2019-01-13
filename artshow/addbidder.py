@@ -251,7 +251,7 @@ class BidderIdAddForm(forms.Form):
 BidderIdAddFormSet = formset_factory(BidderIdAddForm)
 
 
-@permission_required('artshow.add_bidder_id')
+@permission_required('artshow.is_artshow_staff')
 def bidder_detail(request, pk):
     bidder = get_object_or_404(Bidder, pk=pk)
 

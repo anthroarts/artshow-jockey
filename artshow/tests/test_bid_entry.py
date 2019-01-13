@@ -11,7 +11,7 @@ class BidEntryTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
             username='test', email='test@example.com', password='test')
-        permission = Permission.objects.get(codename='add_bid')
+        permission = Permission.objects.get(codename='is_artshow_staff')
         self.user.user_permissions.add(permission)
         self.user.save()
 
