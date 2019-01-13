@@ -137,7 +137,10 @@ PieceCheckinFormSet = inlineformset_factory(Artist, Piece,
 @permission_required('artshow.is_artshow_staff')
 def artist_checkin(request, artistid):
     artist = get_object_or_404(Artist, artistid=artistid)
-    queryset = artist.piece_set.order_by('pieceid')
+    queryset = artist.piece_set \
+            .filter(status__in=(Piece.StatusNotInShow,
+                                Piece.StatusInShow)) \
+            .order_by('pieceid')
     if request.method == 'POST':
         formset = PieceCheckinFormSet(request.POST, queryset=queryset,
                                       instance=artist)
