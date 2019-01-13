@@ -1,12 +1,15 @@
+@page {
+  margin: 0.5in;
+}
+
 body {
   margin: 0;
   -webkit-print-color-adjust: exact;
 }
 
 .container {
-  width: 8.5in;
+  width: 8in;
   box-sizing: border-box;
-  padding: 0.25in;
   page-break-after: always;
 }
 
