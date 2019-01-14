@@ -11,12 +11,12 @@ class Command(BaseCommand):
         parser.add_argument("num_ids", metavar='N', type=int, nargs=1,
                             help="create up to N unused bidder ids")
         parser.add_argument("--digits", type=int, default=3,
-                            help="pad to this many digits [%default]"),
+                            help="pad to this many digits"),
         parser.add_argument("--allow-x", action="store_true", default=False,
                             help="allow X checkdigit"),
         parser.add_argument("--offset", type=int,
                             default=settings.ARTSHOW_BIDDERID_MOD11_OFFSET or 0,
-                            help="offset checkdigit [%default]"),
+                            help="offset checkdigit"),
 
     def handle(self, *args, **options):
         value = 1
