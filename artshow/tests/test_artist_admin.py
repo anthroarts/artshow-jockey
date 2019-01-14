@@ -52,12 +52,12 @@ class ArtistAdminTest(TestCase):
 
         # Piece 1-1 has no bids.
         piece = Piece(artist=self.artist, pieceid=1, min_bid=5, buy_now=50,
-                      status=Piece.StatusInShow)
+                      status=Piece.StatusInShow, location='A1')
         piece.save()
 
         # Piece 1-2 has 1 bid.
         piece = Piece(artist=self.artist, pieceid=2, min_bid=5, buy_now=50,
-                      status=Piece.StatusInShow)
+                      status=Piece.StatusInShow, location='A1')
         piece.save()
 
         bid = Bid(bidder=bidder, piece=piece, amount=10)

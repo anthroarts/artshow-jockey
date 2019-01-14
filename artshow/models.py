@@ -383,6 +383,10 @@ class Piece (models.Model):
 
     def save(self, *args, **kwargs):
         self.code = "%s-%s" % (self.artist.artistid, self.pieceid)
+        if self.location and self.status == Piece.StatusNotInShow:
+            self.status = Piece.StatusInShow
+        if not self.location and self.status == Piece.StatusInShow:
+            self.status = Piece.StatusNotInShow
         super(Piece, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -405,13 +409,6 @@ class Piece (models.Model):
             raise ValidationError("A Piece must either be Not For Sale or have a Minimum Bid")
         if self.min_bid and self.buy_now and self.min_bid >= self.buy_now:
             raise ValidationError("Buy Now must be empty, or greater than Minimum Bid")
-
-    def save(self, **kwargs):
-        if self.location and self.status == Piece.StatusNotInShow:
-            self.status = Piece.StatusInShow
-        if not self.location and self.status == Piece.StatusInShow:
-            self.status = Piece.StatusNotInShow
-        super().save(**kwargs)
 
     def apply_won_status(self):
         if self.status == Piece.StatusInShow:

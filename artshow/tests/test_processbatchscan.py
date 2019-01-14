@@ -35,25 +35,39 @@ class BidScanTest(BatchScanTestCase):
         super(BidScanTest, cls).setUpClass()
         cls.person1 = Person.objects.create(name="John Smith")
         cls.person2 = Person.objects.create(name="Joe Diddly")
-        cls.artist1 = Artist.objects.create(artistid=1, person=cls.person1, publicname="Da Artiste")
-        cls.piece_nobuynow = Piece.objects.create(artist=cls.artist1, pieceid=1, name="First Piece", min_bid=10, status=Piece.StatusInShow)
-        cls.piece_bynow = Piece.objects.create(artist=cls.artist1, pieceid=2, name="Second Piece", min_bid=10,
-                                               buy_now=15, status=Piece.StatusInShow)
-        cls.piece_nfs = Piece.objects.create(artist=cls.artist1, pieceid=3, name="Third Piece", not_for_sale=True, status=Piece.StatusInShow)
-        cls.piece_notinshow = Piece.objects.create(artist=cls.artist1, pieceid=4, name="Fourth Piece", min_bid=10)
+        cls.artist1 = Artist.objects.create(
+            artistid=1, person=cls.person1, publicname="Da Artiste")
+        cls.piece_nobuynow = Piece.objects.create(
+            artist=cls.artist1, pieceid=1, name="First Piece", min_bid=10,
+            status=Piece.StatusInShow, location='A1')
+        cls.piece_bynow = Piece.objects.create(
+            artist=cls.artist1, pieceid=2, name="Second Piece", min_bid=10,
+            buy_now=15, status=Piece.StatusInShow, location='A1')
+        cls.piece_nfs = Piece.objects.create(
+            artist=cls.artist1, pieceid=3, name="Third Piece",
+            not_for_sale=True, status=Piece.StatusInShow, location='A1')
+        cls.piece_notinshow = Piece.objects.create(
+            artist=cls.artist1, pieceid=4, name="Fourth Piece", min_bid=10)
         cls.bidder = Bidder.objects.create(person=cls.person2)
         BidderId.objects.create(id='1001', bidder=cls.bidder)
 
-        cls.piece_withabid = Piece.objects.create(artist=cls.artist1, pieceid=5, name="Fifth Piece", min_bid=10, status=Piece.StatusInShow)
-        Bid.objects.create(piece=cls.piece_withabid, bidder=cls.bidder, amount=15)
+        cls.piece_withabid = Piece.objects.create(
+            artist=cls.artist1, pieceid=5, name="Fifth Piece", min_bid=10,
+            status=Piece.StatusInShow, location='A1')
+        Bid.objects.create(piece=cls.piece_withabid, bidder=cls.bidder,
+                           amount=15)
 
-        cls.piece_withabuynow = Piece.objects.create(artist=cls.artist1, pieceid=6, name="Sixth Piece", min_bid=10,
-                                                     buy_now=15, status=Piece.StatusInShow)
-        Bid.objects.create(piece=cls.piece_withabuynow, bidder=cls.bidder, amount=15, buy_now_bid=True)
+        cls.piece_withabuynow = Piece.objects.create(
+            artist=cls.artist1, pieceid=6, name="Sixth Piece", min_bid=10,
+            buy_now=15, status=Piece.StatusInShow, location='A1')
+        Bid.objects.create(piece=cls.piece_withabuynow, bidder=cls.bidder,
+                           amount=15, buy_now_bid=True)
 
-        cls.piece_won = Piece.objects.create(artist=cls.artist1, pieceid=7, name="Seventh Piece", min_bid=10,
-                                             buy_now=15, status=Piece.StatusWon)
-        Bid.objects.create(piece=cls.piece_won, bidder=cls.bidder, amount=15, buy_now_bid=True)
+        cls.piece_won = Piece.objects.create(
+            artist=cls.artist1, pieceid=7, name="Seventh Piece", min_bid=10,
+            buy_now=15, status=Piece.StatusWon)
+        Bid.objects.create(piece=cls.piece_won, bidder=cls.bidder, amount=15,
+                           buy_now_bid=True)
 
     def assertNoBids(self, piece):
         with self.assertRaises(Bid.DoesNotExist):
