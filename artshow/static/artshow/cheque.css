@@ -16,32 +16,32 @@ body {
 
 .cheque_date {
   position: absolute;
-  left: 7.5in;
+  left: 7in;
   top: 0.9in;
 }
 
 .cheque_payee {
   position: absolute;
   left: 1in;
-  top: 1.45in;
+  top: 1.325in;
 }
 
 .cheque_amount {
   position: absolute;
-  left: 7.5in;
+  left: 7in;
   top: 1.3875in;
 }
 
 .cheque_amount_words {
   position: absolute;
   left: 0.375in;
-  top: 1.8125in;
+  top: 1.6875in;
 }
 
 .cheque_memo {
   position: absolute;
   left: 0.75in;
-  top: 2.8in;
+  top: 2.675in;
 }
 
 .mailing_label {
@@ -51,7 +51,7 @@ body {
 .summary_payee {
   position: absolute;
   left: 0in;
-  top: 3.5in;
+  top: 3.25in;
   box-sizing: border-box;
   padding: 0.5in;
   width: 100%;
@@ -60,7 +60,7 @@ body {
 .summary {
   position: absolute;
   left: 0in;
-  top: 7.125in;
+  top: 6.625in;
   box-sizing: border-box;
   padding: 0.5in;
   width: 100%;
