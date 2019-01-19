@@ -25,8 +25,9 @@ class BidderRegistrationForm0(forms.Form):
 
 class BidderRegistrationForm1(forms.Form):
     name = forms.CharField(
+        label="Legal name",
         max_length=100,
-        help_text="Your real, first and last name. This should match your "
+        help_text="Your legal first and last name. This should match your "
                   "identification.")
     reg_id = forms.CharField(
         max_length=20,
