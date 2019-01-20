@@ -231,7 +231,7 @@ class Artist (models.Model):
     def create_cheque(self):
         pt_paymentsent = PaymentType.objects.get(pk=settings.ARTSHOW_PAYMENT_SENT_PK)
         balance = self.payment_set.aggregate(balance=Sum('amount'))['balance']
-        if balance > 0:
+        if balance and balance > 0:
             chq = ChequePayment(artist=self, payment_type=pt_paymentsent,
                                 amount=-balance, date=datetime.now())
             chq.clean()
