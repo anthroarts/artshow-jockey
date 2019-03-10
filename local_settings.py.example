@@ -3,6 +3,8 @@ from artshowjockey.common_settings import *  # noqa
 # This is, probably, the minimum set of settings attributes that
 # should be specified for your installation.
 
+DEBUG = True
+
 # With debugging off, details of errors will be e-mailed to the following people.
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -12,7 +14,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/PROJDIR/data/artshowjockey.db',  # Or path to database file if using sqlite3.
+        'NAME': '/data/artshowjockey.db',  # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -20,7 +22,7 @@ DATABASES = {
     }
 }
 
-STATIC_ROOT = '/PROJDIR/static/'
+STATIC_ROOT = '/static'
 
 ARTSHOW_SHOW_NAME = "Generic Art Show"
 ARTSHOW_TAX_RATE = "0.0825"
