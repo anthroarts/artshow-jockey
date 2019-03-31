@@ -1,4 +1,4 @@
-FROM python:3.7-alpine
+FROM python:3.7-alpine as build
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -10,12 +10,8 @@ RUN pip install pipenv \
  && apk add --no-cache jpeg zlib \
  && apk add --no-cache --virtual .build-deps build-base jpeg-dev python-dev zlib-dev
 
-# Install Python dependencies and remove build-only native dependencies.
 COPY Pipfile Pipfile.lock /code/
-RUN pipenv install --system \
- && pip uninstall -y pipenv \
- && apk del .build-deps \
- && rm -fr ~/.cache
+RUN pipenv install --system
 
 COPY . /code/
 
@@ -25,5 +21,10 @@ COPY local_settings.py.example /code/local_settings.py
 EXPOSE 8000/tcp
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
-#RUN python manage.py test \
-# && rm local_settings.py
+FROM build as test
+RUN python manage.py test
+
+FROM build as prod
+RUN pip uninstall -y pipenv \
+ && apk del .build-deps \
+ && rm -fr ~/.cache

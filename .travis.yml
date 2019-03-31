@@ -1,18 +1,11 @@
 language: python
-sudo: required
-dist: xenial
-python: "3.7"
-cache: pip
 
-# Workaround for travis-ci/travis-ci#7940.
-before_install:
-  - sudo rm -f /etc/boto.cfg
+services:
+  - docker
 
 install:
-  - pip install pipenv
-  - pipenv install --dev
+  - pip install flake8
 
 script:
-  - cp local_settings.py.example local_settings.py
-  - pipenv run flake8
-  - pipenv run python manage.py test
+  - flake8
+  - docker build -t artshow-jockey .
