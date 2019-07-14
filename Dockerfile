@@ -6,8 +6,8 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /code
 
 # Install native dependencies.
-RUN pip install pipenv \
- && apk add --no-cache jpeg zlib \
+RUN pip install gunicorn pipenv \
+ && apk add --no-cache jpeg nginx supervisor zlib \
  && apk add --no-cache --virtual .build-deps build-base jpeg-dev python-dev zlib-dev
 
 COPY Pipfile Pipfile.lock /code/
@@ -15,11 +15,13 @@ RUN pipenv install --system
 
 COPY . /code/
 
-RUN mkdir /data
-COPY local_settings.py.example /code/local_settings.py
+RUN mv local_settings.py.example local_settings.py \
+ && mkdir /data \
+ && mkdir /run/nginx \
+ && python manage.py collectstatic
 
-EXPOSE 8000/tcp
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+EXPOSE 80/tcp
+CMD ["/usr/bin/supervisord", "-c", "/code/supervisord.conf"]
 
 FROM build as test
 RUN python manage.py test
