@@ -9,7 +9,7 @@ Installation Steps
 pip install -r requirements.txt
 ```
 
-2. Copy `local_settings.py.example` to `local_settings.py` and modify as needed.
+2. Modify `artshowjockey/settings.py` as needed.
 
 | Config Variable              | Description |
 | ---------------------------- | ----------- |

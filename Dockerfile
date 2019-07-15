@@ -15,8 +15,7 @@ RUN pipenv install --system
 
 COPY . /code/
 
-RUN mv local_settings.py.example local_settings.py \
- && mkdir /data \
+RUN mkdir /data \
  && mkdir /run/nginx \
  && python manage.py collectstatic
 

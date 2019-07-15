@@ -2,7 +2,7 @@
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-DEBUG = False
+DEBUG = True
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -10,7 +10,16 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-# DATABASES is set in local_settings.py
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': '/data/artshowjockey.db',  # Or path to database file if using sqlite3.
+        'USER': '',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    }
+}
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -24,8 +33,6 @@ TIME_ZONE = 'America/Chicago'
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
-
-SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -51,7 +58,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = 'static'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -72,7 +79,8 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 
-# SECRET_KEY must be specified in local_settings.py.
+# Type about 40 random characters between the quotes. Don't share this with anyone.
+SECRET_KEY = "--- NOT A SECURE SECRET KEY! CHANGE ME! ---"
 
 TEMPLATES = [
     {
@@ -176,4 +184,32 @@ AJAX_SELECT_INLINES = 'inline'
 
 LOGIN_REDIRECT_URL = "/"
 
+ARTSHOW_SHOW_NAME = "Generic Art Show"
+ARTSHOW_TAX_RATE = "0.0825"
+ARTSHOW_TAX_DESCRIPTION = "Santa Clara CA Tax 8.25%"
+ARTSHOW_EMAIL_SENDER = "Generic Art Show <artshow@example.com>"
+ARTSHOW_COMMISSION = "0.1"
+ARTSHOW_INVOICE_PREFIX = "2012-"
+ARTSHOW_EMAIL_FOOTER = """\
+--
+Random J Hacker
+Generic Art Show Lead.
+artshow@example.com - http://www.example.com/artshow
+"""
+ARTSHOW_CHEQUE_THANK_YOU = "Thank you for exhibiting at Generic Art Show"
+ARTSHOW_CHEQUES_AS_PDF = True
+ARTSHOW_PRINT_COMMAND = "enscript -P Samsung -B -L 66 -f Courier-Bold10 -q"
+ARTSHOW_AUTOPRINT_INVOICE = ["CUSTOMER COPY", "MERCHANT COPY", "PICK LIST"]
+ARTSHOW_BLANK_BID_SHEET = "artshow/files/blank_bid_sheet.pdf"
+ARTSHOW_SCANNER_DEVICE = "/dev/ttyUSB0"
+
 PEEPS_DEFAULT_COUNTRY = "USA"
+
+# Visit https://www.google.com/recaptcha/admin/create to create a keypair.
+# These are test keys.
+NORECAPTCHA_SITE_KEY = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+NORECAPTCHA_SECRET_KEY = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+
+SITE_ID = 1
+SITE_NAME = ARTSHOW_SHOW_NAME
+SITE_ROOT_URL = "http://www.example.com"
