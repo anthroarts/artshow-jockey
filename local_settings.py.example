@@ -22,7 +22,7 @@ DATABASES = {
     }
 }
 
-STATIC_ROOT = '/static'
+STATIC_ROOT = 'static'
 
 ARTSHOW_SHOW_NAME = "Generic Art Show"
 ARTSHOW_TAX_RATE = "0.0825"
