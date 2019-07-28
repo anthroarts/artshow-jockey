@@ -1,8 +1,15 @@
 # Django settings for artshowjockey project.
+from environs import Env
 import os
+
+env = Env()
+env.read_env()
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-DEBUG = True
+DEBUG = env.bool('DEBUG', default=False)
+SECRET_KEY = env.str('SECRET_KEY')
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -10,16 +17,14 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/data/artshowjockey.db',  # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-    }
-}
+DATABASES = {"default": env.dj_db_url("DATABASE_URL")}
+
+email = env.dj_email_url("EMAIL_URL", default="smtp://")
+EMAIL_HOST = email["EMAIL_HOST"]
+EMAIL_PORT = email["EMAIL_PORT"]
+EMAIL_HOST_PASSWORD = email["EMAIL_HOST_PASSWORD"]
+EMAIL_HOST_USER = email["EMAIL_HOST_USER"]
+EMAIL_USE_TLS = email["EMAIL_USE_TLS"]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -28,7 +33,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'US/Pacific'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -78,9 +83,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
-
-# Type about 40 random characters between the quotes. Don't share this with anyone.
-SECRET_KEY = "--- NOT A SECURE SECRET KEY! CHANGE ME! ---"
 
 TEMPLATES = [
     {
@@ -205,10 +207,13 @@ ARTSHOW_SCANNER_DEVICE = "/dev/ttyUSB0"
 
 PEEPS_DEFAULT_COUNTRY = "USA"
 
-# Visit https://www.google.com/recaptcha/admin/create to create a keypair.
-# These are test keys.
-NORECAPTCHA_SITE_KEY = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-NORECAPTCHA_SECRET_KEY = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+with env.prefixed('NORECAPTCHA_'):
+    # Visit https://www.google.com/recaptcha/admin/create to create a keypair.
+    # These are test keys.
+    NORECAPTCHA_SITE_KEY = \
+        env.str('SITE_KEY', default='6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI')
+    NORECAPTCHA_SECRET_KEY = \
+        env.str('SECRET_KEY', default='6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe')
 
 SITE_ID = 1
 SITE_NAME = ARTSHOW_SHOW_NAME
