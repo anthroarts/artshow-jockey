@@ -1,8 +1,15 @@
 # Django settings for artshowjockey project.
+from environs import Env
 import os
+
+env = Env()
+env.read_env()
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-DEBUG = False
+DEBUG = env.bool('DEBUG', default=False)
+SECRET_KEY = env.str('SECRET_KEY')
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -10,7 +17,14 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-# DATABASES is set in local_settings.py
+DATABASES = {"default": env.dj_db_url("DATABASE_URL")}
+
+email = env.dj_email_url("EMAIL_URL", default="smtp://")
+EMAIL_HOST = email["EMAIL_HOST"]
+EMAIL_PORT = email["EMAIL_PORT"]
+EMAIL_HOST_PASSWORD = email["EMAIL_HOST_PASSWORD"]
+EMAIL_HOST_USER = email["EMAIL_HOST_USER"]
+EMAIL_USE_TLS = email["EMAIL_USE_TLS"]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -19,13 +33,11 @@ MANAGERS = ADMINS
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'US/Pacific'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
-
-SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -51,7 +63,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = 'static'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -71,8 +83,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
-
-# SECRET_KEY must be specified in local_settings.py.
 
 TEMPLATES = [
     {
@@ -176,4 +186,35 @@ AJAX_SELECT_INLINES = 'inline'
 
 LOGIN_REDIRECT_URL = "/"
 
+ARTSHOW_SHOW_NAME = "Generic Art Show"
+ARTSHOW_TAX_RATE = "0.0825"
+ARTSHOW_TAX_DESCRIPTION = "Santa Clara CA Tax 8.25%"
+ARTSHOW_EMAIL_SENDER = "Generic Art Show <artshow@example.com>"
+ARTSHOW_COMMISSION = "0.1"
+ARTSHOW_INVOICE_PREFIX = "2012-"
+ARTSHOW_EMAIL_FOOTER = """\
+--
+Random J Hacker
+Generic Art Show Lead.
+artshow@example.com - http://www.example.com/artshow
+"""
+ARTSHOW_CHEQUE_THANK_YOU = "Thank you for exhibiting at Generic Art Show"
+ARTSHOW_CHEQUES_AS_PDF = True
+ARTSHOW_PRINT_COMMAND = "enscript -P Samsung -B -L 66 -f Courier-Bold10 -q"
+ARTSHOW_AUTOPRINT_INVOICE = ["CUSTOMER COPY", "MERCHANT COPY", "PICK LIST"]
+ARTSHOW_BLANK_BID_SHEET = "artshow/files/blank_bid_sheet.pdf"
+ARTSHOW_SCANNER_DEVICE = "/dev/ttyUSB0"
+
 PEEPS_DEFAULT_COUNTRY = "USA"
+
+with env.prefixed('NORECAPTCHA_'):
+    # Visit https://www.google.com/recaptcha/admin/create to create a keypair.
+    # These are test keys.
+    NORECAPTCHA_SITE_KEY = \
+        env.str('SITE_KEY', default='6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI')
+    NORECAPTCHA_SECRET_KEY = \
+        env.str('SECRET_KEY', default='6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe')
+
+SITE_ID = 1
+SITE_NAME = ARTSHOW_SHOW_NAME
+SITE_ROOT_URL = "http://www.example.com"

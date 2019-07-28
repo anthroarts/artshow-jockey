@@ -6,22 +6,21 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /code
 
 # Install native dependencies.
-RUN pip install gunicorn pipenv \
- && apk add --no-cache jpeg nginx supervisor zlib \
- && apk add --no-cache --virtual .build-deps build-base jpeg-dev python-dev zlib-dev
+RUN pip install --upgrade pip pipenv \
+ && apk add --no-cache jpeg libpq nginx zlib \
+ && apk add --no-cache --virtual .build-deps build-base jpeg-dev postgresql-dev python-dev zlib-dev
 
 COPY Pipfile Pipfile.lock /code/
 RUN pipenv install --system
 
 COPY . /code/
 
-RUN mv local_settings.py.example local_settings.py \
- && mkdir /data \
+RUN mkdir /data \
  && mkdir /run/nginx \
  && python manage.py collectstatic
 
 EXPOSE 80/tcp
-CMD ["/usr/bin/supervisord", "-c", "/code/supervisord.conf"]
+CMD ["/usr/local/bin/supervisord", "-c", "/code/supervisord.conf"]
 
 FROM build as test
 RUN python manage.py test
