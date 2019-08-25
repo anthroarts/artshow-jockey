@@ -1,5 +1,5 @@
 # Django settings for artshowjockey project.
-from environs import Env
+from environs import Env, EnvError
 import os
 
 env = Env()
@@ -27,7 +27,7 @@ try:
     EMAIL_HOST_USER = email["EMAIL_HOST_USER"]
     EMAIL_USE_TLS = email["EMAIL_USE_TLS"]
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-except:
+except EnvError:
     try:
         with env.prefixed('AWS_'):
             AWS_ACCESS_KEY_ID = env('ACCESS_KEY_ID')
@@ -37,7 +37,7 @@ except:
                 AWS_SES_REGION_ENDPOINT = env('REGION_ENDPOINT')
                 AWS_SES_CONFIGURATION_SET = env('CONFIGURATION_SET')
         EMAIL_BACKEND = 'django_ses.SESBackend'
-    except:
+    except EnvError:
         EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
 SERVER_EMAIL = 'artshow-jockey@furtherconfusion.org'
