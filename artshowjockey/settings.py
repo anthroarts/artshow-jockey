@@ -19,12 +19,29 @@ MANAGERS = ADMINS
 
 DATABASES = {"default": env.dj_db_url("DATABASE_URL")}
 
-email = env.dj_email_url("EMAIL_URL", default="smtp://")
-EMAIL_HOST = email["EMAIL_HOST"]
-EMAIL_PORT = email["EMAIL_PORT"]
-EMAIL_HOST_PASSWORD = email["EMAIL_HOST_PASSWORD"]
-EMAIL_HOST_USER = email["EMAIL_HOST_USER"]
-EMAIL_USE_TLS = email["EMAIL_USE_TLS"]
+try:
+    email = env.dj_email_url("EMAIL_URL")
+    EMAIL_HOST = email["EMAIL_HOST"]
+    EMAIL_PORT = email["EMAIL_PORT"]
+    EMAIL_HOST_PASSWORD = email["EMAIL_HOST_PASSWORD"]
+    EMAIL_HOST_USER = email["EMAIL_HOST_USER"]
+    EMAIL_USE_TLS = email["EMAIL_USE_TLS"]
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+except:
+    try:
+        with env.prefixed('AWS_'):
+            AWS_ACCESS_KEY_ID = env('ACCESS_KEY_ID')
+            AWS_SECRET_ACCESS_KEY = env('SECRET_ACCESS_KEY')
+            with env.prefixed('SES_'):
+                AWS_SES_REGION_NAME = env('REGION_NAME')
+                AWS_SES_REGION_ENDPOINT = env('REGION_ENDPOINT')
+                AWS_SES_CONFIGURATION_SET = env('CONFIGURATION_SET')
+        EMAIL_BACKEND = 'django_ses.SESBackend'
+    except:
+        EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+
+SERVER_EMAIL = 'artshow-jockey@furtherconfusion.org'
+DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -157,19 +174,32 @@ LOGGING = {
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        }
+        },
     },
     'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
     },
     'loggers': {
+        'artshow.square': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
+            'propagate': True,
+        },
+        'paypal': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
             'propagate': True,
         },
     }
@@ -186,35 +216,46 @@ AJAX_SELECT_INLINES = 'inline'
 
 LOGIN_REDIRECT_URL = "/"
 
-ARTSHOW_SHOW_NAME = "Generic Art Show"
-ARTSHOW_TAX_RATE = "0.0825"
-ARTSHOW_TAX_DESCRIPTION = "Santa Clara CA Tax 8.25%"
-ARTSHOW_EMAIL_SENDER = "Generic Art Show <artshow@example.com>"
-ARTSHOW_COMMISSION = "0.1"
-ARTSHOW_INVOICE_PREFIX = "2012-"
+ARTSHOW_SHOW_NAME = 'Further Confusion 2020 Art Show'
+ARTSHOW_TAX_RATE = '0.0925'
+ARTSHOW_TAX_DESCRIPTION = 'San Jose CA Tax 9.25%'
+ARTSHOW_EMAIL_SENDER = 'Futher Confusion Art Show <artshow@furtherconfusion.org>'
+ARTSHOW_COMMISSION = '0.1'
+ARTSHOW_INVOICE_PREFIX = '2020-'
 ARTSHOW_EMAIL_FOOTER = """\
 --
-Random J Hacker
-Generic Art Show Lead.
-artshow@example.com - http://www.example.com/artshow
+binaryfox
+Further Confsion 2020 Art Show Lead.
+artshow@furtherconfusion.org - https://www.furtherconfusion.org/artshow
 """
-ARTSHOW_CHEQUE_THANK_YOU = "Thank you for exhibiting at Generic Art Show"
+ARTSHOW_ARTIST_AGREEMENT_URL = 'https://www.furtherconfusion.org/artshow'
+
+ARTSHOW_CHEQUE_THANK_YOU = "Thank you for exhibiting at the " + ARTSHOW_SHOW_NAME
 ARTSHOW_CHEQUES_AS_PDF = True
 ARTSHOW_PRINT_COMMAND = "enscript -P Samsung -B -L 66 -f Courier-Bold10 -q"
 ARTSHOW_AUTOPRINT_INVOICE = ["CUSTOMER COPY", "MERCHANT COPY", "PICK LIST"]
 ARTSHOW_BLANK_BID_SHEET = "artshow/files/blank_bid_sheet.pdf"
 ARTSHOW_SCANNER_DEVICE = "/dev/ttyUSB0"
+ARTSHOW_SHOW_ALLOCATED_SPACES = True
+ARTSHOW_MAX_PIECE_ID = 99
 
 PEEPS_DEFAULT_COUNTRY = "USA"
 
 with env.prefixed('NORECAPTCHA_'):
     # Visit https://www.google.com/recaptcha/admin/create to create a keypair.
     # These are test keys.
-    NORECAPTCHA_SITE_KEY = \
-        env.str('SITE_KEY', default='6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI')
-    NORECAPTCHA_SECRET_KEY = \
-        env.str('SECRET_KEY', default='6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe')
+    NORECAPTCHA_SITE_KEY = env.str('SITE_KEY')
+    NORECAPTCHA_SECRET_KEY = env.str('SECRET_KEY')
+
+with env.prefixed('ARTSHOW_PAYPAL_'):
+    ARTSHOW_PAYPAL_ACCOUNT = env.str('ACCOUNT')
+    ARTSHOW_PAYPAL_URL = env.str('URL', 'https://www.paypal.com/cgi-bin/webscr')
+
+with env.prefixed('ARTSHOW_SQUARE_'):
+    ARTSHOW_SQUARE_APPLICATION_ID = env.str('APPLICATION_ID')
+    ARTSHOW_SQUARE_LOCATION_ID = env.str('LOCATION_ID')
+    ARTSHOW_SQUARE_ACCESS_TOKEN = env.str('ACCESS_TOKEN')
 
 SITE_ID = 1
 SITE_NAME = ARTSHOW_SHOW_NAME
-SITE_ROOT_URL = "http://www.example.com"
+SITE_ROOT_URL = 'https://artshow.furcon.org'
