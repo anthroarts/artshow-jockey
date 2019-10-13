@@ -4,7 +4,11 @@ services:
     build: .
     ports:
       - "8000:8000"
+    environment:
+      - DATABASE_URL=postgres://postgres@db/postgres
+  db:
+    image: "postgres:alpine"
     volumes:
-      - data:/data:rw
+      - db-data:/var/lib/postgresql/data
 volumes:
-  data:
+  db-data:
