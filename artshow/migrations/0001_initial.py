@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
                 ('notes', models.TextField(blank=True)),
             ],
             options={
-                'permissions': (('view_artist', 'Can view Piece details outside of Admin system.'), ('is_artshow_staff', 'Can do generic art-show functions.'), ('is_artshow_kiosk', 'Can do kiosk functions.')),
+                'permissions': (('is_artshow_staff', 'Can do generic art-show functions.'), ('is_artshow_kiosk', 'Can do kiosk functions.')),
             },
             bases=(models.Model,),
         ),
@@ -92,7 +92,6 @@ class Migration(migrations.Migration):
                 ('person', models.OneToOneField(to='peeps.Person', on_delete=models.CASCADE)),
             ],
             options={
-                'permissions': (('view_bidder', 'Can view Bidder details outside of Admin system.'),),
             },
             bases=(models.Model,),
         ),
@@ -163,7 +162,6 @@ class Migration(migrations.Migration):
                 ('payer', models.ForeignKey(to='artshow.Bidder', on_delete=models.CASCADE)),
             ],
             options={
-                'permissions': (('view_invoice', 'Can view Invoice details outside of Admin system.'),),
             },
             bases=(models.Model,),
         ),
@@ -200,7 +198,6 @@ class Migration(migrations.Migration):
                 ('date', models.DateField()),
             ],
             options={
-                'permissions': (('view_payment', 'Can view Payment details outside of Admin system.'),),
             },
             bases=(models.Model,),
         ),
@@ -212,7 +209,6 @@ class Migration(migrations.Migration):
                 ('payee', models.CharField(max_length=100, blank=True)),
             ],
             options={
-                'permissions': (('view_cheque', 'Can view Cheque details outside of Admin system.'),),
             },
             bases=('artshow.payment',),
         ),
@@ -251,7 +247,6 @@ class Migration(migrations.Migration):
                 ('artist', models.ForeignKey(to='artshow.Artist', on_delete=models.CASCADE)),
             ],
             options={
-                'permissions': (('view_piece', 'Can view Piece details outside of Admin system.'),),
             },
             bases=(models.Model,),
         ),

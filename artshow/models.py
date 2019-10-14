@@ -239,7 +239,6 @@ class Artist (models.Model):
 
     class Meta:
         permissions = (
-            ('view_artist', 'Can view Piece details outside of Admin system.'),
             ('is_artshow_staff', 'Can do generic art-show functions.'),
             ('is_artshow_kiosk', 'Can do kiosk functions.'),
         )
@@ -291,11 +290,6 @@ class Bidder (models.Model):
 
     def __str__(self):
         return "%s (%s)" % (self.person.name, ", ".join(self.bidder_ids()))
-
-    class Meta:
-        permissions = (
-            ('view_bidder', 'Can view Bidder details outside of Admin system.'),
-        )
 
 
 class BidderId (models.Model):
@@ -420,9 +414,6 @@ class Piece (models.Model):
                 self.save()
 
     class Meta:
-        permissions = (
-            ('view_piece', 'Can view Piece details outside of Admin system.'),
-        )
         unique_together = (
             ('artist', 'pieceid'),
         )
@@ -533,11 +524,6 @@ class Payment (models.Model):
     def __str__(self):
         return "%s (%s) %s %s" % (self.artist.artistname(), self.artist.artistid, self.amount, self.date)
 
-    class Meta:
-        permissions = (
-            ('view_payment', 'Can view Payment details outside of Admin system.'),
-        )
-
 
 class ChequePayment (Payment):
     number = models.CharField(max_length=10, blank=True)
@@ -561,11 +547,6 @@ class ChequePayment (Payment):
         dollars = int(amount)
         cents = int((amount - dollars) * 100 + Decimal("0.5"))
         return '%s dollars and %s cents' % (num2words(dollars), num2words(cents))
-
-    class Meta:
-        permissions = (
-            ('view_cheque', 'Can view Cheque details outside of Admin system.'),
-        )
 
 
 class Invoice (models.Model):
@@ -593,11 +574,6 @@ class Invoice (models.Model):
 
     def get_absolute_url(self):
         return reverse('artshow-cashier-invoice', args=[str(self.id)])
-
-    class Meta:
-        permissions = (
-            ('view_invoice', 'Can view Invoice details outside of Admin system.'),
-        )
 
 
 class InvoicePayment(models.Model):

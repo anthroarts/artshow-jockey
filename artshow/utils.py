@@ -99,7 +99,7 @@ def send_password_reset_email(artist, user, subject=None, template=None):
     c = {
         'artist': artist,
         'user': user,
-        'uid': urlsafe_base64_encode(force_bytes(user.id)).decode(),
+        'uid': urlsafe_base64_encode(force_bytes(user.id)),
         'token': default_token_generator.make_token(user),
         'artshow_settings': artshow_settings
     }
