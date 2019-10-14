@@ -38,7 +38,10 @@ except EnvError:
                 AWS_SES_CONFIGURATION_SET = env('CONFIGURATION_SET')
         EMAIL_BACKEND = 'django_ses.SESBackend'
     except EnvError:
-        EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+        if DEBUG:
+            EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+        else:
+            EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
 SERVER_EMAIL = 'artshow-jockey@furtherconfusion.org'
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
