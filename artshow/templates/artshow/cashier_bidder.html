@@ -4,7 +4,7 @@
     <ul class="breadcrumbs">
         <li><a href="/">Home</a></li>
         <li><a href="{% url 'artshow-cashier' %}">Cashier</a></li>
-        <li class="current">Showing Artists</li>
+        <li class="current">Bidder: {{ bidder.person.name }}</li>
     </ul>
 {% endblock %}
 {% block extra_head %}
