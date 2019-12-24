@@ -11,154 +11,156 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}artshow/cashierstyle.css" />
   <title>Bidder Information</title>
   <script src="{% static 'admin/js/vendor/jquery/jquery.min.js' %}"></script>
-  <script src="{% static 'artshow/bignumber.js' %}"></script>
+  <script src="{% static 'artshow/decimal.min.js' %}"></script>
   <script>
+	Decimal.set({ rounding: Decimal.ROUND_HALF_EVEN });
+
     payment_types = {{ payment_types_json|safe }};
-    function reset_to_remaining ( o ) {
+    function reset_to_remaining(o) {
 	    $(o).trigger("update");
     }
-    function removepayment ( o ) {
+    function removepayment(o) {
        var table = $($(o).parents('table')[0]);
-       $($(o).parents('tr')[0]).remove ();
+       $($(o).parents('tr')[0]).remove();
        table.trigger('update');
     }
-    $( function () {
-    	$('.selecttable').each ( function() {
+    $(function() {
+    	$('.selecttable').each(function() {
     		var selecttable = $(this);
     		var selectall = selecttable.find('.selectallcontrol');
     		var checkboxes = selecttable.find('.selectrow [type=checkbox]'); // TODO Not specific enough
-    		function autocheck_selectall () {
-    			selectall.prop ( 'checked', ! checkboxes.is ( ':not(:checked)' ) );
+    		function autocheck_selectall() {
+    			selectall.prop('checked', ! checkboxes.is(':not(:checked)'));
     		}
-    		selectall.change ( function (event) {
-    			checkboxes.prop ( 'checked', selectall.is(':checked') );
+    		selectall.change(function(event) {
+    			checkboxes.prop('checked', selectall.is(':checked'));
     			selecttable.trigger('update');
     			return true;
-    		} );
-    		checkboxes.change ( function(event) {
+    		});
+    		checkboxes.change(function(event) {
     			autocheck_selectall();
     			selecttable.trigger('update');
     			return true;
-    		} );
-    		autocheck_selectall ();
+    		});
+    		autocheck_selectall();
     	});
-    } );
-    $ ( function () {
-    	$('.purchasetable').each ( function () {
+    });
+    $(function() {
+    	$('.purchasetable').each(function() {
     		var purchasetable = $(this);
-    		var precision = Math.floor ( purchasetable.attr('precision') );
+    		var precision = Math.floor(purchasetable.attr('precision'));
     		var taxrate = purchasetable.attr('taxrate');
     		var amountclass = "." + purchasetable.attr('amountclass');
     		var subtotalfield = purchasetable.find('.subtotalfield');
     		var taxfield = purchasetable.find('.taxfield');
     		var totalfield = purchasetable.find('.totalfield');
-    		function update () {
-    			var subtotal = new BigNumber ( 0, precision, BigNumber.ROUND_FLOOR );
-    			purchasetable.find('.purchaseitem').each ( function() {
+    		function update() {
+    			var subtotal = new Decimal(0);
+    			purchasetable.find('.purchaseitem').each(function() {
     				var item = $(this);
-    				if ( item.find('[type=checkbox]').is(':checked') ) { // not specific enough
-	    				subtotal = subtotal.add ( item.find ( amountclass ).text() );
-	    				item.find('.money').removeClass ( 'excluded' );
+    				if (item.find('[type=checkbox]').is(':checked')) { // not specific enough
+	    				subtotal = subtotal.plus(new Decimal(item.find(amountclass).text()));
+	    				item.find('.money').removeClass('excluded');
     				} else {
-	    				item.find('.money').addClass ( 'excluded' );
+	    				item.find('.money').addClass('excluded');
     				}
     			});
-    			subtotalfield.text ( subtotal.toString(true) );
-    			var tax = subtotal.multiply ( taxrate );
-    			taxfield.text ( tax.toString(true) ).val ( tax.toString(true) ); // sets both innertext and values
-    			var total = subtotal.add ( tax );
-    			totalfield.text ( total.toString(true) );
-    			totalfield.trigger ( 'totalupdated' );
+    			subtotalfield.text(subtotal.toFixed(2));
+    			var tax = subtotal.times(taxrate);
+    			taxfield.text(tax.toFixed(2)).val(tax.toFixed(2)); // sets both innertext and values
+    			var total = subtotal.plus(tax);
+    			totalfield.text(total.toFixed(2));
+    			totalfield.trigger('totalupdated');
     		}
-    		purchasetable.bind ( 'update', update );
-    		update ();
+    		purchasetable.bind('update', update);
+    		update();
 
     	});
-    } );
-    $ ( function () {
+    });
+    $(function() {
     	$('.paymenttable').each(function() {
     		var paymenttable = $(this);
     		var totalfrom = $(document.getElementById(paymenttable.attr('totalfrom')));
-    		var precision = Math.floor ( paymenttable.attr('precision') );
+    		var precision = Math.floor(paymenttable.attr('precision'));
     		var formprefix = paymenttable.attr('formprefix');
     		var paymenttendered = paymenttable.find('.paymenttendered');
     		// var paymenttypes = {{ payment_types_json }};
     		var paymentrowtemplate = paymenttable.find('.paymentrowtemplate');
     		var paymentsgohere = paymenttable.find('.paymentsgohere');
     		var createinvoicebutton = paymenttable.find('.createinvoicebutton');
-    		function get_payment_remaining () {
-    			var acc = new BigNumber ( totalfrom.text(), precision, BigNumber.ROUND_FLOOR );
-    			paymenttable.find("[name$=-amount]").each ( function() {
-    				acc = acc.subtract ( $(this).val() );
+    		function get_payment_remaining() {
+    			var acc = new Decimal(totalfrom.text());
+    			paymenttable.find(".paymentrow").each(function() {
+    				acc = acc.minus(new Decimal($(this).find("[name$=-amount]").val()));
     			});
     			return acc;
     		}
-    		function get_total_tendered () {
-    			var acc = new BigNumber ( 0, precision, BigNumber.ROUND_FLOOR );
-    			paymenttable.find("[name$=-amount]").each ( function() {
-    				acc = acc.add ( $(this).val() );
+    		function get_total_tendered() {
+    			var acc = new Decimal(0);
+    			paymenttable.find(".paymentrow").each(function() {
+    				acc = acc.plus(new Decimal($(this).find("[name$=-amount]").val()));
     			});
     			return acc;
     		}
-    		function update () {
-    			paymenttable.find(".paymentrow").each ( function () {
+    		function update() {
+    			paymenttable.find(".paymentrow").each(function() {
     				var row=$(this);
-    				var amount=new BigNumber ( row.find("[name$=-amount]").val(), precision, BigNumber.ROUND_FLOOR );
+    				var amount=new Decimal(row.find("[name$=-amount]").val());
     				var notes=row.find("[name$=-notes]").val();
     				var type=row.find("[name$=-payment_method]").val();
-    				row.find(".paymenttypetext").text ( payment_types[type] );
-    				row.find(".paymentnotestext").text ( notes );
-    				row.find(".paymentamount").text ( amount.toString( true ) );
+    				row.find(".paymenttypetext").text(payment_types[type]);
+    				row.find(".paymentnotestext").text(notes);
+    				row.find(".paymentamount").text(amount.toFixed(2));
     			});
-    			var acc = get_total_tendered ();
-       			paymenttable.find(".totaltendered").text ( acc.toString( true ) );
-    			acc = get_payment_remaining ();
-       			paymenttable.find(".paymentremaining").text ( acc.toString( true ) );
-       			paymenttendered.val ( acc.toString ( true ) );
-       			createinvoicebutton.prop ( 'disabled', acc != 0 );
+    			var acc = get_total_tendered();
+       			paymenttable.find(".totaltendered").text(acc.toFixed(2));
+    			acc = get_payment_remaining();
+       			paymenttable.find(".paymentremaining").text(acc.toFixed(2));
+       			paymenttendered.val(acc.toFixed(2));
+       			createinvoicebutton.prop('disabled', acc != 0);
        			
     		}
-    		paymenttable.bind ( 'update', update );
-    		totalfrom.bind ( 'totalupdated', function() { paymenttable.trigger ( 'update' ); } );
+    		paymenttable.bind('update', update);
+    		totalfrom.bind('totalupdated', function() { paymenttable.trigger('update'); });
     		paymenttable.find('.paymentbutton').click(function(event) {
     			event.preventDefault();
     			paymenttendered.focus();
     			var paymenttype = Math.floor($(this).attr("paymenttype"));
-    			var amount = new BigNumber ( paymenttendered.val(), precision, BigNumber.ROUND_FLOOR );
-    			if ( amount <= 0 ) {
+    			var amount = new Decimal(paymenttendered.val());
+    			if (amount <= 0) {
     				return;
     			}
-    			var paymentremaining = get_payment_remaining ();
-    			var change = amount.subtract(paymentremaining);
-    			if ( change < 0 ) {
-    				change = new BigNumber ( 0, precision, BigNumber.ROUND_FLOOR );
+    			var paymentremaining = get_payment_remaining();
+    			var change = amount.minus(paymentremaining);
+    			if (change < 0) {
+    				change = new Decimal(0);
     			}
     			var notes = "";
-    			if ( paymenttype == 1 /* cash */ ) {
+    			if (paymenttype == 1 /* cash */) {
     				var tendered = amount;
-    				if ( change > 0 ) {
+    				if (change > 0) {
     					amount = paymentremaining;
-    					if ( ! window.confirm ( "Give " + change.toString(true) + " change " ) ) {
+    					if (! window.confirm("Give " + change.toFixed(2) + " change ")) {
 	    					return;
     					}
     				}
-    				notes = "tendered: " + tendered.toString(true) + "  change: " + change.toString(true);
+    				notes = "tendered: " + tendered.toFixed(2) + "  change: " + change.toFixed(2);
     			} else {
-	    			if ( change > 0 ) {
-		    			window.alert ( "Amount cannot be larger than payment remaining." );
+	    			if (change > 0) {
+		    			window.alert("Amount cannot be larger than payment remaining.");
 		    			return;
 	    			}
-	    			if ( paymenttype == 2 /* check */ ) {
-	    				if ( ! window.confirm ( "Ask for Identification. Does it match?" ) ) {
+	    			if (paymenttype == 2 /* check */) {
+	    				if (!window.confirm("Ask for Identification. Does it match?")) {
 		    				return;
 	    				}
-	    			} else if ( paymenttype == 3 /* card */ ) {
-	    				if ( ! window.confirm ( "Charge card amount " + amount.toString(true) + "\nWas this sucesssful?" ) ) {
+	    			} else if (paymenttype == 3 /* card */) {
+	    				if (!window.confirm("Charge card amount " + amount.toFixed(2) + "\nWas this sucesssful?")) {
 		    				return;
 	    				}
-	    			} else if ( paymenttype == 4 /* other */ ) {
-	    				notes = window.prompt ( "Enter details of payment." );
-	    				if ( ! notes ) {
+	    			} else if (paymenttype == 4 /* other */) {
+	    				notes = window.prompt("Enter details of payment.");
+	    				if (!notes) {
 		    				return;
 	    				}
 	    			} else {
@@ -173,29 +175,29 @@
     			newrow.find("[name$=-notes]").val(notes);
     			newrow.find("[name$=-amount]").val(amount);
     			paymentsgohere.before(newrow);
-    			update ();    			
+    			update();    			
     		});
     		paymenttable.find("[type=submit]").click(function(event) {
-    			console.log ( 'clicked submit button' );
-    			var acc = get_payment_remaining ();
-    			if ( acc != 0 ) {
-    				window.alert ( "Payment remaining must be zero before invoice can be created." );
+    			console.log('clicked submit button');
+    			var acc = get_payment_remaining();
+    			if (acc != 0) {
+    				window.alert("Payment remaining must be zero before invoice can be created.");
     				return false;
     			}
     			var paymentrows = paymenttable.find(".paymentrow");
     			paymentrows.each(function(index) {
     				var row=$(this);
-    				row.find("[name$=-payment_method]").attr ( 'name', formprefix + "-" + index + "-payment_method" );
-    				row.find("[name$=-notes]").attr ( 'name', formprefix + "-" + index + "-notes" );
-    				row.find("[name$=-amount]").attr ( 'name', formprefix + "-" + index + "-amount" );
+    				row.find("[name$=-payment_method]").attr('name', formprefix + "-" + index + "-payment_method");
+    				row.find("[name$=-notes]").attr('name', formprefix + "-" + index + "-notes");
+    				row.find("[name$=-amount]").attr('name', formprefix + "-" + index + "-amount");
     			});
-    			console.log ( 'paymentrows', paymentrows, paymentrows.length );
-    			paymenttable.find('[name$=-TOTAL_FORMS]').val ( paymentrows.length );
+    			console.log('paymentrows', paymentrows, paymentrows.length);
+    			paymenttable.find('[name$=-TOTAL_FORMS]').val(paymentrows.length);
     			return true;
     		});
-    		update ();
+    		update();
     	});
-    } );
+    });
   </script>
 {% endblock %}
 {% block content %}
