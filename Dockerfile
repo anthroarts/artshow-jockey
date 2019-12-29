@@ -19,7 +19,7 @@ RUN mkdir /data \
  && mkdir /run/nginx \
  && python manage.py collectstatic
 
-EXPOSE 80/tcp
+EXPOSE 8000/tcp
 CMD ["/usr/local/bin/supervisord", "-c", "/code/supervisord.conf"]
 
 FROM build as test
