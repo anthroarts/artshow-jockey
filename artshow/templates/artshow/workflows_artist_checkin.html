@@ -28,7 +28,7 @@
     {% for form in formset %}
     {% if form.non_field_errors %}
     <tr>
-        <td colspan="8">{{ form.non_field_errors }}</td>
+        <td colspan="10">{{ form.non_field_errors }}</td>
     </tr>
     {% endif %}
     <tr>{{ form.id.errors }}{{ form.id }}{{ form.artist.errors }}{{ form.artist }}
