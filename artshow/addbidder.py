@@ -124,16 +124,20 @@ class BidAddForm (forms.Form):
             if bidder:
                 self._errors['bidder'] = self.error_class(["Bidder not permitted for type \"%s\"" % type_text])
                 del cleaned_data['bidder']
+                return cleaned_data
             if amount:
                 self._errors['amount'] = self.error_class(["Amount not permitted for type \"%s\"" % type_text])
                 del cleaned_data['amount']
+                return cleaned_data
         else:
             if not bidder:
                 self._errors['bidder'] = self.error_class(["Bidder required for type \"%s\"" % type_text])
                 del cleaned_data['type']
+                return cleaned_data
             if not amount:
                 self._errors['amount'] = self.error_class(["Amount required for type \"%s\"" % type_text])
                 del cleaned_data['amount']
+                return cleaned_data
 
         if bidder is not None:
             try:
@@ -164,7 +168,7 @@ class BidAddOptionsForm (forms.Form):
 def finalize_bid(stage, piece, bid_type):
 
     assert stage in ('mid', 'close', 'final')
-    assert bid_type in ('normal', 'buynow', 'auction')
+    assert bid_type in ('nobids', 'normal', 'buynow', 'auction')
 
     if bid_type == 'auction':
         # If the piece was already set voice_auction, leave it that way.
@@ -176,6 +180,10 @@ def finalize_bid(stage, piece, bid_type):
     if (piece.status == Piece.StatusInShow
         and (stage == 'final'
              or (stage == 'close' and bid_type in ('normal', 'buynow')))):
+        piece.status = Piece.StatusWon
+
+    if (piece.status == Piece.StatusInShow and piece.voice_auction
+            and stage == 'final' and bid_type == 'nobids'):
         piece.status = Piece.StatusWon
 
     piece.save()

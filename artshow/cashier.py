@@ -115,6 +115,7 @@ def cashier_bidder(request, bidder_id):
 
             if len(selected_bids) == 0:
                 items_form._errors['__all__'] = items_form.error_class(["Invoice must contain at least one item"])
+                payment_formset.items_total = total = Decimal(0)
             else:
                 subtotal = sum([bid.amount for bid in selected_bids], Decimal(0))
                 tax_paid = items_form.cleaned_data['tax_paid']
