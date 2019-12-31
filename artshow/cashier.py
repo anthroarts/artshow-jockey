@@ -14,11 +14,11 @@ from .conf import settings
 from django.core.exceptions import ValidationError
 from decimal import Decimal
 import logging
-import datetime
 from . import invoicegen
 from . import pdfreports
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
+from django.utils import timezone
 import json
 from .conf import _DISABLED as SETTING_DISABLED
 
@@ -126,7 +126,7 @@ def cashier_bidder(request, bidder_id):
 
                     logger.debug("payment formset passed")
 
-                    invoice = Invoice(payer=bidder, tax_paid=tax_paid, paid_date=datetime.datetime.now(),
+                    invoice = Invoice(payer=bidder, tax_paid=tax_paid, paid_date=timezone.now(),
                                       created_by=request.user)
                     invoice.save()
                     payments = payment_formset.save(commit=False)

@@ -7,7 +7,6 @@ __all__ = ["Allocation", "Artist", "ArtistManager", "BatchScan", "Bid", "Bidder"
            "InvoicePayment", "Payment", "PaymentType", "Piece", "Product", "Space", "Task",
            "Agent", "validate_space", "validate_space_increments"]
 
-from datetime import datetime
 from decimal import Decimal
 
 from django.db import models
@@ -16,6 +15,7 @@ from django.db.models.functions import Coalesce
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.utils import timezone
 
 from num2words import num2words
 
@@ -190,7 +190,7 @@ class Artist (models.Model):
             payment = Payment(artist=self, amount=-total,
                               payment_type=payment_type,
                               description=allocated_spaces_str,
-                              date=datetime.now())
+                              date=timezone.now())
             payment.save()
 
     def apply_winnings_and_commission(self):
@@ -218,14 +218,14 @@ class Artist (models.Model):
                                   total_pieces != 1 and "s" or "",
                                   pieces_with_bids,
                                   pieces_with_bids != 1 and "s" or ""),
-                              date=datetime.now())
+                              date=timezone.now())
             payment.save()
         if commission > 0:
             payment = Payment(artist=self, amount=-commission,
                               payment_type=pt_commission,
                               description="%s%% of sales" % (
                                   Decimal(settings.ARTSHOW_COMMISSION) * 100),
-                              date=datetime.now())
+                              date=timezone.now())
             payment.save()
 
     def create_cheque(self):
@@ -233,7 +233,7 @@ class Artist (models.Model):
         balance = self.payment_set.aggregate(balance=Sum('amount'))['balance']
         if balance and balance > 0:
             chq = ChequePayment(artist=self, payment_type=pt_paymentsent,
-                                amount=-balance, date=datetime.now())
+                                amount=-balance, date=timezone.now())
             chq.clean()
             chq.save()
 

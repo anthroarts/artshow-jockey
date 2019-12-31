@@ -4,11 +4,11 @@
 # See file COPYING for licence details
 
 from .models import BatchScan, Piece, Bid, BidderId, Bidder
-import datetime
 import re
 from django.apps import apps
 from django.db.models.query import transaction
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from .conf import settings
 
 
@@ -364,7 +364,7 @@ def process_batchscan(id):
     if not batchscan.original_data:
         batchscan.original_data = batchscan.data
         batchscan.save()
-    now = datetime.datetime.now()
+    now = timezone.now()
     if batchscan.processed:
         log_str = "%s\nAlready Processed" % now
         batchscan.processing_log = log_str
