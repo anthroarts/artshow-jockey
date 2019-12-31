@@ -79,6 +79,9 @@ def set_bids(piece, data):
                 except BidderId.DoesNotExist:
                     return error_response('bidder', 'Invalid bidder ID', i)
 
+                if not bidderid.bidder:
+                    return error_response('bidder', 'Unassigned bidder ID', i)
+
                 amount = Decimal(bids[i]['bid'])
                 buy_now_bid = bool(bids[i]['buy_now_bid'])
 

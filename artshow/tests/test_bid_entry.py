@@ -27,6 +27,9 @@ class BidEntryTests(TestCase):
         bidderid = BidderId(id='0365327', bidder=bidder)
         bidderid.save()
 
+        unassigned_bidderid = BidderId(id='0019')
+        unassigned_bidderid.save()
+
         # Piece 1-1 has no bids and is not marked in show yet.
         piece = Piece(artist=artist, pieceid=1, min_bid=5, buy_now=50)
         piece.save()
@@ -112,6 +115,25 @@ class BidEntryTests(TestCase):
                 'field': 'bidder',
                 'index': 1,
                 'message': 'Invalid bidder ID',
+            }
+        }
+        self.assertEqual(response.json(), expected)
+
+    def test_unassigned_bidder_id(self):
+        data = {
+            'bids': [
+                {'bidder': '0019',
+                 'bid': 10,
+                 'buy_now_bid': False},
+            ],
+            'location': '1A',
+        }
+        response = self.postJson('/artshow/entry/bids/1/1/', data)
+        expected = {
+            'error': {
+                'field': 'bidder',
+                'index': 0,
+                'message': 'Unassigned bidder ID',
             }
         }
         self.assertEqual(response.json(), expected)
