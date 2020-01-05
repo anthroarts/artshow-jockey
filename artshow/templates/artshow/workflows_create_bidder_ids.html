@@ -1,0 +1,39 @@
+{% extends "artshow/base_generic.html" %}
+{% block title %}Create Bidder IDs{% endblock %}
+{% block breadcrumbs %}
+    <ul class="breadcrumbs">
+      <li><a href="{% url 'artshow-home' %}">Home</a></li>
+      <li><a href="{% url 'artshow-workflows' %}">Workflows</a></li>
+      <li class="current">Create Bidder IDs</li>
+    </ul>
+{% endblock %}
+{% block content %}
+<table>
+  <tr>
+    <td>Total IDs</td>
+    <td>{{ total_ids }}</td>
+  </tr>
+  <tr>
+    <td>First ID</td>
+    <td>{{ first_id }}</td>
+  </tr>
+  <tr>
+    <td>First Used ID</td>
+    <td>{{ first_used_id }}</td>
+  </tr>
+  <tr>
+    <td>Last ID</td>
+    <td>{{ last_id }}</td>
+  </tr>
+  <tr>
+    <td>Last Used ID</td>
+    <td>{{ last_used_id }}</td>
+  </tr>
+</table>
+<p>
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create Bidder IDs</button>
+  </form>
+</p>
+{% endblock %}

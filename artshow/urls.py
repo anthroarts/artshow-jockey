@@ -106,6 +106,8 @@ urlpatterns = [
         name='artshow-workflow-bidder-lookup'),
     url(r'^workflows/bidder/(?P<pk>\d+)/$', addbidder.bidder_detail,
         name='artshow-workflow-bidder'),
+    url(r'^workflows/create_ids/$', workflows.create_bidder_ids,
+        name='artshow-workflow-create-bidder-ids'),
     url(r'^workflows/close/$', workflows.close_show,
         name='artshow-workflow-close-show'),
     url(r'^workflows/printing/cheques/$', workflows.print_cheques,

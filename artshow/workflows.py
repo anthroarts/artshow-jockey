@@ -9,7 +9,8 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from .conf import settings
-from .models import Artist, ChequePayment, Piece
+from .mod11codes import make_check
+from .models import Artist, BidderId, ChequePayment, Piece
 
 
 @permission_required('artshow.is_artshow_staff')
@@ -321,6 +322,68 @@ def artist_print_checkout_control_form(request, artistid):
                             kwargs={'artistid': artist.artistid}),
     }
     return render(request, 'artshow/control_form.html', c)
+
+
+class CreateBidderIdsForm(forms.Form):
+    num_ids = forms.IntegerField(label="New IDs")
+
+
+@permission_required('artshow.is_artshow_staff')
+def create_bidder_ids(request):
+    total_ids = BidderId.objects.count()
+    try:
+        last_id = BidderId.objects.latest('id').id
+    except BidderId.DoesNotExist:
+        last_id = None
+
+    if request.method == 'POST':
+        form = CreateBidderIdsForm(request.POST)
+        if form.is_valid():
+            desired_ids = total_ids + form.cleaned_data['num_ids']
+            if last_id is None:
+                value = 1
+            else:
+                value = int(last_id[:-1]) + 1
+
+            new_ids = []
+            while total_ids < desired_ids:
+                code = '%0*d' % (3, value)
+                value += 1
+                check = make_check(code, offset=settings.ARTSHOW_BIDDERID_MOD11_OFFSET)
+                if check == 'X':
+                    continue
+
+                last_id = code + check
+                new_ids.append(BidderId(id=last_id))
+                total_ids += 1
+            BidderId.objects.bulk_create(new_ids)
+    else:
+        form = CreateBidderIdsForm()
+
+    try:
+        first_id = BidderId.objects.earliest('id').id
+    except BidderId.DoesNotExist:
+        first_id = None
+
+    try:
+        first_used_id = BidderId.objects.filter(bidder__isnull=False).earliest('id').id
+    except BidderId.DoesNotExist:
+        first_used_id = None
+
+    try:
+        last_used_id = BidderId.objects.filter(bidder__isnull=False).latest('id').id
+    except BidderId.DoesNotExist:
+        last_used_id = None
+
+    c = {
+        'total_ids': total_ids,
+        'first_id': first_id,
+        'first_used_id': first_used_id,
+        'last_id': last_id,
+        'last_used_id': last_used_id,
+        'form': form,
+    }
+    return render(request, 'artshow/workflows_create_bidder_ids.html', c)
 
 
 @permission_required('artshow.is_artshow_staff')
