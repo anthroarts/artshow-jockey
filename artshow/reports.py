@@ -34,6 +34,25 @@ def winning_bidders(request):
 
 
 @permission_required('artshow.is_artshow_staff')
+def unsold_pieces(request):
+    bidders = Bidder.objects.all().annotate(first_bidderid=Min('bidderid')).order_by('first_bidderid')
+    data = []
+    for bidder in bidders:
+        bids = bidder.top_bids(unsold_only=True)
+        if len(bids) == 0:
+            continue
+        data.append({
+            'id': bidder.id,
+            'name': str(bidder),
+            'phone': bidder.person.phone,
+            'email': bidder.person.email,
+            'row_height': len(bids) + 1,
+            'top_bids': bids,
+        })
+    return render(request, 'artshow/reports-unsold-pieces.html', {'bidders': data})
+
+
+@permission_required('artshow.is_artshow_staff')
 def artist_piece_report(request, artist_id):
     artist = Artist.objects.get(id=artist_id)
     pieces = artist.piece_set.all()

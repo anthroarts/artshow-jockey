@@ -1,0 +1,37 @@
+{% extends "artshow/base_generic.html" %}
+{% block breadcrumbs %}
+    <ul class="breadcrumbs">
+        <li><a href="/">Home</a></li>
+        <li><a href="{% url 'artshow-reports' %}">Reports</a></li>
+        <li class="current">Unsold Pieces</li>
+    </ul>
+{% endblock %}
+{% block content %}
+    <table>
+        <thead>
+        <tr class="header">
+            <th>Bidder</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Amount</th>
+            <th>Notes</th>
+        </tr>
+        </thead>
+        {% for bidder in bidders %}
+            <tbody>
+                <tr>
+                    <td class="bidder" rowspan="{{ bidder.row_height }}"><a href="{% url 'admin:artshow_bidder_change' bidder.id %}">{{ bidder.name }}</a></td>
+                    <td>{{ bidder.phone }}</td>
+                    <td colspan="3">{{ bidder.email }}</td>
+                </tr>
+            {% for bid in bidder.top_bids %}
+                <tr>
+                    <td colspan="2">{{ bid.piece.code }} - <i>{{ bid.piece.name }}</i> by {{ bid.piece.artist.artistname }}</td>
+                    <td>{{ bid.amount }}</td>
+                    <td>{{ bid.piece.voice_auction|yesno:"Voice Auction," }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        {% endfor %}
+    </table>
+{% endblock %}

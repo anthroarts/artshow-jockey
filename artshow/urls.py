@@ -37,6 +37,8 @@ urlpatterns = [
     url(r'^reports/artists/$', reports.artists, name='artshow-report-artists'),
     url(r'^reports/winning-bidders/$', reports.winning_bidders,
         name='artshow-report-winning-bidders'),
+    url(r'^reports/unsold-pieces/$', reports.unsold_pieces,
+        name='artshow-report-unsold-pieces'),
     url(r'^reports/artist-panel-report/$', reports.artist_panel_report,
         name='artshow-report-artist-to-panel'),
     url(r'^reports/panel-artist-report/$', reports.panel_artist_report,
