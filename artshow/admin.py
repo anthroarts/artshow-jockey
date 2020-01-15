@@ -423,6 +423,7 @@ class PieceAdmin(admin.ModelAdmin):
             return obj.min_bid
 
     min_bid_x.short_description = "min bid"
+    min_bid_x.admin_order_field = "min_bid"
 
     def buy_now_x(self, obj):
         if obj.buy_now is None:
@@ -431,6 +432,8 @@ class PieceAdmin(admin.ModelAdmin):
             return obj.buy_now
 
     buy_now_x.short_description = "buy now"
+    buy_now_x.admin_order_field = "buy_now"
+
     list_filter = ('adult', 'not_for_sale', 'voice_auction', 'status')
     search_fields = ('=code', '=artist__artistid', 'name', '=location', 'artist__person__name', 'artist__publicname')
     list_display = (
