@@ -16,4 +16,4 @@ class ReportTests(TestCase):
         c = Client()
         c.login(username='test', password='test')
         response = c.get(reverse('artshow-summary'))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
