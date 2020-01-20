@@ -220,7 +220,7 @@ class BidderSearchForm(forms.Form):
     text = forms.CharField(label="Search Text")
 
 
-@permission_required('artshow.add_bidder_id')
+@permission_required('artshow.is_artshow_staff')
 def find_bidder(request):
     search_executed = False
     if request.method == "POST":
