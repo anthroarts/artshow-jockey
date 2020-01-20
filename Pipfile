@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "==2.2.*"
+django = "*"
 django-ajax-selects = "*"
 django-appconf = "*"
 django-formtools = "*"
