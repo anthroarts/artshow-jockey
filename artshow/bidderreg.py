@@ -4,6 +4,7 @@ from django import forms
 from django.apps import apps
 from django.contrib.auth.decorators import permission_required
 from django.shortcuts import get_object_or_404, render, redirect, reverse
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from formtools.wizard.views import CookieWizardView
 from .conf import settings
 from .models import Bidder, BidderId
@@ -150,6 +151,7 @@ wizard_view = permission_required('artshow.is_artshow_kiosk')(
 
 
 @permission_required('artshow.is_artshow_kiosk')
+@xframe_options_sameorigin
 def bidder_agreement(request, pk):
     bidder = get_object_or_404(Bidder, pk=pk)
     return render(request, "artshow/bidder_agreement.html", {

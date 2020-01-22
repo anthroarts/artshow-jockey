@@ -19,6 +19,7 @@ from . import pdfreports
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.utils import timezone
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 import json
 from .conf import _DISABLED as SETTING_DISABLED
 
@@ -194,6 +195,7 @@ def cashier_invoice(request, invoice_id):
 
 
 @permission_required('artshow.add_invoice')
+@xframe_options_sameorigin
 def cashier_print_invoice(request, invoice_id):
     invoice = get_object_or_404(Invoice, pk=invoice_id)
     has_reproduction_rights = invoice.invoiceitem_set \
