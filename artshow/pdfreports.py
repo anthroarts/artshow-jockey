@@ -2,7 +2,7 @@
 # Copyright (C) 2009, 2010 Chris Cogdon
 # See file COPYING for licence details
 
-from cgi import escape
+from html import escape
 
 from django.db.models import Min
 from django.shortcuts import get_object_or_404
