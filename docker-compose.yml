@@ -2,13 +2,22 @@ version: '3'
 services:
   web:
     build: .
+    depends_on: 
+      - db
+      - broker
     ports:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgres://postgres@db/postgres
+      - BROKER_URL=amqp://broker
   db:
     image: "postgres:alpine"
     volumes:
       - db-data:/var/lib/postgresql/data
+  broker:
+    image: "rabbitmq"
+    volumes:
+      - broker-data:/var/lib/rabbitmq
 volumes:
   db-data:
+  broker-data:
