@@ -46,6 +46,17 @@ except EnvError:
 SERVER_EMAIL = 'artshow-jockey@furtherconfusion.org'
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_BROKER_URL = env.str('BROKER_URL', default='amqp://')
+
+# Configure mail sent with the backend above to go through the Celery task
+# queue.
+CELERY_EMAIL_BACKEND = EMAIL_BACKEND
+EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
+CELERY_EMAIL_TASK_CONFIG = {
+    'ignore_result': False,
+}
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -162,6 +173,8 @@ INSTALLED_APPS = (
     'artshow',
     'ajax_select',
     'tinyannounce',
+    'django_celery_results',
+    'djcelery_email',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
