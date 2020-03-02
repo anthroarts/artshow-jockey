@@ -53,9 +53,6 @@ CELERY_BROKER_URL = env.str('BROKER_URL', default='amqp://')
 # queue.
 CELERY_EMAIL_BACKEND = EMAIL_BACKEND
 EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
-CELERY_EMAIL_TASK_CONFIG = {
-    'ignore_result': False,
-}
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
