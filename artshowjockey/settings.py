@@ -29,13 +29,12 @@ try:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 except EnvError:
     try:
-        with env.prefixed('AWS_'):
-            AWS_ACCESS_KEY_ID = env('ACCESS_KEY_ID')
-            AWS_SECRET_ACCESS_KEY = env('SECRET_ACCESS_KEY')
-            with env.prefixed('SES_'):
-                AWS_SES_REGION_NAME = env('REGION_NAME')
-                AWS_SES_REGION_ENDPOINT = env('REGION_ENDPOINT')
-                AWS_SES_CONFIGURATION_SET = env('CONFIGURATION_SET')
+        with env.prefixed('AWS_SES_'):
+            AWS_SES_ACCESS_KEY_ID = env('ACCESS_KEY_ID')
+            AWS_SES_SECRET_ACCESS_KEY = env('SECRET_ACCESS_KEY')
+            AWS_SES_REGION_NAME = env('REGION_NAME')
+            AWS_SES_REGION_ENDPOINT = env('REGION_ENDPOINT')
+            AWS_SES_CONFIGURATION_SET = env('CONFIGURATION_SET')
         EMAIL_BACKEND = 'django_ses.SESBackend'
     except EnvError:
         if DEBUG:
@@ -46,8 +45,12 @@ except EnvError:
 SERVER_EMAIL = 'artshow-jockey@furtherconfusion.org'
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
-CELERY_RESULT_BACKEND = 'django-db'
 CELERY_BROKER_URL = env.str('BROKER_URL', default='amqp://')
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'queue_name_prefix':
+        env.str('CELERY_QUEUE_PREFIX', default='artshowjockey-'),
+}
 
 # Configure mail sent with the backend above to go through the Celery task
 # queue.
