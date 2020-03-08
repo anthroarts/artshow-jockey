@@ -29,13 +29,12 @@ try:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 except EnvError:
     try:
-        with env.prefixed('AWS_'):
+        with env.prefixed('AWS_SES_'):
             AWS_ACCESS_KEY_ID = env('ACCESS_KEY_ID')
             AWS_SECRET_ACCESS_KEY = env('SECRET_ACCESS_KEY')
-            with env.prefixed('SES_'):
-                AWS_SES_REGION_NAME = env('REGION_NAME')
-                AWS_SES_REGION_ENDPOINT = env('REGION_ENDPOINT')
-                AWS_SES_CONFIGURATION_SET = env('CONFIGURATION_SET')
+            AWS_SES_REGION_NAME = env('REGION_NAME')
+            AWS_SES_REGION_ENDPOINT = env('REGION_ENDPOINT')
+            AWS_SES_CONFIGURATION_SET = env('CONFIGURATION_SET')
         EMAIL_BACKEND = 'django_ses.SESBackend'
     except EnvError:
         if DEBUG:
