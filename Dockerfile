@@ -7,8 +7,8 @@ WORKDIR /code
 
 # Install native dependencies.
 RUN pip install --upgrade pip pipenv \
- && apk add --no-cache jpeg libpq nginx zlib \
- && apk add --no-cache --virtual .build-deps build-base jpeg-dev postgresql-dev python-dev zlib-dev
+ && apk add --no-cache jpeg libcurl libpq nginx zlib \
+ && apk add --no-cache --virtual .build-deps build-base curl-dev jpeg-dev postgresql-dev python-dev zlib-dev
 
 COPY Pipfile Pipfile.lock /code/
 RUN pipenv install --system

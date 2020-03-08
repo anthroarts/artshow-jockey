@@ -22,6 +22,7 @@ requests = "*"
 psycopg2 = "*"
 supervisor = "*"
 environs = {extras = ["django"],version = "*"}
+celery = {extras = ["sqs"],version = "*"}
 
 [dev-packages]
 "flake8" = "*"
