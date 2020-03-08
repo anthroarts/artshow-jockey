@@ -48,7 +48,8 @@ DEFAULT_FROM_EMAIL = SERVER_EMAIL
 CELERY_BROKER_URL = env.str('BROKER_URL', default='amqp://')
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_BROKER_TRANSPORT_OPTIONS = {
-    'queue_name_prefix': env.str('CELERY_QUEUE_PREFIX', default='artshowjockey-'),
+    'queue_name_prefix':
+        env.str('CELERY_QUEUE_PREFIX', default='artshowjockey-'),
 }
 
 # Configure mail sent with the backend above to go through the Celery task
