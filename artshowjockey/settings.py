@@ -46,20 +46,11 @@ except EnvError:
 SERVER_EMAIL = 'artshow-jockey@furtherconfusion.org'
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
+CELERY_BROKER_URL = env.str('BROKER_URL', default='amqp://')
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_BROKER_TRANSPORT_OPTIONS = {
     'queue_name_prefix': env.str('CELERY_QUEUE_PREFIX', default='artshow-'),
 }
-
-try:
-    from kombu.utils.url import safequote
-
-    aws_access_key = safequote(env.str('AWS_ACCESS_KEY_ID'))
-    aws_secret_key = safequote(env.str('AWS_SECRET_ACCESS_KEY'))
-
-    CELERY_BROKER_URL = f'sqs://{aws_access_key}:{aws_secret_key}@'
-except EnvError:
-    CELERY_BROKER_URL = env.str('BROKER_URL', default='amqp://')
 
 # Configure mail sent with the backend above to go through the Celery task
 # queue.
