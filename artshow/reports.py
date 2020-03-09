@@ -3,7 +3,7 @@
 # See file COPYING for licence details
 from decimal import Decimal
 from django.shortcuts import render
-from django.db.models import Sum, Min, F, Count, Value as V
+from django.db.models import Count, F, Max, Min, Q, Sum, Value as V
 from django.db.models.functions import Coalesce
 from django.contrib.auth.decorators import permission_required
 from .models import (
@@ -91,61 +91,51 @@ def artist_payment_report(request):
 
 
 def get_summary_statistics():
+    max_valid_bid = Max('bid__amount', filter=Q(bid__invalid=False))
+    has_bid = Q(top_bid__isnull=False)
+    general_rating = Q(adult=False)
+    adult_rating = Q(adult=True)
+    piece_showing = ~Q(status__in=[Piece.StatusNotInShow, Piece.StatusNotInShowLocked])
+    voice_auction = Q(voice_auction=True)
+    silent_auction = Q(voice_auction=False)
 
-    pieces = Piece.objects.all()
+    piece_stats = Piece.objects.annotate(top_bid=max_valid_bid).aggregate(
+        pieces_entered_all=Count('pk'),
+        pieces_entered_general=Count('pk', filter=general_rating),
+        pieces_entered_adult=Count('pk', filter=adult_rating),
+        pieces_showing_all=Count('pk', filter=piece_showing),
+        pieces_showing_general=Count('pk', filter=piece_showing & general_rating),
+        pieces_showing_adult=Count('pk', filter=piece_showing & adult_rating),
+        bids_all=Count('pk', filter=has_bid),
+        bids_general=Count('pk', filter=has_bid & general_rating),
+        bids_adult=Count('pk', filter=has_bid & adult_rating),
+        pieces_va_all=Count('pk', filter=voice_auction),
+        pieces_va_general=Count('pk', filter=voice_auction & general_rating),
+        pieces_va_adult=Count('pk', filter=voice_auction & adult_rating),
+        bidamt_all=Sum('top_bid'),
+        bidamt_general=Sum('top_bid', filter=general_rating),
+        bidamt_adult=Sum('top_bid', filter=adult_rating),
+        bidamt_va_all=Sum('top_bid', filter=voice_auction),
+        bidamt_va_general=Sum('top_bid', filter=voice_auction & general_rating),
+        bidamt_va_adult=Sum('top_bid', filter=voice_auction & adult_rating),
+        highest_amt_all=Max('top_bid'),
+        highest_amt_general=Max('top_bid', filter=general_rating),
+        highest_amt_adult=Max('top_bid', filter=adult_rating),
+        highest_amt_va_all=Max('top_bid', filter=voice_auction),
+        highest_amt_va_general=Max('top_bid', filter=voice_auction & general_rating),
+        highest_amt_va_adult=Max('top_bid', filter=voice_auction & adult_rating),
+        highest_amt_sa_all=Max('top_bid', filter=silent_auction),
+        highest_amt_sa_general=Max('top_bid', filter=silent_auction & general_rating),
+        highest_amt_sa_adult=Max('top_bid', filter=silent_auction & adult_rating),
+    )
 
-    class Stats:
-        pieces_entered = 0
-        pieces_showing = 0
-        bids = 0
-        pieces_va = 0
-        bidamt = 0
-        bidamt_va = 0
-        highest_amt = 0
-        highest_amt_va = 0
-        highest_amt_sa = 0
-
-    all_stats = Stats()
-    general_stats = Stats()
-    adult_stats = Stats()
-
-    for p in pieces:
-        section_stats = adult_stats if p.adult else general_stats
-        all_stats.pieces_entered += 1
-        section_stats.pieces_entered += 1
-        # TODO we might need to cover other cases here
-        if p.status not in [Piece.StatusNotInShow, Piece.StatusNotInShowLocked]:
-            all_stats.pieces_showing += 1
-            section_stats.pieces_showing += 1
-        try:
-            top_bid = p.top_bid()
-            all_stats.bids += 1
-            section_stats.bids += 1
-            all_stats.bidamt += top_bid.amount
-            section_stats.bidamt += top_bid.amount
-            all_stats.highest_amt = max(all_stats.highest_amt, top_bid.amount)
-            section_stats.highest_amt = max(section_stats.highest_amt, top_bid.amount)
-            if p.voice_auction:
-                all_stats.pieces_va += 1
-                section_stats.pieces_va += 1
-                all_stats.bidamt_va += top_bid.amount
-                section_stats.bidamt_va += top_bid.amount
-                all_stats.highest_amt_va = max(all_stats.highest_amt_va, top_bid.amount)
-                section_stats.highest_amt_va = max(section_stats.highest_amt_va, top_bid.amount)
-            else:
-                all_stats.highest_amt_sa = max(all_stats.highest_amt_sa, top_bid.amount)
-                section_stats.highest_amt_sa = max(section_stats.highest_amt_sa, top_bid.amount)
-        except Bid.DoesNotExist:
-            pass
-
-    artists = Artist.objects.all()
-    num_artists = num_showing_artists = num_active_artists = 0
-    for a in artists:
-        num_artists += 1
-        if a.is_showing():
-            num_showing_artists += 1
-        if a.is_active():
-            num_active_artists += 1
+    artist_stats = Artist.objects.annotate(
+        num_requested=Sum('allocation__requested'),
+        num_allocated=Sum('allocation__allocated')).aggregate(
+        count=Count('pk'),
+        count_active=Count('pk', filter=Q(num_requested__gt=0)),
+        count_showing=Count('pk', filter=Q(num_allocated__gt=0))
+    )
 
     payment_types = PaymentType.objects.annotate(total_payments=Coalesce(Sum('payment__amount'), V(0)))
     total_payments = sum([pt.total_payments for pt in payment_types])
@@ -156,9 +146,10 @@ def get_summary_statistics():
 
     invoice_payments = InvoicePayment.objects.values('payment_method').annotate(total=Sum('amount'))
     payment_method_choice_dict = dict(InvoicePayment.PAYMENT_METHOD_CHOICES)
+    total_invoice_payments = Decimal(0)
     for ip in invoice_payments:
         ip['payment_method_desc'] = payment_method_choice_dict[ip['payment_method']]
-    total_invoice_payments = InvoicePayment.objects.aggregate(total=Sum('amount'))['total'] or Decimal(0)
+        total_invoice_payments += ip['total']
 
     spaces = Space.objects.annotate(
         requested=Coalesce(Sum('allocation__requested'), V(0)),
@@ -189,10 +180,8 @@ def get_summary_statistics():
     # all_invoices = Invoice.objects.aggregate ( Sum('tax_paid'), Sum('invoicepayment__amount') )
 
     return {
-        'all_stats': all_stats,
-        'general_stats': general_stats,
-        'adult_stats': adult_stats,
-        'num_showing_artists': num_showing_artists,
+        'piece_stats': piece_stats,
+        'artist_stats': artist_stats,
         'payment_types': payment_types,
         'total_payments': total_payments,
         'tax_paid': tax_paid,
@@ -202,8 +191,6 @@ def get_summary_statistics():
         'invoice_payments': invoice_payments,
         'spaces': spaces,
         'total_spaces': total_spaces,
-        'num_artists': num_artists,
-        'num_active_artists': num_active_artists
     }
 
 
