@@ -11,13 +11,13 @@
 
     <table>
         <tr>
-            <th>Artists Registered</th><td>{{ num_artists }}</td>
+            <th>Artists Registered</th><td>{{ artist_stats.count }}</td>
         </tr>
         <tr>
-            <th>Artists Active (Requested Space)</th><td>{{ num_active_artists }}</td>
+            <th>Artists Active (Requested Space)</th><td>{{ artist_stats.count_active }}</td>
         </tr>
         <tr>
-            <th>Artists Showing (Allocated Space)</th><td>{{ num_showing_artists }}</td>
+            <th>Artists Showing (Allocated Space)</th><td>{{ artist_stats.count_showing }}</td>
         </tr>
     </table>
     <br/>
@@ -50,57 +50,57 @@
         </tr>
         <tr>
             <th>Number of Pieces Entered</th>
-            <td align="right">{{ all_stats.pieces_entered }}</td>
-            <td align="right">{{ general_stats.pieces_entered }}</td>
-            <td align="right">{{ adult_stats.pieces_entered }}</td>
+            <td align="right">{{ piece_stats.pieces_entered_all }}</td>
+            <td align="right">{{ piece_stats.pieces_entered_general }}</td>
+            <td align="right">{{ piece_stats.pieces_entered_adult }}</td>
         </tr>
         <tr>
             <th>Number of Pieces Showing</th>
-            <td align="right">{{ all_stats.pieces_showing }}</td>
-            <td align="right">{{ general_stats.pieces_showing }}</td>
-            <td align="right">{{ adult_stats.pieces_showing }}</td>
+            <td align="right">{{ piece_stats.pieces_showing_all }}</td>
+            <td align="right">{{ piece_stats.pieces_showing_general }}</td>
+            <td align="right">{{ piece_stats.pieces_showing_adult }}</td>
         </tr>
         <tr>
             <th>Pieces with Bids</th>
-            <td align="right">{{ all_stats.bids }}</td>
-            <td align="right">{{ general_stats.bids }}</td>
-            <td align="right">{{ adult_stats.bids }}</td>
+            <td align="right">{{ piece_stats.bids_all }}</td>
+            <td align="right">{{ piece_stats.bids_general }}</td>
+            <td align="right">{{ piece_stats.bids_adult }}</td>
         </tr>
         <tr>
             <th>Pieces in Voice Auction</th>
-            <td align="right">{{ all_stats.pieces_va }}</td>
-            <td align="right">{{ general_stats.pieces_va }}</td>
-            <td align="right">{{ adult_stats.pieces_va }}</td>
+            <td align="right">{{ piece_stats.pieces_va_all }}</td>
+            <td align="right">{{ piece_stats.pieces_va_general }}</td>
+            <td align="right">{{ piece_stats.pieces_va_adult }}</td>
         </tr>
         <tr>
             <th>Total Bid Amounts</th>
-            <td align="right">${{ all_stats.bidamt|stringformat:"0.2f" }}</td>
-            <td align="right">${{ general_stats.bidamt|stringformat:"0.2f" }}</td>
-            <td align="right">${{ adult_stats.bidamt|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.bidamt_all|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.bidamt_general|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.bidamt_adult|stringformat:"0.2f" }}</td>
         </tr>
         <tr>
             <th>Bid Amounts in Voice Auction</th>
-            <td align="right">${{ all_stats.bidamt_va|stringformat:"0.2f" }}</td>
-            <td align="right">${{ general_stats.bidamt_va|stringformat:"0.2f" }}</td>
-            <td align="right">${{ adult_stats.bidamt_va|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.bidamt_va_all|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.bidamt_va_general|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.bidamt_va_adult|stringformat:"0.2f" }}</td>
         </tr>
         <tr>
             <th>Highest Bid</th>
-            <td align="right">${{ all_stats.highest_amt|stringformat:"0.2f" }}</td>
-            <td align="right">${{ general_stats.highest_amt|stringformat:"0.2f" }}</td>
-            <td align="right">${{ adult_stats.highest_amt|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.highest_amt_all|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.highest_amt_general|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.highest_amt_adult|stringformat:"0.2f" }}</td>
         </tr>
         <tr>
             <th>Highest Bid in Voice Auction</th>
-            <td align="right">${{ all_stats.highest_amt_va|stringformat:"0.2f" }}</td>
-            <td align="right">${{ general_stats.highest_amt_va|stringformat:"0.2f" }}</td>
-            <td align="right">${{ adult_stats.highest_amt_va|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.highest_amt_va_all|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.highest_amt_va_general|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.highest_amt_va_adult|stringformat:"0.2f" }}</td>
         </tr>
         <tr>
             <th>Highest Bid in Silent Auction</th>
-            <td align="right">${{ all_stats.highest_amt_sa|stringformat:"0.2f" }}</td>
-            <td align="right">${{ general_stats.highest_amt_sa|stringformat:"0.2f" }}</td>
-            <td align="right">${{ adult_stats.highest_amt_sa|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.highest_amt_sa_all|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.highest_amt_sa_general|stringformat:"0.2f" }}</td>
+            <td align="right">${{ piece_stats.highest_amt_sa_adult|stringformat:"0.2f" }}</td>
         </tr>
     </table>
     <br/>
