@@ -3,11 +3,13 @@
 # See file COPYING for licence details
 from decimal import Decimal
 from django.shortcuts import render
-from django.db.models import Count, F, Max, Min, Q, Sum, Value as V
+from django.db.models import (
+    Count, Exists, F, Max, Min, OuterRef, Q, Subquery, Sum, Value as V
+)
 from django.db.models.functions import Coalesce
 from django.contrib.auth.decorators import permission_required
 from .models import (
-    Allocation, Artist, Bid, Bidder, Invoice, InvoiceItem, InvoicePayment,
+    Allocation, Artist, Bid, Bidder, BidderId, Invoice, InvoiceItem, InvoicePayment,
     PaymentType, Piece, Space
 )
 
@@ -29,8 +31,43 @@ def artists(request):
 
 @permission_required('artshow.is_artshow_staff')
 def winning_bidders(request):
-    bidders = Bidder.objects.all().annotate(first_bidderid=Min('bidderid')).order_by('first_bidderid')
-    return render(request, 'artshow/reports-winning-bidders.html', {'bidders': bidders})
+    bidder_ids = BidderId.objects.filter(
+        bidder__isnull=False
+    ).order_by('bidder', 'id')
+    winning_bid_query = Bid.objects.filter(
+        piece=OuterRef('pk'), invalid=False).order_by('-amount')
+    pieces = Piece.objects.values(
+        'code', 'name', 'artist__publicname', 'artist__person__name',
+        'voice_auction'
+    ).filter(Exists(winning_bid_query)).annotate(
+        winning_bidder=Subquery(winning_bid_query.values('bidder')[:1]),
+        winning_bid=Subquery(winning_bid_query.values('amount')[:1])
+    ).order_by('winning_bidder', 'artist', 'pieceid')
+
+    bidders = []
+    last_bidder = None
+    for bidder_id in bidder_ids:
+        if last_bidder != bidder_id.bidder_id:
+            bidders.append({
+                'bidder': bidder_id.bidder_id,
+                'bidder_ids': [bidder_id.id],
+                'pieces': [],
+            })
+            last_bidder = bidder_id.bidder_id
+        else:
+            bidders[-1]['bidder_ids'].append(bidder_id.id)
+
+    bidder_index = 0
+    for piece in pieces:
+        assert piece['winning_bidder'] >= bidders[bidder_index]['bidder']
+        while piece['winning_bidder'] != bidders[bidder_index]['bidder']:
+            bidder_index += 1
+        bidders[bidder_index]['pieces'].append(piece)
+
+    bidders.sort(key=lambda bidder: bidder['bidder_ids'][0])
+
+    return render(request, 'artshow/reports-winning-bidders.html',
+                  {'bidders': bidders})
 
 
 @permission_required('artshow.is_artshow_staff')
