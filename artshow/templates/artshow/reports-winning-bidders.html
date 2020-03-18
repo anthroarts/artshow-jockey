@@ -18,16 +18,16 @@
         </thead>
         {% for bidder in bidders %}
             <tbody>
-            {% for bid in bidder.top_bids %}
+            {% for piece in bidder.pieces %}
                 <tr>
-                    {% if forloop.first %}<th class="bidder" rowspan="{{ bidder.top_bids|length }}">{{ bidder.bidder_ids|join:", " }}</th>{% endif %}
-                    <td>{{ bid.piece.code }} - <i>{{ bid.piece.name }}</i> by {{ bid.piece.artist.artistname }}</td>
-                    <td>{{ bid.amount }}</td>
-                    <td>{{ bid.piece.voice_auction|yesno:"Voice Auction," }}</td>
+                    {% if forloop.first %}<th class="bidder" rowspan="{{ bidder.pieces|length }}">{{ bidder.bidder_ids|join:", " }}</th>{% endif %}
+                    <td>{{ piece.code }} - <i>{{ piece.name }}</i> by {% firstof piece.artist__publicname piece.artist__person__name %}</td>
+                    <td>{{ piece.winning_bid }}</td>
+                    <td>{{ piece.voice_auction|yesno:"Voice Auction," }}</td>
                 </tr>
             {% empty %}
                 <tr>
-                    <th class="bidder" rowspan="{{ bidder.top_bids.count }}">{{ bidder.bidder_ids|join:", " }}</th>
+                    <th class="bidder">{{ bidder.bidder_ids|join:", " }}</th>
                     <td colspan="3">No winning bids</td>
                 </tr>
             {% endfor %}
