@@ -4,12 +4,12 @@
 from decimal import Decimal
 from django.shortcuts import render
 from django.db.models import (
-    Count, Exists, F, Max, Min, OuterRef, Q, Subquery, Sum, Value as V
+    Count, Exists, F, Max, OuterRef, Q, Subquery, Sum, Value as V
 )
 from django.db.models.functions import Coalesce
 from django.contrib.auth.decorators import permission_required
 from .models import (
-    Allocation, Artist, Bid, Bidder, BidderId, Invoice, InvoiceItem, InvoicePayment,
+    Allocation, Artist, Bid, BidderId, Invoice, InvoiceItem, InvoicePayment,
     PaymentType, Piece, Space
 )
 
@@ -72,21 +72,41 @@ def winning_bidders(request):
 
 @permission_required('artshow.is_artshow_staff')
 def unsold_pieces(request):
-    bidders = Bidder.objects.all().annotate(first_bidderid=Min('bidderid')).order_by('first_bidderid')
-    data = []
-    for bidder in bidders:
-        bids = bidder.top_bids(unsold_only=True)
-        if len(bids) == 0:
-            continue
-        data.append({
-            'id': bidder.id,
-            'name': str(bidder),
-            'phone': bidder.person.phone,
-            'email': bidder.person.email,
-            'row_height': len(bids) + 1,
-            'top_bids': bids,
-        })
-    return render(request, 'artshow/reports-unsold-pieces.html', {'bidders': data})
+    winning_bid_query = Bid.objects.filter(
+        piece=OuterRef('pk'), invalid=False).order_by('-amount')
+    pieces = Piece.objects.values(
+        'code', 'name', 'artist__publicname', 'artist__person__name',
+        'voice_auction'
+    ).filter(status=Piece.StatusWon).filter(
+        Exists(winning_bid_query)
+    ).annotate(
+        winning_bidder=Subquery(winning_bid_query.values('bidder')[:1]),
+        winning_bidder_name=Subquery(
+            winning_bid_query.values('bidder__person__name')[:1]),
+        winning_bidder_phone=Subquery(
+            winning_bid_query.values('bidder__person__phone')[:1]),
+        winning_bidder_email=Subquery(
+            winning_bid_query.values('bidder__person__email')[:1]),
+        winning_bid=Subquery(winning_bid_query.values('amount')[:1])
+    ).order_by('winning_bidder', 'artist', 'pieceid')
+
+    bidders = []
+    last_bidder = None
+    for piece in pieces:
+        if last_bidder != piece['winning_bidder']:
+            bidders.append({
+                'id': piece['winning_bidder'],
+                'name': piece['winning_bidder_name'],
+                'phone': piece['winning_bidder_phone'],
+                'email': piece['winning_bidder_email'],
+                'pieces': [piece],
+            })
+            last_bidder = piece['winning_bidder']
+        else:
+            bidders[-1]['pieces'].append(piece)
+
+    return render(request, 'artshow/reports-unsold-pieces.html',
+                  {'bidders': bidders})
 
 
 @permission_required('artshow.is_artshow_staff')
