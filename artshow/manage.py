@@ -10,7 +10,7 @@ from django.utils.timezone import now
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from .models import (
-    Allocation, Artist, Payment, PaymentType, Piece, Space, validate_space,
+    Allocation, Artist, Payment, Piece, Space, validate_space,
     validate_space_increments
 )
 from django import forms
@@ -339,12 +339,9 @@ def make_payment(request, artist_id):
     if request.method == "POST":
         form = PaymentForm(request.POST)
         if form.is_valid():
-            payment_pending = PaymentType(id=settings.ARTSHOW_PAYMENT_PENDING_PK)
-            payment_received = PaymentType(id=settings.ARTSHOW_PAYMENT_RECEIVED_PK)
-
             payment = Payment(artist=artist,
                               amount=form.cleaned_data["amount"],
-                              payment_type=payment_pending,
+                              payment_type_id=settings.ARTSHOW_PAYMENT_PENDING_PK,
                               description="",
                               date=now())
 
@@ -357,7 +354,7 @@ def make_payment(request, artist_id):
 
             transaction = square.charge(payment, form.cleaned_data["nonce"])
             if transaction:
-                payment.payment_type = payment_received
+                payment.payment_type_id = settings.ARTSHOW_PAYMENT_RECEIVED_PK
                 payment.description = "Square " + transaction
                 payment.save()
                 return redirect(reverse("artshow-manage-payment-square",
