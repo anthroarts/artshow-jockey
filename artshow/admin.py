@@ -247,8 +247,7 @@ class ArtistAdmin(AjaxSelectAdmin):
         Artist.apply_space_fees(artists)
 
     def apply_winnings_and_commission(self, request, artists):
-        for a in artists:
-            a.apply_winnings_and_commission()
+        Artist.apply_winnings_and_commission(artists)
 
     def create_cheques(self, request, artists):
         for a in artists:

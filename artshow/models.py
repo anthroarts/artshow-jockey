@@ -10,7 +10,7 @@ __all__ = ["Allocation", "Artist", "ArtistManager", "BatchScan", "Bid", "Bidder"
 from decimal import Decimal
 
 from django.db import models
-from django.db.models import Sum, Q, Value as V
+from django.db.models import Count, Max, Sum, Q, Value as V
 from django.db.models.functions import Coalesce
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -176,12 +176,14 @@ class Artist (models.Model):
                 self.artistid = 1
         super(Artist, self).save(**kwargs)
 
+    @staticmethod
     def apply_space_fees(artists):
         Payment.objects.filter(
             payment_type_id=settings.ARTSHOW_SPACE_FEE_PK,
             artist__in=artists).delete()
 
-        allocations = Allocation.objects.filter(artist__in=artists).select_related('space').order_by('artist')
+        allocations = Allocation.objects.filter(
+            artist__in=artists).select_related('space').order_by('artist')
         artist_id = None
         total = 0
         allocated_spaces = []
@@ -211,41 +213,44 @@ class Artist (models.Model):
         make_payment()
         Payment.objects.bulk_create(payments)
 
-    def apply_winnings_and_commission(self):
-        self.payment_set.filter(
+    @staticmethod
+    def apply_winnings_and_commission(artists):
+        Payment.objects.filter(
             payment_type_id__in=(settings.ARTSHOW_SALES_PK,
-                                 settings.ARTSHOW_COMMISSION_PK)
+                                 settings.ARTSHOW_COMMISSION_PK),
+            artist__in=artists,
         ).delete()
-        total_winnings = 0
-        total_pieces = 0
-        pieces_with_bids = 0
-        for piece in self.piece_set.all():
-            if piece.status != Piece.StatusNotInShow:
-                total_pieces += 1
-            try:
-                top_bid = piece.top_bid()
-                total_winnings += top_bid.amount
-                pieces_with_bids += 1
-            except Bid.DoesNotExist:
-                pass
-        commission = total_winnings * Decimal(settings.ARTSHOW_COMMISSION)
-        if total_pieces > 0:
-            payment = Payment(artist=self, amount=total_winnings,
-                              payment_type_id=settings.ARTSHOW_SALES_PK,
-                              description="%d piece%s, %d with bid%s" % (
-                                  total_pieces,
-                                  total_pieces != 1 and "s" or "",
-                                  pieces_with_bids,
-                                  pieces_with_bids != 1 and "s" or ""),
-                              date=timezone.now())
-            payment.save()
-        if commission > 0:
-            payment = Payment(artist=self, amount=-commission,
-                              payment_type_id=settings.ARTSHOW_COMMISSION_PK,
-                              description="%s%% of sales" % (
-                                  Decimal(settings.ARTSHOW_COMMISSION) * 100),
-                              date=timezone.now())
-            payment.save()
+
+        artists = artists.annotate(
+            pieces=Count('piece'),
+            pieces_with_bids=Count('piece', filter=Q(piece__bid__invalid=False)),
+        )
+        payments = []
+        for artist in artists:
+            artist.winnings = Piece.objects.filter(artist=artist).annotate(
+                top_bid=Max('bid__amount', filter=Q(bid__invalid=False))
+            ).aggregate(winnings=Sum('top_bid'))['winnings']
+            if artist.pieces > 0:
+                payments.append(
+                    Payment(artist=artist, amount=artist.winnings,
+                            payment_type_id=settings.ARTSHOW_SALES_PK,
+                            description="%d piece%s, %d with bid%s" % (
+                                artist.pieces,
+                                artist.pieces != 1 and "s" or "",
+                                artist.pieces_with_bids,
+                                artist.pieces_with_bids != 1 and "s" or ""),
+                            date=timezone.now()))
+
+            commission = artist.winnings * Decimal(settings.ARTSHOW_COMMISSION)
+            if commission > 0:
+                payments.append(
+                    Payment(artist=artist, amount=-commission,
+                            payment_type_id=settings.ARTSHOW_COMMISSION_PK,
+                            description="%s%% of sales" % (
+                                Decimal(settings.ARTSHOW_COMMISSION) * 100),
+                            date=timezone.now()))
+
+        Payment.objects.bulk_create(payments)
 
     def create_cheque(self):
         balance = self.payment_set.aggregate(balance=Sum('amount'))['balance']
