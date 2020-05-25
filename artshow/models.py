@@ -136,10 +136,9 @@ class Artist (models.Model):
         total_requested_cost = Decimal(0)
         for a in self.allocation_set.all():
             total_requested_cost += a.space.price * a.requested
-        space_fee = PaymentType(id=settings.ARTSHOW_SPACE_FEE_PK)
         # Deductions from accounts are always negative, so we re-negate it.
         deduction_to_date = - (
-            self.payment_set.filter(payment_type=space_fee).aggregate(amount=Sum("amount"))["amount"] or 0)
+            self.payment_set.filter(payment_type_id=settings.ARTSHOW_SPACE_FEE_PK).aggregate(amount=Sum("amount"))["amount"] or 0)
         deduction_remaining = max(total_requested_cost - deduction_to_date, 0)
         return total_requested_cost, deduction_to_date, deduction_remaining
 
@@ -178,8 +177,8 @@ class Artist (models.Model):
         super(Artist, self).save(**kwargs)
 
     def apply_space_fees(self):
-        payment_type = PaymentType.objects.get(pk=settings.ARTSHOW_SPACE_FEE_PK)
-        self.payment_set.filter(payment_type=payment_type).delete()
+        self.payment_set.filter(
+            payment_type_id=settings.ARTSHOW_SPACE_FEE_PK).delete()
         total = 0
         for alloc in self.allocation_set.all():
             total += alloc.space.price * alloc.allocated
@@ -188,15 +187,16 @@ class Artist (models.Model):
                 "%s:%s" % (al.space.shortname, al.allocated)
                 for al in self.allocation_set.all())
             payment = Payment(artist=self, amount=-total,
-                              payment_type=payment_type,
+                              payment_type_id=settings.ARTSHOW_SPACE_FEE_PK,
                               description=allocated_spaces_str,
                               date=timezone.now())
             payment.save()
 
     def apply_winnings_and_commission(self):
-        pt_winning = PaymentType.objects.get(pk=settings.ARTSHOW_SALES_PK)
-        pt_commission = PaymentType.objects.get(pk=settings.ARTSHOW_COMMISSION_PK)
-        self.payment_set.filter(payment_type__in=(pt_winning, pt_commission)).delete()
+        self.payment_set.filter(
+            payment_type_id__in=(settings.ARTSHOW_SALES_PK,
+                                 settings.ARTSHOW_COMMISSION_PK)
+        ).delete()
         total_winnings = 0
         total_pieces = 0
         pieces_with_bids = 0
@@ -212,7 +212,7 @@ class Artist (models.Model):
         commission = total_winnings * Decimal(settings.ARTSHOW_COMMISSION)
         if total_pieces > 0:
             payment = Payment(artist=self, amount=total_winnings,
-                              payment_type=pt_winning,
+                              payment_type_id=settings.ARTSHOW_SALES_PK,
                               description="%d piece%s, %d with bid%s" % (
                                   total_pieces,
                                   total_pieces != 1 and "s" or "",
@@ -222,18 +222,20 @@ class Artist (models.Model):
             payment.save()
         if commission > 0:
             payment = Payment(artist=self, amount=-commission,
-                              payment_type=pt_commission,
+                              payment_type_id=settings.ARTSHOW_COMMISSION_PK,
                               description="%s%% of sales" % (
                                   Decimal(settings.ARTSHOW_COMMISSION) * 100),
                               date=timezone.now())
             payment.save()
 
     def create_cheque(self):
-        pt_paymentsent = PaymentType.objects.get(pk=settings.ARTSHOW_PAYMENT_SENT_PK)
         balance = self.payment_set.aggregate(balance=Sum('amount'))['balance']
         if balance and balance > 0:
-            chq = ChequePayment(artist=self, payment_type=pt_paymentsent,
-                                amount=-balance, date=timezone.now())
+            chq = ChequePayment(
+                artist=self,
+                payment_type_id=settings.ARTSHOW_PAYMENT_SENT_PK,
+                amount=-balance,
+                date=timezone.now())
             chq.clean()
             chq.save()
 
@@ -534,7 +536,7 @@ class ChequePayment (Payment):
             self.payee = self.artist.chequename()
         if self.amount >= 0:
             raise ValidationError("Cheque amounts are a payment outbound and must be negative")
-        self.payment_type = PaymentType.objects.get(pk=settings.ARTSHOW_PAYMENT_SENT_PK)
+        self.payment_type_id = settings.ARTSHOW_PAYMENT_SENT_PK
         self.description = "Cheque %s Payee %s" % (self.number and "#" + self.number or "pending number", self.payee)
 
     @property

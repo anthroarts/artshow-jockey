@@ -407,9 +407,9 @@ def close_show(request):
             continue
 
         if artist.payment_set.filter(
-                payment_type__pk__in=(settings.ARTSHOW_SPACE_FEE_PK,
-                                      settings.ARTSHOW_COMMISSION_PK,
-                                      settings.ARTSHOW_SALES_PK)).exists():
+                payment_type_id__in=(settings.ARTSHOW_SPACE_FEE_PK,
+                                     settings.ARTSHOW_COMMISSION_PK,
+                                     settings.ARTSHOW_SALES_PK)).exists():
             artists_processed += 1
             continue
 
