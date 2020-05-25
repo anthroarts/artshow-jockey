@@ -2,7 +2,9 @@ from decimal import Decimal
 
 from django.contrib.admin.sites import AdminSite
 from django.conf import settings
-from django.test import TestCase
+from django.contrib.auth.models import Permission, User
+from django.test import Client, TestCase
+from django.urls import reverse
 
 from ..admin import ArtistAdmin
 from ..models import (
@@ -14,16 +16,10 @@ class MockRequest:
     pass
 
 
-request = MockRequest()
-
-
-class ArtistAdminTest(TestCase):
+class ArtistTest(TestCase):
     fixtures = ['artshowpaymenttypes', 'artshowspaces']
 
     def setUp(self):
-        site = AdminSite()
-        self.admin = ArtistAdmin(Artist, site)
-
         person = Person()
         person.save()
 
@@ -96,22 +92,27 @@ class ArtistAdminTest(TestCase):
         bid.save()
 
     def test_apply_space_fees(self):
-        self.admin.apply_space_fees(request, Artist.objects.all())
+        Artist.apply_space_fees(Artist.objects.all())
 
         self.assertEqual(Payment.objects.count(), 2)
 
-        payment = Payment.objects.get(artist=self.artist_1)
+        payment = Payment.objects.get(
+            artist=self.artist_1,
+            payment_type_id=settings.ARTSHOW_SPACE_FEE_PK)
         self.assertEqual(payment.amount, Decimal(-35))  # 2 * $10 + 1.5 * $10
         self.assertEqual(payment.payment_type.name, 'Space Fee')
         self.assertEqual(payment.description, 'GP:2.0, GT:1.5')
 
+        payment = Payment.objects.get(
+            artist=self.artist_2,
+            payment_type_id=settings.ARTSHOW_SPACE_FEE_PK)
         payment = Payment.objects.get(artist=self.artist_2)
         self.assertEqual(payment.amount, Decimal(-40))  # 3 * $10 + 1 * $10
         self.assertEqual(payment.payment_type.name, 'Space Fee')
         self.assertEqual(payment.description, 'AP:3.0, AT:1.0')
 
     def test_apply_winnings_and_commission(self):
-        self.admin.apply_winnings_and_commission(request, Artist.objects.all())
+        Artist.apply_winnings_and_commission(Artist.objects.all())
 
         self.assertEqual(Payment.objects.count(), 4)
 
@@ -140,9 +141,13 @@ class ArtistAdminTest(TestCase):
         self.assertEqual(commission.description, '10.0% of sales')
 
     def test_create_cheques(self):
+        site = AdminSite()
+        admin = ArtistAdmin(Artist, site)
+        request = MockRequest()
+
         # Don't apply space fees so that the payment is positive.
-        self.admin.apply_winnings_and_commission(request, Artist.objects.all())
-        self.admin.create_cheques(request, Artist.objects.all())
+        Artist.apply_winnings_and_commission(Artist.objects.all())
+        admin.create_cheques(request, Artist.objects.all())
 
         self.assertEqual(Payment.objects.count(), 6)
 
@@ -155,3 +160,58 @@ class ArtistAdminTest(TestCase):
             artist=self.artist_2,
             payment_type_id=settings.ARTSHOW_PAYMENT_SENT_PK)
         self.assertEqual(cheque.amount, Decimal(-18))
+
+    def test_close_show(self):
+        user = User.objects.create_user(
+            username='test', email='test@example.com', password='test')
+        permission = Permission.objects.get(codename='is_artshow_staff')
+        user.user_permissions.add(permission)
+        user.save()
+
+        c = Client()
+        c.login(username='test', password='test')
+        response = c.get(reverse('artshow-workflow-close-show'))
+        self.assertEqual(response.status_code, 200)
+
+        response = c.post(reverse('artshow-workflow-close-show'))
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(Payment.objects.count(), 6)
+
+        payment = Payment.objects.get(
+            artist=self.artist_1,
+            payment_type_id=settings.ARTSHOW_SPACE_FEE_PK)
+        self.assertEqual(payment.amount, Decimal(-35))  # 2 * $10 + 1.5 * $10
+        self.assertEqual(payment.payment_type.name, 'Space Fee')
+        self.assertEqual(payment.description, 'GP:2.0, GT:1.5')
+
+        winnings = Payment.objects.get(
+            artist=self.artist_1,
+            payment_type_id=settings.ARTSHOW_SALES_PK)
+        self.assertEqual(winnings.amount, Decimal(10))
+        self.assertEqual(winnings.description, '2 pieces, 1 with bid')
+
+        commission = Payment.objects.get(
+            artist=self.artist_1,
+            payment_type_id=settings.ARTSHOW_COMMISSION_PK)
+        self.assertEqual(commission.amount, Decimal(-1))
+        self.assertEqual(commission.description, '10.0% of sales')
+
+        payment = Payment.objects.get(
+            artist=self.artist_2,
+            payment_type_id=settings.ARTSHOW_SPACE_FEE_PK)
+        self.assertEqual(payment.amount, Decimal(-40))  # 3 * $10 + 1 * $10
+        self.assertEqual(payment.payment_type.name, 'Space Fee')
+        self.assertEqual(payment.description, 'AP:3.0, AT:1.0')
+
+        winnings = Payment.objects.get(
+            artist=self.artist_2,
+            payment_type_id=settings.ARTSHOW_SALES_PK)
+        self.assertEqual(winnings.amount, Decimal(20))
+        self.assertEqual(winnings.description, '2 pieces, 1 with bid')
+
+        commission = Payment.objects.get(
+            artist=self.artist_2,
+            payment_type_id=settings.ARTSHOW_COMMISSION_PK)
+        self.assertEqual(commission.amount, Decimal(-2))
+        self.assertEqual(commission.description, '10.0% of sales')
