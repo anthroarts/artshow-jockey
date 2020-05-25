@@ -176,21 +176,40 @@ class Artist (models.Model):
                 self.artistid = 1
         super(Artist, self).save(**kwargs)
 
-    def apply_space_fees(self):
-        self.payment_set.filter(
-            payment_type_id=settings.ARTSHOW_SPACE_FEE_PK).delete()
+    def apply_space_fees(artists):
+        Payment.objects.filter(
+            payment_type_id=settings.ARTSHOW_SPACE_FEE_PK,
+            artist__in=artists).delete()
+
+        allocations = Allocation.objects.filter(artist__in=artists).select_related('space').order_by('artist')
+        artist_id = None
         total = 0
-        for alloc in self.allocation_set.all():
-            total += alloc.space.price * alloc.allocated
-        if total > 0:
-            allocated_spaces_str = ", ".join(
-                "%s:%s" % (al.space.shortname, al.allocated)
-                for al in self.allocation_set.all())
-            payment = Payment(artist=self, amount=-total,
-                              payment_type_id=settings.ARTSHOW_SPACE_FEE_PK,
-                              description=allocated_spaces_str,
-                              date=timezone.now())
-            payment.save()
+        allocated_spaces = []
+        payments = []
+
+        def make_payment():
+            if artist_id is None or total == 0:
+                return
+
+            payments.append(Payment(artist_id=artist_id, amount=-total,
+                                    payment_type_id=settings.ARTSHOW_SPACE_FEE_PK,
+                                    description=', '.join(allocated_spaces),
+                                    date=timezone.now()))
+
+        for allocation in allocations:
+            if artist_id != allocation.artist_id:
+                make_payment()
+
+                artist_id = allocation.artist_id
+                total = 0
+                allocated_spaces = []
+
+            total += allocation.space.price * allocation.allocated
+            if total > 0:
+                allocated_spaces.append(f'{allocation.space.shortname}:{allocation.allocated}')
+
+        make_payment()
+        Payment.objects.bulk_create(payments)
 
     def apply_winnings_and_commission(self):
         self.payment_set.filter(

@@ -244,8 +244,7 @@ class ArtistAdmin(AjaxSelectAdmin):
     print_piece_stickers.short_description = "Print Piece Stickers"
 
     def apply_space_fees(self, request, artists):
-        for a in artists:
-            a.apply_space_fees()
+        Artist.apply_space_fees(artists)
 
     def apply_winnings_and_commission(self, request, artists):
         for a in artists:

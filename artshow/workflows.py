@@ -414,7 +414,7 @@ def close_show(request):
             continue
 
         if request.method == 'POST':
-            artist.apply_space_fees()
+            Artist.apply_space_fees([artist])
             artist.apply_winnings_and_commission()
             artist.create_cheque()
             artists_processed += 1
