@@ -250,8 +250,7 @@ class ArtistAdmin(AjaxSelectAdmin):
         Artist.apply_winnings_and_commission(artists)
 
     def create_cheques(self, request, artists):
-        for a in artists:
-            a.create_cheque()
+        Artist.create_cheques(artists)
 
     # noinspection PyUnusedLocal
     def allocate_spaces(self, request, artists):

@@ -252,16 +252,18 @@ class Artist (models.Model):
 
         Payment.objects.bulk_create(payments)
 
-    def create_cheque(self):
-        balance = self.payment_set.aggregate(balance=Sum('amount'))['balance']
-        if balance and balance > 0:
-            chq = ChequePayment(
-                artist=self,
-                payment_type_id=settings.ARTSHOW_PAYMENT_SENT_PK,
-                amount=-balance,
-                date=timezone.now())
-            chq.clean()
-            chq.save()
+    @staticmethod
+    def create_cheques(artists):
+        artists = artists.annotate(balance=Sum('payment__amount'))
+        for artist in artists:
+            if artist.balance and artist.balance > 0:
+                chq = ChequePayment(
+                    artist=artist,
+                    payment_type_id=settings.ARTSHOW_PAYMENT_SENT_PK,
+                    amount=-artist.balance,
+                    date=timezone.now())
+                chq.clean()
+                chq.save()
 
     class Meta:
         permissions = (
