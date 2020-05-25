@@ -1,19 +1,13 @@
 from decimal import Decimal
 
-from django.contrib.admin.sites import AdminSite
 from django.conf import settings
 from django.contrib.auth.models import Permission, User
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from ..admin import ArtistAdmin
 from ..models import (
     Allocation, Artist, Bid, Bidder, BidderId, Payment, Piece, Space)
 from peeps.models import Person
-
-
-class MockRequest:
-    pass
 
 
 class ArtistTest(TestCase):
@@ -141,13 +135,9 @@ class ArtistTest(TestCase):
         self.assertEqual(commission.description, '10.0% of sales')
 
     def test_create_cheques(self):
-        site = AdminSite()
-        admin = ArtistAdmin(Artist, site)
-        request = MockRequest()
-
         # Don't apply space fees so that the payment is positive.
         Artist.apply_winnings_and_commission(Artist.objects.all())
-        admin.create_cheques(request, Artist.objects.all())
+        Artist.create_cheques(Artist.objects.all())
 
         self.assertEqual(Payment.objects.count(), 6)
 

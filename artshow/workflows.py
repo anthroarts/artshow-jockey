@@ -417,7 +417,7 @@ def close_show(request):
             artist_queryset = Artist.objects.filter(pk=artist.pk)
             Artist.apply_space_fees(artist_queryset)
             Artist.apply_winnings_and_commission(artist_queryset)
-            artist.create_cheque()
+            Artist.create_cheques(artist_queryset)
             artists_processed += 1
         else:
             artists_remaining += 1
