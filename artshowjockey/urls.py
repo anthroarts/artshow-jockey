@@ -11,7 +11,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^artshow/', include('artshow.urls')),
     url(r'^manage/', include('artshow.manage_urls')),
-    url(r'^peeps/', include('peeps.urls')),
     url(r'^accounts/', include('tinyreg.urls')),
     url(r'^$', artshow.views.home, name="home"),
 ]

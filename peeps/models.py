@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-from django.urls import reverse
 from django.utils.html import format_html
 
 
@@ -28,10 +27,6 @@ class Person (models.Model):
         return format_html('<a href="mailto:{}">{}</a>',
                            self.email, self.email)
     clickable_email.allow_tags = True
-
-    def mailing_label(self):
-        return '<a href="javascript:w=window.open(\'%s\',\'blank\',\'toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=300,height=100\');">ML&rarr;</a>' % (reverse('person-mailing-label', args=(self.pk,)), )
-    mailing_label.allow_tags = True
 
     def get_address_lines(self):
         lines = []
