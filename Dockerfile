@@ -11,9 +11,11 @@ RUN mkdir /data /run/nginx \
  && apk add --no-cache jpeg libcurl libpq nginx zlib \
  && apk add --no-cache --virtual .build-deps build-base curl-dev jpeg-dev postgresql-dev zlib-dev
 
-# Development environment.
-FROM native-deps AS dev
+FROM native-deps AS pipfile
 COPY Pipfile Pipfile.lock /code/
+
+# Development environment.
+FROM pipfile AS dev
 RUN pipenv install --system --dev
 
 COPY . /code/
@@ -21,7 +23,7 @@ COPY . /code/
 RUN flake8 && python manage.py test
 
 # Production environment.
-FROM native-deps AS prod
+FROM pipfile AS prod
 COPY Pipfile Pipfile.lock /code/
 RUN pipenv install --system \
  && pip uninstall -y pipenv \
