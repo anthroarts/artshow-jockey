@@ -1,4 +1,4 @@
-FROM python:3.8-alpine AS native-deps
+FROM python:3.9-alpine AS native-deps
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
