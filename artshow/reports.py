@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.db.models import (
     Count, Exists, F, Max, OuterRef, Q, Subquery, Sum, Value as V
 )
+from django.db.models.fields import DecimalField
 from django.db.models.functions import Coalesce
 from django.contrib.auth.decorators import permission_required
 from .models import (
@@ -194,7 +195,10 @@ def get_summary_statistics():
         count_showing=Count('pk', filter=Q(num_allocated__gt=0))
     )
 
-    payment_types = PaymentType.objects.annotate(total_payments=Coalesce(Sum('payment__amount'), V(0)))
+    decimal_zero = V(0, output_field=DecimalField())
+
+    payment_types = PaymentType.objects.annotate(
+        total_payments=Coalesce(Sum('payment__amount'), decimal_zero))
     total_payments = sum([pt.total_payments for pt in payment_types])
 
     tax_paid = Invoice.objects.aggregate(tax_paid=Sum('tax_paid'))['tax_paid'] or Decimal(0)
@@ -209,8 +213,8 @@ def get_summary_statistics():
         total_invoice_payments += ip['total']
 
     spaces = Space.objects.annotate(
-        requested=Coalesce(Sum('allocation__requested'), V(0)),
-        allocated2=Coalesce(Sum('allocation__allocated'), V(0)))
+        requested=Coalesce(Sum('allocation__requested'), decimal_zero),
+        allocated2=Coalesce(Sum('allocation__allocated'), decimal_zero))
     total_spaces = {
         'available': 0,
         'requested': 0,
