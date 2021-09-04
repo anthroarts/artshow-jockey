@@ -28,12 +28,10 @@ class UnicodeWriter(object):
         self.encoding = encoding
 
     def writerow(self, row):
-        # Modified from original: now using unicode(s) to deal with e.g. ints
-        self.writer.writerow([str(s).encode("utf-8") for s in row])
-        # Fetch UTF-8 output from the queue ...
+        self.writer.writerow([str(s) for s in row])
+        # Fetch Unicode output from the queue ...
         data = self.queue.getvalue()
-        data = data.decode("utf-8")
-        # ... and reencode it into the target encoding
+        # Encode into the target encoding
         data = data.encode(self.encoding)
         # write to the target stream
         self.stream.write(data)

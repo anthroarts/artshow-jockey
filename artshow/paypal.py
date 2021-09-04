@@ -77,7 +77,7 @@ def make_paypal_url(request, payment):
     return settings.ARTSHOW_PAYPAL_URL + "?" + urlencode(params)
 
 
-ipn_received = Signal(providing_args=["query"])
+ipn_received = Signal()
 
 
 class IPNProcessingError(Exception):

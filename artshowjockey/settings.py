@@ -222,6 +222,7 @@ LOGGING = {
 }
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 AJAX_LOOKUP_CHANNELS = {
     'person': ('peeps.lookups', 'PersonLookup'),
