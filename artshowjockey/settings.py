@@ -233,21 +233,20 @@ AJAX_SELECT_INLINES = 'inline'
 
 LOGIN_REDIRECT_URL = "/"
 
-ARTSHOW_SHOW_NAME = 'Further Confusion 2020 Art Show'
-ARTSHOW_TAX_RATE = '0.0925'
-ARTSHOW_TAX_DESCRIPTION = 'San Jose CA Tax 9.25%'
-ARTSHOW_EMAIL_SENDER = 'Further Confusion Art Show <artshow@furtherconfusion.org>'
-ARTSHOW_COMMISSION = '0.1'
-ARTSHOW_INVOICE_PREFIX = '2020-'
-ARTSHOW_EMAIL_FOOTER = """\
---
-binaryfox
-Further Confsion 2020 Art Show Lead.
-artshow@furtherconfusion.org - https://www.furtherconfusion.org/artshow
-"""
-ARTSHOW_ARTIST_AGREEMENT_URL = 'https://www.furtherconfusion.org/artshow'
+with env.prefixed('ARTSHOW_'):
+    ARTSHOW_SHOW_NAME = env.str('SHOW_NAME', default='Art Show')
+    ARTSHOW_TAX_RATE = env.str('TAX_RATE', default='0.1')
+    ARTSHOW_TAX_DESCRIPTION = \
+        env.str('TAX_DESCRIPTION', default='Sales Tax 10%')
+    ARTSHOW_EMAIL_SENDER = \
+        env.str('EMAIL_SENDER', default='Art Show <artshow@example.com>')
+    ARTSHOW_COMMISSION = env.str('COMMISSION', default='0.1')
+    ARTSHOW_INVOICE_PREFIX = env.str('INVOICE_PREFIX', default='INV-')
+    ARTSHOW_EMAIL_FOOTER = env.str('EMAIL_FOOTER', default="")
+    ARTSHOW_ARTIST_AGREEMENT_URL = env.str('ARTIST_AGREEMENT_URL')
 
-ARTSHOW_CHEQUE_THANK_YOU = "Thank you for exhibiting at the " + ARTSHOW_SHOW_NAME
+ARTSHOW_CHEQUE_THANK_YOU = \
+    "Thank you for exhibiting at the " + ARTSHOW_SHOW_NAME
 ARTSHOW_CHEQUES_AS_PDF = True
 ARTSHOW_PRINT_COMMAND = "enscript -P Samsung -B -L 66 -f Courier-Bold10 -q"
 ARTSHOW_AUTOPRINT_INVOICE = ["CUSTOMER COPY", "MERCHANT COPY", "PICK LIST"]
