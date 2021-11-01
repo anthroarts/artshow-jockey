@@ -23,25 +23,42 @@ class AgreementForm(forms.Form):
 
 
 class PersonForm(forms.ModelForm):
-    name = forms.CharField(required=True, label="Real Name", help_text="Your real, legal name", widget=LongerTextInput)
-    address1 = forms.CharField(required=True, label="Postal Address",
-                               help_text="Address where we can send paper correspondence", widget=LongerTextInput)
-    address2 = forms.CharField(required=False, label="Apt, Suite, etc.", widget=LongerTextInput)
+    name = forms.CharField(
+        required=True,
+        label="Legal name",
+        help_text="The name that goes on the check",
+        widget=LongerTextInput)
+    address1 = forms.CharField(
+        required=True,
+        label="Street address",
+        help_text="Address where we can send paper correspondence",
+        widget=LongerTextInput)
+    address2 = forms.CharField(required=False, label="Apt, Suite, etc.",
+        widget=LongerTextInput)
     city = forms.CharField(required=True, widget=LongerTextInput)
-    state = forms.CharField(required=True, label="State/Province", widget=LongerTextInput)
-    postcode = forms.CharField(required=True, label="Postcode/ZIP", widget=LongerTextInput)
-    country = forms.CharField(required=False,
-                              help_text="We'll assume %s if left blank" % settings.PEEPS_DEFAULT_COUNTRY,
-                              widget=LongerTextInput)
-    phone = forms.CharField(required=True,
-                            help_text="We rarely call artists. We need this in case there's a urgent problem.",
-                            widget=LongerTextInput)
-    email = forms.CharField(required=True, help_text="We contact you at this address. "
-                                                     "Also, we create an on-line management account with this address.",
-                            widget=LongerTextInput)
-    email_confirm = forms.CharField(required=True,
-                                    help_text="To ensure correctness, please type your e-mail address again.",
-                                    widget=LongerTextInput)
+    state = forms.CharField(required=True,
+        label="State/Province",
+        widget=LongerTextInput)
+    postcode = forms.CharField(required=True,
+        label="Postcode/ZIP",
+        widget=LongerTextInput)
+    country = forms.CharField(
+        required=False,
+        help_text="We'll assume %s if left blank" % settings.PEEPS_DEFAULT_COUNTRY,
+        widget=LongerTextInput)
+    phone = forms.CharField(
+        required=True,
+        help_text="We rarely call artists. We need this in case there's a urgent problem.",
+        widget=LongerTextInput)
+    email = forms.CharField(
+        required=True,
+        help_text="We contact you at this address. "
+                  "Also, we create an on-line management account with this address.",
+        widget=LongerTextInput)
+    email_confirm = forms.CharField(
+        required=True,
+        help_text="To ensure correctness, please type your e-mail address again.",
+        widget=LongerTextInput)
 
     class Meta:
         model = Person

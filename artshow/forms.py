@@ -9,10 +9,14 @@ class LongerTextInput(forms.TextInput):
 
 
 class ArtistRegisterForm(forms.Form):
-    artist_name = forms.CharField(required=False, help_text="Your \"Artist Name\" is what we'll present to the public.",
-                                  widget=LongerTextInput)
-    use_real_name = forms.BooleanField(required=False,
-                                       help_text="If selected, we'll show your real name as your artist name.")
+    artist_name = forms.CharField(
+        required=False,
+        help_text="Your \"Artist Name\" is what we'll present to the public.",
+        widget=LongerTextInput)
+    use_real_name = forms.BooleanField(
+        required=False,
+        label="Use legal name",
+        help_text="If selected, we'll show your legal name as your artist name.")
 
     def clean(self):
         cleaned_data = super(ArtistRegisterForm, self).clean()
@@ -21,9 +25,9 @@ class ArtistRegisterForm(forms.Form):
 
         if not artist_name_entered and not use_real_name:
             raise forms.ValidationError(
-                "Please enter your preferred artist name, or select \"Use real name\"")
+                "Please enter your preferred artist name, or select \"Use legal name\"")
         elif artist_name_entered and use_real_name:
             raise forms.ValidationError(
-                "Enter an artist name or \"Use real name\", but not both.")
+                "Enter an artist name or \"Use legal name\", but not both.")
 
         return cleaned_data
