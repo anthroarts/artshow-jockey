@@ -33,13 +33,16 @@ class PersonForm(forms.ModelForm):
         label="Street address",
         help_text="Address where we can send paper correspondence",
         widget=LongerTextInput)
-    address2 = forms.CharField(required=False, label="Apt, Suite, etc.",
+    address2 = forms.CharField(
+        required=False, label="Apt, Suite, etc.",
         widget=LongerTextInput)
     city = forms.CharField(required=True, widget=LongerTextInput)
-    state = forms.CharField(required=True,
+    state = forms.CharField(
+        required=True,
         label="State/Province",
         widget=LongerTextInput)
-    postcode = forms.CharField(required=True,
+    postcode = forms.CharField(
+        required=True,
         label="Postcode/ZIP",
         widget=LongerTextInput)
     country = forms.CharField(
