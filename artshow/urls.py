@@ -87,7 +87,7 @@ urlpatterns = [
             name='artshow-cheques-csv'),
     re_path(r'^access/$', views.artist_self_access,
             name='artshow-artist-access'),
-    re_path(r'^bidderreg/$', bidderreg.wizard_view,
+    re_path(r'^bidderreg/$', bidderreg.main,
             name='artshow-bidderreg-wizard'),
     re_path(r'^bidderreg/(?P<pk>\d+)/done/$', bidderreg.final,
             name='artshow-bidderreg-final'),

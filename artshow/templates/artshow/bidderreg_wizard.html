@@ -8,41 +8,73 @@
 {% endblock %}
 {% block content %}
 <h1>Bidder Self-Registration</h1>
-{% if wizard.steps.step1 == 1 %}
-<p>To Register to bid at this show, start here.</p>
-<h2>Before starting, you'll need:</h2>
-<ul>
-  <li>Your convention badge, and the number upon it.</li>
-  <li>Your identification</li>
-</ul>
-<h2>What you'll be doing:</h2>
-<ul>
-  <li>Enter your name, convention badge number, and a way to contact you during the convention.</li>
-  <li>If they've changed recently, provide us with updated address and e-mail details.</li>
-  <li>Read and sign a form we print for you.</li>
-  <li>Take these to Art Show Staff for verification, and collect your bid stickers.</li>
-</ul>
-{% else %}
+
+<p>Fill out this form in order to register to bid in this show.</p>
+
+<p>You will need your convention badge, and the number upon it.</p>
+
 <p>You can use the TAB key to move from field to field.</p>
-{% endif %}
-<form action="" method="post">{% csrf_token %}
-<table>
-{{ wizard.management_form }}
-{% if wizard.form.forms %}
-  {{ wizard.form.management_form }}
-  {% for form in wizard.form.forms %}
-    {{ form }}
-  {% endfor %}
-{% else %}
-  {{ wizard.form }}
-{% endif %}
-</table>
-{% if wizard.steps.prev %}
-<input style="visibility:hidden;position:absolute;" type="submit" value="Next >>" />
+
+<form action="" method="post">
+{% csrf_token %}
+
+<h2>Basics</h2>
+{{ basics_form.non_field_errors }}
+{% for field in basics_form %}
+<p>
+  {{ field.errors }}
+  {{ field.label_tag }} {{ field }}<br>
+  {% if field.help_text %}
+  <small>{{ field.help_text }}</small>
+  {% endif %}
+</p>
+{% endfor %}
+
+<h2>Contact information</h2>
+{{ contact_form.non_field_errors }}
+<p>
+  {{ contact_form.email.errors }}
+  {{ contact_form.email.label_tag }} {{ contact_form.email }}<br>
+  {% if contact_form.email.help_text %}
+  <small>{{ contact_form.email.help_text }}</small>
+  {% endif %}
+</p>
+
+<p>
+  {{ contact_form.phone.errors }}
+  {{ contact_form.phone.label_tag }} {{ contact_form.phone }}<br>
+  {% if contact_form.phone.help_text %}
+  <small>{{ contact_form.phone.help_text }}</small>
+  {% endif %}
+</p>
+
+<p>
+  Mailing address:
+</p>
+<p>
+  {{ contact_form.address1.errors }}
+  {{ contact_form.address2.errors }}
+  {{ contact_form.city.errors }}
+  {{ contact_form.state.errors }}
+  {{ contact_form.postcode.errors }}
+  {{ contact_form.country.errors }}
+
+  {{ contact_form.address1 }}<br>
+  {{ contact_form.address2 }}<br>
+  {{ contact_form.city }}{{ contact_form.state }}{{ contact_form.postcode }}<br>
+  {{ contact_form.country }}
+</p>
+
+<h2>At-con contact information</h2>
+{{ at_con_contact_form.non_field_errors }}
+<p>
+  {{ at_con_contact_form.at_con_contact.errors }}
+  {{ at_con_contact_form.at_con_contact }}<br>
+  <small>{{ at_con_contact_form.at_con_contact.help_text }}</small>
+</p>
+
 <button onclick="window.location='{% url "artshow-bidderreg-wizard" %}';return false;">&lt;&lt; Start Over</button>  
-<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}"  >&lt;&lt; Back</button>  
-{% endif %}
-<input type="submit" value="Next >>" />
+<input type="submit" value="Submit >>" />
 </form>
 
 {% endblock %}
