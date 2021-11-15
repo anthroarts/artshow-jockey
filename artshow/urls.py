@@ -89,7 +89,7 @@ urlpatterns = [
             name='artshow-artist-access'),
     re_path(r'^bidderreg/$', bidderreg.main,
             name='artshow-bidderreg-wizard'),
-    re_path(r'^bidderreg/(?P<pk>\d+)/done/$', bidderreg.final,
+    re_path(r'^bidderreg/done/$', bidderreg.final,
             name='artshow-bidderreg-final'),
     re_path(r'^bidder/(?P<pk>\d+)/agreement/$', bidderreg.bidder_agreement,
             name='artshow-bidder-agreement'),

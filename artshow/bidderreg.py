@@ -120,7 +120,7 @@ def main(request):
             b.person = p
             b.save()
 
-            return redirect(reverse('artshow-bidderreg-final', args=(b.pk,)))
+            return redirect(reverse('artshow-bidderreg-final'))
     else:
         basics_form = BasicsForm()
         contact_form = ContactForm()
@@ -133,12 +133,11 @@ def main(request):
 
 
 @permission_required('artshow.is_artshow_kiosk')
-def final(request, pk):
-    return render(request, "artshow/bidderreg_final.html", {
-        'agreement_url': reverse('artshow-bidder-agreement', args=(pk,))})
+def final(request):
+    return render(request, "artshow/bidderreg_final.html")
 
 
-@permission_required('artshow.is_artshow_kiosk')
+@permission_required('artshow.is_artshow_staff')
 @xframe_options_sameorigin
 def bidder_agreement(request, pk):
     bidder = get_object_or_404(Bidder, pk=pk)

@@ -9,13 +9,13 @@
 {% block content %}
 <h1>Bidder Self-Registration</h1>
 
-<h2>Almost done!</h2>
+<p><b>Almost done!</b></p>
 
-<p>Click this button to print your bidder agreement form: <button id="print_form">Print</button></p>
+<p>Please see the Art Show Staff next to sign the bidder agreement. We'll give you the stickers you'll need to place bids, as well as a handy instruction sheet.</p>
 
-<p>Please read it, sign it, and take it to the Art Show Staff. We'll give you your bid stickers you'll need to place bids, as well as a handy instruction sheet.</p>
+<p>Keep your convention badge handy. We'll need it for identification.</p>
 
-<p>Keep your convention badge and identification handy. We'll need them for comparison.</p>
+<p>This page will automatically reset in <span id="time_remaining">30</span> seconds.</p>
 
 <button id="return_to_start" >&lt;&lt; Ready for next Bidder</button>
 
@@ -25,14 +25,15 @@ function return_to_start() {
   return false;
 }
 
-document.getElementById('print_form').addEventListener('click', function () {
-  document.getElementById('form_iframe').contentWindow.print();
-  setTimeout(return_to_start, 15000);
-  return false;
-});
-
 document.getElementById('return_to_start').addEventListener('click', return_to_start);
-</script>
 
-<iframe id="form_iframe" src="{{ agreement_url }}" style="display: none"></iframe>
+let time_remaining = 30;
+setInterval(() => {
+  time_remaining--;
+  document.getElementById('time_remaining').textContent = time_remaining;
+  if (time_remaining == 0) {
+    return_to_start();
+  }
+}, 1000);
+</script>
 {% endblock %}

@@ -3,7 +3,7 @@
     <ul class="breadcrumbs">
       <li><a href="{% url 'artshow-home' %}">Home</a></li>
       <li><a href="{% url 'artshow-workflows' %}">Workflows</a></li>
-      <li><a href="{% url 'artshow-workflow-bidder-lookup' %}">Assign Bidder IDs</a></li>
+      <li><a href="{% url 'artshow-workflow-bidder-lookup' %}">Bidder Check-in</a></li>
       <li class="current">Bidder: {{ bidder.name }}</li>
     </ul>
 {% endblock %}
@@ -12,6 +12,10 @@
 <p>
   <strong>Name:</strong> {{ bidder.name }}<br>
   <strong>Reg ID:</strong> {{ bidder.person.reg_id }}<br>
+</p>
+
+<p>
+  <button id="print_form">Print Bidder Agreement</button>
 </p>
 
 <form method="post">
@@ -32,4 +36,13 @@
 </table>
 <input type="submit" value="Add IDs" />
 </form>
+
+<iframe id="form_iframe" src="{% url 'artshow-bidder-agreement' bidder.pk %}" style="display: none"></iframe>
+
+<script>
+document.getElementById('print_form').addEventListener('click', function () {
+  document.getElementById('form_iframe').contentWindow.print();
+  return false;
+});
+</script>
 {% endblock %}
