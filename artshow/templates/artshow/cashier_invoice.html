@@ -1,5 +1,9 @@
 {% extends "artshow/base_generic.html" %}
+{% load static %}
 {% block title %}Invoice{% endblock %}
+{% block extra_head %}
+<script type="text/javascript" src="{% static 'artshow/esc-pos-encoder-415c2c8.js' %}"></script>
+{% endblock %}
 {% block content %}
 <h3>Invoice</h3>
 <table>
@@ -39,4 +43,173 @@ document.getElementById('print_invoice').addEventListener('click', function () {
 <h4>Notes</h4>
 <p>{{ invoice.notes }}</p>
 {% endif %}
+
+<script>
+const supportedPrinters = [
+    { vendorId: 1208, productId: 514 },  // Epson TM-T88V
+];
+
+function isSupported(device) {
+    for (const printer of supportedPrinters) {
+        if (device.vendorId == printer.vendorId &&
+            device.productId == printer.productId) {
+            return true;
+        }
+    }
+    return false;
+}
+
+let receiptPrinterStatus;
+let selectedDevice = null;
+
+function setUpReceiptPrinter(statusElementId) {
+  receiptPrinterStatus = document.getElementById(statusElementId);
+
+    navigator.usb.getDevices().then((devices) => {
+        for (const device of devices) {
+            if (isSupported(device)) {
+                selectedDevice = device;
+                receiptPrinterStatus.textContent = 'Receipt printer ready.';
+            }
+        }
+    });
+
+    navigator.usb.addEventListener('connect', (e) => {
+        if (selectedDevice == null && isSupported(e.device)) {
+            selectedDevice = e.device;
+            receiptPrinterStatus.textContent = 'Receipt printer ready.';
+        }
+    });
+
+    navigator.usb.addEventListener('disconnect', (e) => {
+        if (selectedDevice == e.device) {
+            selectedDevice = null;
+            receiptPrinterStatus.textContent = 'Receipt printer disconnected.';
+        }
+    });
+}
+
+async function printReceipt(data) {
+    if (selectedDevice === null) {
+        try {
+            selectedDevice = await navigator.usb.requestDevice({ filters: supportedPrinters });
+        } catch (e) {
+            receiptPrinterStatus.textContent = 'No printer selected.';
+            return;
+        }
+    }
+
+    await selectedDevice.open();
+
+    try {
+        await selectedDevice.selectConfiguration(1);
+        await selectedDevice.claimInterface(0);
+        await selectedDevice.transferOut(1, data);
+    } finally {
+        await selectedDevice.close();
+    }
+}
+</script>
+
+<p>
+  <button id="print-invoice">Print</button>
+  <span id="receipt-printer-status">No receipt printer detected.</span>
+</p>
+
+<script>
+setUpReceiptPrinter('receipt-printer-status');
+
+function stringElipsis(text, length) {
+    if (text.length > length) {
+        return text.slice(0, length - 3) + '...';
+    }
+    return text
+}
+
+document.getElementById('print-invoice').addEventListener('click', async () => {
+  const pickListData = [
+{% for item in invoice.invoiceitems %}
+    [ '{{ item.piece.code|escapejs }} - {{ item.piece.artistname }}'.slice(0, 38),
+      '{{ item.piece.location|escapejs }}' ],
+    [ '"' + stringElipsis('{{ item.piece.name|escapejs }}', 36) + '"', ''],
+{% endfor %}
+  ];
+
+  const pageWidth = 42;
+  const encoder = new EscPosEncoder();
+  const result = encoder
+      .initialize()
+      //.raw([27, 77, 1])
+/*
+      // Merchant copy
+      .align('center')
+      .width(2)
+      .height(2)
+      .line('Invoice', pageWidth)
+      .newline()
+      .width(1)
+      .height(1)
+      .align('left')
+      .line("12345678901234567890123456789012345678901234567890")
+      .line("Hello world!")
+
+      // For testing, use lots of newlines instead of actually cutting. 
+      .newline()
+      .newline()
+      // .raw([0x1D, 0x56, 65])  // Feed and cut.
+
+      // Customer copy
+      .align('center')
+      .width(2)
+      .height(2)
+      .line('Receipt', pageWidth)
+      .newline()
+      .width(1)
+      .height(1)
+      .align('left')
+      .line("12345678901234567890123456789012345678901234567890")
+      .line("Hello world!")
+
+      .newline()
+      .newline()
+      // .raw([0x1D, 0x56, 65])  // Feed and cut.
+*/
+      // Pick list
+      .align('center')
+      .width(2)
+      .height(2)
+      .line('Pick List', pageWidth)
+      .newline()
+      .width(1)
+      .height(1)
+      .align('left')
+      .line('Item                              Location')
+      .table(
+        [
+          { width: 38, align: 'left'},
+          { width: 4, align: 'right' },
+        ],
+        pickListData
+      )
+
+      // For testing, use lots of newlines instead of actually cutting. 
+      .newline()
+      .newline()
+      .newline()
+      .newline()
+      .newline()
+      .newline()
+      .newline()
+      .newline()
+      .newline()
+      .newline()
+      // .raw([0x1D, 0x56, 65])  // Feed and cut.
+      .encode();
+  console.log(result);
+  printReceipt(result);
+});
+
+</script>
+
+
 {% endblock %}
