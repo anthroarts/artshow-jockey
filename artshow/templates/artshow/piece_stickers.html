@@ -5,7 +5,6 @@
 <link rel="stylesheet" type="text/css" href="{% static 'artshow/piece_stickers.css' %}">
 </head>
 <body>
-<button id="print">Print</button>
 <div>
 {% for piece in pieces %}
 {% if forloop.counter0|divisibleby:"60" %}</div><div class="container">{% endif %}
@@ -17,64 +16,15 @@
   </div>
 {% endfor %}
 </div>
+{% if print %}
 <script>
-
-async function print() {
-  const supportedPrinters = [
-    { vendorId: 0x0A5F, productID: 0x0015 },  // Zebra LP-2824
-  ];
-  const device = await navigator.usb.requestDevice({ filters: supportedPrinters });
-
-  await device.open();
-  await device.selectConfiguration(1);
-  await device.claimInterface(0);
-
-  const stickers = document.getElementsByClassName('sticker');
-
-  const formSetup = `FK"1"
-FS"1"
-V00,30,L,"Artist name:"
-V01,30,L,"Piece name (line 1):"
-V02,30,L,"Piece name (line 2):"
-V03,30,L,"Media:"
-V04,7,C,"Piece ID:"
-A20,0,0,2,1,1,N,V00
-A20,20,0,2,1,1,N,V01
-A20,40,0,2,1,1,N,V02
-A20,60,0,2,1,1,N,V03
-A350,0,1,2,2,2,N,V04
-PA1
-FE
-${stickers.length}
-`;
-  await device.transferOut(6, new TextEncoder().encode(formSetup));
-
-  for (const sticker of stickers) {
-    const artistName = sticker.getElementsByClassName('artist')[0].textContent;
-    const pieceName = sticker.getElementsByClassName('name')[0].textContent;
-    const media = sticker.getElementsByClassName('media')[0].textContent;
-    const pieceId = sticker.getElementsByClassName('piece_id')[0].textContent;
-
-    const formData = `FR"1"
-?
-${artistName}
-${pieceName}
-
-${media}
-${pieceId}
-`;
-    await device.transferOut(6, new TextEncoder().encode(formData));
-  }
-
-  await device.close();
-
-  {% if redirect %}
+{% if redirect %}
+window.addEventListener('afterprint', () => {
   document.location = "{{ redirect }}";
-  {% endif %}
-}
-
-document.getElementById('print').addEventListener('click', print);
-
+});
+{% endif %}
+window.print();
 </script>
+{% endif %}
 </body>
 </html>

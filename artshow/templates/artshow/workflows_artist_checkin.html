@@ -1,5 +1,9 @@
 {% extends "artshow/base_generic.html" %}
+{% load static %}
 {% block title %}{{ artist.name }} ({{ artist.artistid }}){% endblock %}
+{% block extra_head %}
+<script type="text/javascript" src="{% static 'artshow/label_printer.js' %}"></script>
+{% endblock %}
 {% block breadcrumbs %}
     <ul class="breadcrumbs">
       <li><a href="{% url 'artshow-home' %}">Home</a></li>
@@ -10,7 +14,28 @@
 {% endblock %}
 {% block content %}
 
-<form method="post">{% csrf_token %}
+<p>
+  <button id="select-all">Select All</button>
+  <button id="select-none">Select None</button>
+</p>
+
+<script>
+document.getElementById('select-all').addEventListener('click', () => {
+  const formCount = Number(document.getElementById('id_piece_set-INITIAL_FORMS').value);
+  for (let i = 0; i < formCount; ++i) {
+    document.getElementById(`id_piece_set-${i}-print_item`).checked = true;
+  }
+});
+
+document.getElementById('select-none').addEventListener('click', () => {
+  const formCount = Number(document.getElementById('id_piece_set-INITIAL_FORMS').value);
+  for (let i = 0; i < formCount; ++i) {
+    document.getElementById(`id_piece_set-${i}-print_item`).checked = false;
+  }
+});
+</script>
+
+<form id="main-form" method="post">{% csrf_token %}
   {{ formset.management_form }}
   <table>
     <tr>
@@ -52,4 +77,50 @@
     <button type="submit" formaction="{% url 'artshow-workflow-artist-checkin' artistid=artist.artistid %}">Save</button>
   </p>
 </form>
+
+<p>
+  <button id="print-piece-stickers">Print Piece Stickers</button>
+  <span id="label-printer-status">No label printer found.</span>
+</p>
+
+<script>
+const mainForm = document.getElementById('main-form');
+const printPieceStickers = document.getElementById('print-piece-stickers');
+
+setUpLabelPrinter('label-printer-status');
+
+printPieceStickers.addEventListener('click', async () => {
+  const stickers = [];
+  const formCount = Number(document.getElementById('id_piece_set-TOTAL_FORMS').value);
+  for (let i = 0; i < formCount; ++i) {
+    if (!document.getElementById(`id_piece_set-${i}-print_item`).checked) {
+      continue;
+    }
+
+    const artistId = "{{ artist.artistid|escapejs }}";
+    const artistName = "{{ artist.artistname|escapejs }}";
+    const pieceId = document.getElementById(`id_piece_set-${i}-pieceid`).value;
+    const pieceName = document.getElementById(`id_piece_set-${i}-name`).value;
+    const media = document.getElementById(`id_piece_set-${i}-media`).value;
+
+    stickers.push({artistId, artistName, pieceId, pieceName, media});
+  }
+
+  let data = '';
+  for (const sticker of stickers) {
+    data += `N
+A20,5,0,2,1,1,N,"${sticker.artistName.slice(0, 24)}"
+A20,45,0,2,1,1,N,"${sticker.pieceName.slice(0, 24)}"
+A20,65,0,2,1,1,N,"${sticker.pieceName.slice(24, 49)}"
+A20,105,0,2,1,1,N,"${sticker.media.slice(0, 24)}"
+A350,0,1,2,2,2,N,"${sticker.artistId}-${sticker.pieceId}"
+JB
+P1
+`;
+  }
+  data += 'JF\n';
+  printLabels(data);
+});
+</script>
+
 {% endblock %}
