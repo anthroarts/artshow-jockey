@@ -1,16 +1,12 @@
-from io import StringIO
-import subprocess
 from django import forms
 from django.apps import apps
 from django.contrib.auth.decorators import permission_required
 from django.shortcuts import get_object_or_404, render, redirect, reverse
 from django.views.decorators.clickjacking import xframe_options_sameorigin
-from formtools.wizard.views import CookieWizardView
 from .conf import settings
 from .forms import LongerTextInput
 from .models import Bidder, BidderId
 import logging
-from .conf import _DISABLED as SETTING_DISABLED
 
 
 Person = apps.get_model(settings.ARTSHOW_PERSON_CLASS)
