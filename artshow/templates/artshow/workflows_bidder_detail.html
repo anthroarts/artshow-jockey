@@ -15,12 +15,9 @@
 </p>
 
 <p>
-  <button id="print_form">Print Bidder Agreement</button>
-</p>
-
-<form method="post">
+<form method="post" action="{% url 'artshow-workflow-bidder' bidder.pk %}">
 {% csrf_token %}
-{{ formset.management_form }}
+{{ manual_id_formset.management_form }}
 <table>
 <tr><th>Bidder IDs</th></tr>
 {% for id in bidder.bidder_ids %}
@@ -28,7 +25,7 @@
   <td>{{ id }}</td>
 </tr>
 {% endfor %}
-{% for form in formset %}
+{% for form in manual_id_formset %}
 <tr>
   <td>{{ form.bidderid.errors }}{{ form.bidderid }}</td>
 </tr>
@@ -36,6 +33,19 @@
 </table>
 <input type="submit" value="Add IDs" />
 </form>
+</p>
+
+<p>
+<form method="post" action="{% url 'artshow-workflow-bidder-auto-id' bidder.pk %}">
+{% csrf_token %}
+{{ auto_id_form.non_field_errors }}
+<input type="submit" value="Automatically Assign ID"/>
+</form>
+</p>
+
+<p>
+  <button id="print_form">Print Bidder Agreement</button>
+</p>
 
 <iframe id="form_iframe" src="{% url 'artshow-bidder-agreement' bidder.pk %}" style="display: none"></iframe>
 

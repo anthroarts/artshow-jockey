@@ -1,19 +1,20 @@
 # Artshow Jockey
 # Copyright (C) 2009, 2010 Chris Cogdon
 # See file COPYING for licence details
+from django import forms
 from django.apps import apps
 from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.db.transaction import atomic
-from django.shortcuts import get_object_or_404, render, redirect
-from .models import Bidder, BidderId, Piece, Bid
-from django import forms
-from django.core.exceptions import ValidationError
-from . import mod11codes
-import re
 from django.forms.formsets import formset_factory
-from django.contrib.auth.decorators import permission_required
+from django.shortcuts import get_object_or_404, render, redirect
+from django.views.decorators.http import require_POST
+import re
+from . import mod11codes
 from .conf import settings
+from .models import Bidder, BidderId, Piece, Bid
 
 BIDDERS_PER_PAGE = 10
 BIDS_PER_PAGE = 10
@@ -260,20 +261,69 @@ BidderIdAddFormSet = formset_factory(BidderIdAddForm)
 
 
 @permission_required('artshow.is_artshow_staff')
+@atomic
 def bidder_detail(request, pk):
     bidder = get_object_or_404(Bidder, pk=pk)
 
     if request.method == 'POST':
-        formset = BidderIdAddFormSet(request.POST)
-        if formset.is_valid():
-            for form in formset:
+        manual_id_formset = BidderIdAddFormSet(request.POST)
+        auto_id_form = AssignBidderIdForm()
+        if manual_id_formset.is_valid():
+            for form in manual_id_formset:
                 bidder_id = BidderId.objects.get(id=form.cleaned_data['bidderid'])
                 bidder_id.bidder = bidder
                 bidder_id.save()
             # Clear the form before rendering the results page.
-            formset = BidderIdAddFormSet()
+            manual_id_formset = BidderIdAddFormSet()
     else:
-        formset = BidderIdAddFormSet()
+        manual_id_formset = BidderIdAddFormSet()
+        auto_id_form = AssignBidderIdForm()
 
-    c = {'formset': formset, 'bidder': bidder}
-    return render(request, 'artshow/workflows_bidder_detail.html', c)
+    context = {
+        'manual_id_formset': manual_id_formset,
+        'auto_id_form': auto_id_form,
+        'bidder': bidder
+    }
+    return render(request, 'artshow/workflows_bidder_detail.html', context)
+
+
+class AssignBidderIdForm(forms.Form):
+    def __init__(self, data=None, bidder=None):
+        super().__init__(data)
+        self.bidder = bidder
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if self.bidder.bidderid_set.exists():
+            raise ValidationError('Bidder already has an ID assigned.')
+
+        try:
+            cleaned_data['bidder_id'] = BidderId.objects.filter(bidder__isnull=True).order_by('?')[0]
+        except IndexError:
+            raise ValidationError('No available bidder IDs.')
+
+        return cleaned_data
+
+
+@permission_required('artshow.is_artshow_staff')
+@require_POST
+@atomic
+def assign_bidder_id(request, pk):
+    bidder = get_object_or_404(Bidder, pk=pk)
+
+    manual_id_formset = BidderIdAddFormSet()
+    auto_id_form = AssignBidderIdForm(request.POST, bidder)
+    if auto_id_form.is_valid():
+        bidder_id = auto_id_form.cleaned_data['bidder_id']
+        bidder_id.bidder = bidder
+        bidder_id.save()
+
+        return redirect('artshow-workflow-bidder', pk=bidder.pk)
+
+    context = {
+        'manual_id_formset': manual_id_formset,
+        'auto_id_form': auto_id_form,
+        'bidder': bidder
+    }
+    return render(request, 'artshow/workflows_bidder_detail.html', context)
