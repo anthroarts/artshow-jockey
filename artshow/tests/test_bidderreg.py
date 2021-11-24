@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Permission, User
 from django.test import Client, TestCase
 from django.urls import reverse
+from ..models import Bidder
 
 
 class BidEntryTests(TestCase):
@@ -17,29 +18,29 @@ class BidEntryTests(TestCase):
         self.client.login(username='test', password='test')
 
         response = self.client.post(reverse('artshow-bidderreg-wizard'), {
-            'bidder_registration_wizard-current_step': 0,
-        })
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.post(reverse('artshow-bidderreg-wizard'), {
-            'bidder_registration_wizard-current_step': 1,
-            '1-name': 'Test Bidder',
-            '1-reg_id': '123-456',
-            '1-cell_contact': '(800) 555-0001',
-            '1-other_contact': 'Marriott 626',
-        })
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.post(reverse('artshow-bidderreg-wizard'), {
-            'bidder_registration_wizard-current_step': 2,
-            '2-address1': '100 Underhill Ln',
-            '2-address2': 'Burrow 2',
-            '2-city': 'Foxburrow',
-            '2-state': 'CA',
-            '2-postcode': '12345',
-            '2-country': 'USA',
-            '2-phone': '(800) 555-5555',
-            '2-email': 'bidder@example.com',
+            'name': 'Test Bidder',
+            'reg_id': '123-456',
+            'at_con_contact': 'Marriott 626',
+            'address1': '100 Underhill Ln',
+            'address2': 'Burrow 2',
+            'city': 'Foxburrow',
+            'state': 'CA',
+            'postcode': '12345',
+            'country': 'USA',
+            'phone': '(800) 555-5555',
+            'email': 'bidder@example.com',
         })
         self.assertRedirects(
-            response, reverse('artshow-bidderreg-final', args=(1,)))
+            response, reverse('artshow-bidderreg-final'))
+
+        bidder = Bidder.objects.get(person__reg_id='123-456')
+        self.assertEqual(bidder.person.name, 'Test Bidder')
+        self.assertEqual(bidder.at_con_contact, 'Marriott 626')
+        self.assertEqual(bidder.person.address1, '100 Underhill Ln')
+        self.assertEqual(bidder.person.address2, 'Burrow 2')
+        self.assertEqual(bidder.person.city, 'Foxburrow')
+        self.assertEqual(bidder.person.state, 'CA')
+        self.assertEqual(bidder.person.postcode, '12345')
+        self.assertEqual(bidder.person.country, 'USA')
+        self.assertEqual(bidder.person.phone, '(800) 555-5555')
+        self.assertEqual(bidder.person.email, 'bidder@example.com')
