@@ -1,4 +1,9 @@
 {% extends "artshow/base_generic.html" %}
+{% load static %}
+{% block title %}Bidder: {{ bidder.name }}{% endblock %}
+{% block extra_head %}
+<script type="text/javascript" src="{% static 'artshow/label_printer.js' %}"></script>
+{% endblock %}
 {% block breadcrumbs %}
     <ul class="breadcrumbs">
       <li><a href="{% url 'artshow-home' %}">Home</a></li>
@@ -30,8 +35,10 @@
   <td>{{ form.bidderid.errors }}{{ form.bidderid }}</td>
 </tr>
 {% endfor %}
+<tr>
+  <td><input type="submit" value="Add IDs"/></td>
+</tr>
 </table>
-<input type="submit" value="Add IDs" />
 </form>
 </p>
 
@@ -47,6 +54,17 @@
   <button id="print_form">Print Bidder Agreement</button>
 </p>
 
+{% if bidder.bidder_ids %}
+<p>
+  <button id="print-bid-stickers">Print Bid Stickers</button>
+  <span id="label-printer-status">No label printer detected.</span>
+</p>
+{% else %}
+<p>
+  <button disabled>Print Bid Stickers</button>
+</p>
+{% endif %}
+
 <iframe id="form_iframe" src="{% url 'artshow-bidder-agreement' bidder.pk %}" style="display: none"></iframe>
 
 <script>
@@ -54,5 +72,22 @@ document.getElementById('print_form').addEventListener('click', function () {
   document.getElementById('form_iframe').contentWindow.print();
   return false;
 });
+
+{% if bidder.bidder_ids %}
+setUpLabelPrinter('label-printer-status');
+
+document.getElementById('print-bid-stickers').addEventListener('click', async () => {
+  const bidderId = "{{ bidder.bidder_ids|first|escapejs }}";
+
+  const data = `N
+A50,40,0,7,2,2,N,"${bidderId}"
+A160,46,0,5,1,1,N,"$"
+LO160,100,165,5
+P10
+`;
+
+  printLabels(data);
+});
+{% endif %}
 </script>
 {% endblock %}
