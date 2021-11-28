@@ -3,7 +3,7 @@
 # See file COPYING for licence details
 from io import StringIO
 import subprocess
-from django.shortcuts import render, get_object_or_404, redirect, reverse
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseBadRequest
 from .models import Bidder, Piece, InvoicePayment, InvoiceItem, Invoice
 from django import forms
@@ -182,15 +182,16 @@ def cashier_bidder_invoices(request, bidder_id):
 @permission_required('artshow.add_invoice')
 def cashier_invoice(request, invoice_id):
     invoice = get_object_or_404(Invoice, pk=invoice_id)
+    has_reproduction_rights = invoice.invoiceitem_set \
+        .filter(piece__reproduction_rights_included=True) \
+        .exists()
 
     return render(request, 'artshow/cashier_invoice.html', {
         'invoice': invoice,
+        'has_reproduction_rights': has_reproduction_rights,
         'money_precision': settings.ARTSHOW_MONEY_PRECISION,
-        'tax_rate': settings.ARTSHOW_TAX_RATE,
         'tax_description': settings.ARTSHOW_TAX_DESCRIPTION,
         'invoice_prefix': settings.ARTSHOW_INVOICE_PREFIX,
-        'print_invoice_url':
-            reverse('artshow-print-invoice', args=(invoice_id,)),
     })
 
 
@@ -201,6 +202,7 @@ def cashier_print_invoice(request, invoice_id):
     has_reproduction_rights = invoice.invoiceitem_set \
         .filter(piece__reproduction_rights_included=True) \
         .exists()
+
     return render(request, 'artshow/invoice.html', {
         'showstr': settings.ARTSHOW_SHOW_NAME,
         'taxdescstr': settings.ARTSHOW_TAX_DESCRIPTION,
