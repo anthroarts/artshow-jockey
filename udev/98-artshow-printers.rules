@@ -1,0 +1,8 @@
+# Zebra LP-2824
+SUBSYSTEM=="usb", ATTR{idVendor}=="0a5f", ATTR{idProduct}=="0015", MODE="0660", GROUP="plugdev"
+ACTION=="add", SUBSYSTEM=="usb", DRIVER=="usblp", ATTRS{idVendor}=="0a5f", ATTRS{idProduct}=="0015", RUN+="/etc/udev/scripts/unbind_usblp.sh '%k'"
+
+# Epson TM-T88V
+SUBSYSTEM=="usb", ATTR{idVendor}=="04b8", ATTR{idProduct}=="0202", MODE="0660", GROUP="plugdev"
+ACTION=="add", SUBSYSTEM=="usb", DRIVER=="usblp", ATTRS{idVendor}=="04b8", ATTRS{idProduct}=="0202", RUN+="/etc/udev/scripts/unbind_usblp.sh '%k'"
+
