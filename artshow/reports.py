@@ -301,7 +301,7 @@ def allocations_waiting(request):
 
         for location in Location.objects.filter(type=space):
             size = 1.0
-            if location.half_space or location.half_free or (location.artist_1 and location.artist_2):
+            if location.half_space or location.space_is_split:
                 size = 0.5
             if location.artist_1:
                 artists[location.artist_1.artistid].allocated += size

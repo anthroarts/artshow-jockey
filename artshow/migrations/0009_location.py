@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=5)),
                 ('half_space', models.BooleanField(default=False, help_text='This location is a half-space that can only be allocated to a\n            single artist.')),
-                ('half_free', models.BooleanField(default=False, help_text='Assigned artist is only using half the space.')),
+                ('space_is_split', models.BooleanField(default=False, help_text='Space counts as half for each artist.', verbose_name='Split')),
                 ('artist_1', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='artshow.artist')),
                 ('artist_2', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='artshow.artist')),
                 ('type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='artshow.space')),

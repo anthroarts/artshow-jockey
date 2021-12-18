@@ -349,8 +349,8 @@ admin.site.register(Space, SpaceAdmin)
 
 
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'type', 'artist_1', 'artist_2', 'half_free')
-    list_editable = ('artist_1', 'artist_2', 'half_free')
+    list_display = ('name', 'type', 'artist_1', 'artist_2', 'space_is_split')
+    list_editable = ('artist_1', 'artist_2', 'space_is_split')
     list_filter = ('type',)
     sortable_by = ()
 

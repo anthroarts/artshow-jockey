@@ -39,8 +39,8 @@ class ReportTests(TestCase):
 
         Location.objects.bulk_create([
             Location(name='A1', type=gp, artist_1=artist_1),
-            Location(name='A2', type=gp, artist_1=artist_1, artist_2=artist_2),
-            Location(name='A3', type=gp, artist_1=artist_1, half_free=True),
+            Location(name='A2', type=gp, artist_1=artist_1, artist_2=artist_2, space_is_split=True),
+            Location(name='A3', type=gp, artist_1=artist_1, space_is_split=True),
             Location(name='A4', type=gp, artist_1=artist_2, half_space=True),
             Location(name='B1', type=gt, artist_1=artist_1),
             Location(name='X1', type=ap),

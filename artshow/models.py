@@ -91,9 +91,10 @@ class Location(models.Model):
         default=False,
         help_text='''This location is a half-space that can only be allocated to a
             single artist.''')
-    half_free = models.BooleanField(
+    space_is_split = models.BooleanField(
+        verbose_name='Split',
         default=False,
-        help_text='Assigned artist is only using half the space.')
+        help_text='Space counts as half for each artist.')
 
     objects = LocationManager()
 
@@ -101,17 +102,17 @@ class Location(models.Model):
         return self.name
 
     def clean(self):
-        if self.artist_2 is not None:
+        if (self.space_is_split or self.half_space) and not self.type.allow_half_spaces:
+            raise ValidationError('Allocating half-spaces not allowed for this type.')
+        if self.space_is_split and self.half_space:
+            raise ValidationError('A half space can\'t be split.')
+        if self.artist_1 is not None and self.artist_2 is not None:
             if self.half_space:
                 raise ValidationError('Cannot assign two artists to a half space.')
-            if not self.type.allow_half_spaces:
-                raise ValidationError('Allocating half-spaces not allowed for this type.')
-            if self.artist_1 and self.artist_1 == self.artist_2:
+            if not self.space_is_split:
+                raise ValidationError('A space with two artists must be split.')
+            if self.artist_1 == self.artist_2:
                 raise ValidationError('Cannot allocate the same artist to both halves.')
-            if self.artist_1 and self.half_free:
-                raise ValidationError('Space cannot be half free with two artists.')
-        if self.half_free and not (self.artist_1 or self.artist_2):
-            raise ValidationError('Space cannot be half free with no artists.')
 
 
 class Checkoff (models.Model):
