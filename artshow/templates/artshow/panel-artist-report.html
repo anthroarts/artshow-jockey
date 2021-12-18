@@ -8,6 +8,22 @@
     </ul>
 {% endblock %}
 {% block content %}
+    <p>Artist locations</p>
+    <table>
+        <tr>
+            <th>Location</th>
+            <th>Artist 1</th>
+            <th>Artist 2</th>
+        </tr>
+        {% for l in assigned_locations %}
+            <tr>
+                <td>{{ l }}</td>
+                <td>{{ l.artist_1|default:'' }}</td>
+                <td>{{ l.artist_2|default:'' }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <p>Piece locations</p>
     <table>
         <tr>
             <th>Location</th>

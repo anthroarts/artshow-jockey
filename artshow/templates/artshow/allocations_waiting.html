@@ -7,20 +7,19 @@
     </ul>
 {% endblock %}
 {% block content %}
-    {% for section_name, allocations in sections %}
+    {% for section_name, spaces in sections %}
         <h2>{{ section_name }}</h2>
-        {% regroup allocations by space as allocations_in_space %}
-        {% for space in allocations_in_space %}
-            <h3>{{ space.grouper }}</h3>
+        {% for space, artists in spaces.items %}
+            <h3>{{ space }}</h3>
             <table class="report">
                 <tr>
                     <th>Artist</th>
                     <th>Requsted</th>
                     <th>Allocated</th>
                 </tr>
-                {% for a in space.list %}
+                {% for a in artists %}
                     <tr>
-                        <td><a href="{% url 'admin:artshow_artist_change' a.artist.artistid %}">{{ a.artist }}</a></td>
+                        <td><a href="{% url 'admin:artshow_artist_change' a.artistid %}">{{ a.artist }}</a></td>
                         <td>{{ a.requested }}</td>
                         <td>{{ a.allocated }}</td>
                     </tr>

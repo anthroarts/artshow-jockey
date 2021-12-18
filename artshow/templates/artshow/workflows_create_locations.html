@@ -1,0 +1,25 @@
+{% extends "artshow/base_generic.html" %}
+{% block title %}Create Locations{% endblock %}
+{% block breadcrumbs %}
+    <ul class="breadcrumbs">
+      <li><a href="{% url 'artshow-home' %}">Home</a></li>
+      <li><a href="{% url 'artshow-workflows' %}">Workflows</a></li>
+      <li class="current">Create Locations</li>
+    </ul>
+{% endblock %}
+{% block content %}
+<p>
+  Existing locations:
+  <ul>
+    {% for location in locations %}
+    <li>{{ location }}</li>
+    {% endfor %}
+  </ul>
+</p>
+<p>
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create Locations</button>
+  </form>
+</p>
+{% endblock %}

@@ -4,14 +4,14 @@
 from decimal import Decimal
 from django.shortcuts import render
 from django.db.models import (
-    Count, Exists, F, Max, OuterRef, Q, Subquery, Sum, Value as V
+    Count, Exists, Max, OuterRef, Q, Subquery, Sum, Value as V
 )
 from django.db.models.fields import DecimalField
 from django.db.models.functions import Coalesce
 from django.contrib.auth.decorators import permission_required
 from .models import (
     Allocation, Artist, Bid, BidderId, Invoice, InvoiceItem, InvoicePayment,
-    PaymentType, Piece, Space
+    Location, PaymentType, Piece, Space
 )
 
 
@@ -119,7 +119,16 @@ def artist_piece_report(request, artist_id):
 
 @permission_required('artshow.is_artshow_staff')
 def artist_panel_report(request):
-    artists = Artist.objects.all()
+    artists = list(Artist.objects.order_by('artistid'))
+    for artist in artists:
+        artist.locations = []
+
+    artist_map = {artist.artistid: artist for artist in artists}
+    for location in Location.objects.sorted().filter(Q(artist_1__isnull=False) | Q(artist_2__isnull=False)):
+        if location.artist_1:
+            artist_map[location.artist_1.artistid].locations.append(location.name)
+        if location.artist_2:
+            artist_map[location.artist_2.artistid].locations.append(location.name)
     return render(request, 'artshow/artist-panel-report.html', {'artists': artists})
 
 
@@ -130,7 +139,10 @@ def panel_artist_report(request):
         l['artists'] = Artist.objects.filter(piece__location=l['location']) \
             .annotate(num_pieces=Count("artistid")) \
             .order_by("artistid")
-    return render(request, "artshow/panel-artist-report.html", {'locations': locations})
+    return render(request, "artshow/panel-artist-report.html", {
+        'assigned_locations': Location.objects.sorted(),
+        'locations': locations
+    })
 
 
 @permission_required('artshow.is_artshow_staff')
@@ -269,8 +281,49 @@ def show_summary(request):
 
 @permission_required('artshow.is_artshow_staff')
 def allocations_waiting(request):
-    short_allocations = Allocation.objects.filter(allocated__lt=F('requested')).order_by('space', 'artist')
-    over_allocations = Allocation.objects.filter(allocated__gt=F('requested')).order_by('space', 'artist')
+    short_allocations = {}
+    over_allocations = {}
+
+    for space in Space.objects.all():
+        subquery = Allocation.objects \
+            .filter(artist=OuterRef('artistid'), space=space) \
+            .annotate(total_requested=Sum('requested')) \
+            .values('total_requested')
+        artists = {
+            artist.artistid: artist
+            for artist in Artist.objects.annotate(requested=Subquery(subquery))
+        }
+
+        for artist in artists.values():
+            if artist.requested is None:
+                artist.requested = 0.0
+            artist.allocated = 0.0
+
+        for location in Location.objects.filter(type=space):
+            size = 1.0
+            if location.half_space or location.half_free or (location.artist_1 and location.artist_2):
+                size = 0.5
+            if location.artist_1:
+                artists[location.artist_1.artistid].allocated += size
+            if location.artist_2:
+                artists[location.artist_2.artistid].allocated += size
+
+        for artist in artists.values():
+            map = None
+            if artist.allocated > artist.requested:
+                map = over_allocations
+            elif artist.allocated < artist.requested:
+                map = short_allocations
+            else:
+                continue
+
+            space_artists = map.setdefault(space.name, [])
+            space_artists.append({
+                'artistid': artist.artistid,
+                'artist': str(artist),
+                'requested': artist.requested,
+                'allocated': artist.allocated,
+            })
 
     sections = [
         ('Short Allocations', short_allocations),

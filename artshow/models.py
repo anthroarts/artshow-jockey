@@ -4,14 +4,14 @@
 
 __all__ = ["Allocation", "Artist", "ArtistManager", "BatchScan", "Bid", "Bidder", "BidderId",
            "Checkoff", "ChequePayment", "EmailSignature", "EmailTemplate", "Event", "Invoice", "InvoiceItem",
-           "InvoicePayment", "Payment", "PaymentType", "Piece", "Product", "Space", "Task",
+           "InvoicePayment", "Payment", "PaymentType", "Piece", "Product", "Location", "Space", "Task",
            "Agent", "validate_space", "validate_space_increments"]
 
 from decimal import Decimal
 
 from django.db import models
-from django.db.models import Count, Max, Sum, Q, Value as V
-from django.db.models.functions import Coalesce
+from django.db.models import Count, IntegerField, Max, Sum, Q, Value as V
+from django.db.models.functions import Cast, Coalesce, Substr
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.urls import reverse
@@ -37,6 +37,7 @@ def validate_space_increments(value, allow_half_spaces):
             raise ValidationError("Spaces must be in whole increments")
 
 
+# A type of space which an Artist can request.
 class Space(models.Model):
     name = models.CharField(max_length=20)
     shortname = models.CharField(max_length=8)
@@ -68,6 +69,49 @@ class Space(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class LocationManager(models.Manager):
+    def sorted(self):
+        return self.annotate(
+            prefix=Substr('name', 1, 1),
+            index=Cast(Substr('name', 2), IntegerField())
+        ).order_by('prefix', 'index')
+
+
+# A specific instance of a Space to which one or two Artists may be assigned.
+class Location(models.Model):
+    name = models.CharField(max_length=5)
+    type = models.ForeignKey('Space', on_delete=models.CASCADE)
+    artist_1 = models.ForeignKey('Artist', on_delete=models.SET_NULL,
+                                 blank=True, null=True, related_name='+')
+    artist_2 = models.ForeignKey('Artist', on_delete=models.SET_NULL,
+                                 blank=True, null=True, related_name='+')
+    half_space = models.BooleanField(
+        default=False,
+        help_text='''This location is a half-space that can only be allocated to a
+            single artist.''')
+    half_free = models.BooleanField(
+        default=False,
+        help_text='Assigned artist is only using half the space.')
+
+    objects = LocationManager()
+
+    def __str__(self):
+        return self.name
+
+    def clean(self):
+        if self.artist_2 is not None:
+            if self.half_space:
+                raise ValidationError('Cannot assign two artists to a half space.')
+            if not self.type.allow_half_spaces:
+                raise ValidationError('Allocating half-spaces not allowed for this type.')
+            if self.artist_1 and self.artist_1 == self.artist_2:
+                raise ValidationError('Cannot allocate the same artist to both halves.')
+            if self.artist_1 and self.half_free:
+                raise ValidationError('Space cannot be half free with two artists.')
+        if self.half_free and not (self.artist_1 or self.artist_2):
+            raise ValidationError('Space cannot be half free with no artists.')
 
 
 class Checkoff (models.Model):

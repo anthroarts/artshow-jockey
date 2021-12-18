@@ -12,7 +12,8 @@ from django.contrib import admin, messages
 from django.contrib.admin import helpers
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
-from django.db.models import Max
+from django.db.models import IntegerField, Max
+from django.db.models.functions import Cast, Substr
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -23,7 +24,7 @@ from . import processbatchscan
 from .models import (
     Agent, Allocation, Artist, BatchScan, Bid, Bidder, BidderId, Checkoff,
     ChequePayment, EmailSignature, EmailTemplate, Invoice, InvoiceItem,
-    InvoicePayment, Payment, PaymentType, Piece, Space
+    InvoicePayment, Payment, PaymentType, Piece, Location, Space
 )
 
 User = get_user_model()
@@ -345,6 +346,22 @@ class SpaceAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Space, SpaceAdmin)
+
+
+class LocationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'type', 'artist_1', 'artist_2', 'half_free')
+    list_editable = ('artist_1', 'artist_2', 'half_free')
+    list_filter = ('type',)
+    sortable_by = ()
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(
+            prefix=Substr('name', 1, 1),
+            index=Cast(Substr('name', 2), IntegerField())
+        ).order_by('prefix', 'index')
+
+
+admin.site.register(Location, LocationAdmin)
 
 
 class PieceBidInline(admin.TabularInline):

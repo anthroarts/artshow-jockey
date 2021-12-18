@@ -8,6 +8,7 @@
 {% endblock %}
 {% block content %}
     <ul>
+      <li><a href="{% url 'artshow-workflow-create-locations' %}">Create Locations</a></li>
       <li><a href="{% url 'artshow-workflow-printing' %}">Bid Sheet and Control Form Printing</a></li>
       <li><a href="{% url 'artshow-workflow-artist-checkin-lookup' %}">Artist Check-in</a></li>
       <li><a href="{% url 'artshow-workflow-create-bidder-ids' %}">Create Bidder IDs</a></li>

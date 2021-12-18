@@ -116,6 +116,8 @@ urlpatterns = [
             name='artshow-workflow-bidder'),
     re_path(r'^workflows/bidder/(?P<pk>\d+)/auto_id$', addbidder.assign_bidder_id,
             name='artshow-workflow-bidder-auto-id'),
+    re_path(r'^workflows/create_locations/$', workflows.create_locations,
+            name='artshow-workflow-create-locations'),
     re_path(r'^workflows/create_ids/$', workflows.create_bidder_ids,
             name='artshow-workflow-create-bidder-ids'),
     re_path(r'^workflows/close/$', workflows.close_show,

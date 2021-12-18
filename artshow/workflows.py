@@ -10,7 +10,7 @@ from django.views.decorators.http import require_POST
 
 from .conf import settings
 from .mod11codes import make_check
-from .models import Artist, BidderId, ChequePayment, Piece
+from .models import Artist, BidderId, ChequePayment, Location, Piece, Space
 
 
 @permission_required('artshow.is_artshow_staff')
@@ -322,6 +322,35 @@ def artist_print_checkout_control_form(request, artistid):
                             kwargs={'artistid': artist.artistid}),
     }
     return render(request, 'artshow/control_form.html', c)
+
+
+class CreateLocationsForm(forms.Form):
+    type = forms.ModelChoiceField(label='Space', queryset=Space.objects)
+    prefix = forms.CharField(label='Prefix', max_length=1)
+    start_value = forms.IntegerField(label='Starting value', min_value=1)
+    count = forms.IntegerField(label='Count', min_value=1)
+
+
+@permission_required('artshow.is_artshow_staff')
+def create_locations(request):
+    if request.method == 'POST':
+        form = CreateLocationsForm(request.POST)
+        if form.is_valid():
+            type = form.cleaned_data['type']
+            prefix = form.cleaned_data['prefix']
+            start = form.cleaned_data['start_value']
+            count = form.cleaned_data['count']
+            locations = [Location(type=type, name=prefix + str(index))
+                         for index in range(start, start + count)]
+            Location.objects.bulk_create(locations)
+    else:
+        form = CreateLocationsForm()
+
+    c = {
+        'form': form,
+        'locations': Location.objects.sorted(),
+    }
+    return render(request, 'artshow/workflows_create_locations.html', c)
 
 
 class CreateBidderIdsForm(forms.Form):
