@@ -25,6 +25,7 @@ environs = {extras = ["django"],version = "*"}
 celery = {extras = ["sqs"],version = "*"}
 
 [dev-packages]
+"django-debug-toolbar" = "*"
 "flake8" = "*"
 
 [requires]

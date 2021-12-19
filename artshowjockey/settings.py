@@ -144,6 +144,8 @@ TEMPLATES = [
 ]
 
 MIDDLEWARE = (
+    # Uncomment the next line when using the debug toolbar.
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -177,7 +179,15 @@ INSTALLED_APPS = (
     'djcelery_email',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    # Uncomment the next line to enable the debug toolbar.
+    # 'debug_toolbar',
 )
+
+# Uncomment the following when using the debug toolbar.
+# if DEBUG:
+#     import socket
+#     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+#     INTERNAL_IPS = [ip[:-1] + '1' for ip in ips] + ['127.0.0.1', '10.0.2.2']
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

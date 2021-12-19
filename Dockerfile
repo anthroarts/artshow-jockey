@@ -18,13 +18,15 @@ COPY Pipfile Pipfile.lock /code/
 FROM pipfile AS dev
 RUN pipenv install --system --dev
 
+EXPOSE 8000/tcp
+CMD ["/usr/local/bin/supervisord", "-c", "/code/supervisord.conf"]
+
 COPY . /code/
 
-RUN flake8 && python manage.py test
+RUN flake8 && python manage.py test && python manage.py collectstatic
 
 # Production environment.
 FROM pipfile AS prod
-COPY Pipfile Pipfile.lock /code/
 RUN pipenv install --system \
  && pip uninstall -y pipenv \
  && apk del .build-deps \
