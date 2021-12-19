@@ -352,6 +352,7 @@ class LocationAdmin(admin.ModelAdmin):
     list_display = ('name', 'type', 'artist_1', 'artist_2', 'space_is_split')
     list_editable = ('artist_1', 'artist_2', 'space_is_split')
     list_filter = ('type',)
+    autocomplete_fields = ('artist_1', 'artist_2')
     sortable_by = ()
 
     def get_queryset(self, request):
