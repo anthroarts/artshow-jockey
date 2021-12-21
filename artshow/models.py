@@ -173,24 +173,18 @@ class Artist (models.Model):
         return ", ".join("%s:%s" % (al.space.shortname, al.requested) for al in self.allocation_set.all())
 
     def allocated_spaces(self):
-        allocations = list(self.allocation_set.all())
-        allocation_map = {a.space.pk: a for a in allocations}
-        # Re-calculate the number of allocated spaces based on the assigned
-        # locations.
-        for a in allocations:
-            a.allocated = 0.0
-
-        locations = Location.objects.filter(Q(artist_1=self) | Q(artist_2=self))
+        space_map = {}
+        locations = Location.objects \
+            .filter(Q(artist_1=self) | Q(artist_2=self)) \
+            .select_related('type')
         for l in locations:
             size = 0.5 if l.space_is_split or l.half_space else 1.0
-            if l.type.pk in allocation_map:
-                allocation_map[l.type.pk].allocated += size
+            if l.type.shortname in space_map:
+                space_map[l.type.shortname] += size
             else:
-                a = Allocation(artist=self, space=l.type, allocated=size)
-                allocations.append(a)
-                allocation_map[l.type.pk] = a
+                space_map[l.type.shortname] = size
 
-        return ", ".join("%s:%s" % (al.space.shortname, al.allocated) for al in allocations)
+        return ", ".join("%s:%s" % (shortname, allocated) for shortname, allocated in space_map.items())
 
     def used_locations(self):
         return [x[0] for x in self.piece_set.exclude(status__in=[Piece.StatusNotInShow, Piece.StatusNotInShowLocked])
