@@ -26,29 +26,33 @@ class ArtistTest(TestCase):
         self.artist_2 = Artist(person=person)
         self.artist_2.save()
 
-        allocation = Allocation(artist=self.artist_1,
-                                space=Space.objects.get(shortname='GP'),
-                                requested=2,
-                                allocated=2)
-        allocation.save()
+        gp = Space.objects.get(shortname='GP')
+        gt = Space.objects.get(shortname='GT')
+        ap = Space.objects.get(shortname='AP')
+        at = Space.objects.get(shortname='AT')
 
-        allocation = Allocation(artist=self.artist_1,
-                                space=Space.objects.get(shortname='GT'),
-                                requested=1.5,
-                                allocated=1.5)
-        allocation.save()
+        Allocation.objects.bulk_create([
+            Allocation(artist=self.artist_1, space=gp, requested=2, allocated=2),
+            Allocation(artist=self.artist_1, space=gt, requested=1.5, allocated=1.5),
+            Allocation(artist=self.artist_2, space=ap, requested=3, allocated=3),
+            Allocation(artist=self.artist_2, space=at, requested=1.5, allocated=1),  # Half-table unallocated
+        ])
 
-        allocation = Allocation(artist=self.artist_2,
-                                space=Space.objects.get(shortname='AP'),
-                                requested=3,
-                                allocated=3)
-        allocation.save()
+        pieces = [
+            Piece(artist=self.artist_1, pieceid=1, min_bid=5, buy_now=50,
+                  status=Piece.StatusInShow, location='A1'),
+            Piece(artist=self.artist_2, pieceid=1, min_bid=5, buy_now=50,
+                  status=Piece.StatusInShow, location='B1'),
+        ]
+        Piece.objects.bulk_create(pieces)
 
-        allocation = Allocation(artist=self.artist_2,
-                                space=Space.objects.get(shortname='AT'),
-                                requested=1.5,
-                                allocated=1)  # Half-table unallocated
-        allocation.save()
+        piece_1_2 = Piece(artist=self.artist_1, pieceid=2, min_bid=5, buy_now=50,
+                          status=Piece.StatusInShow, location='A1')
+        piece_1_2.save()
+
+        piece_2_2 = Piece(artist=self.artist_2, pieceid=2, min_bid=5, buy_now=50,
+                          status=Piece.StatusInShow, location='B1')
+        piece_2_2.save()
 
         person = Person()
         person.save()
@@ -59,31 +63,10 @@ class ArtistTest(TestCase):
         bidderid = BidderId(id='0365327', bidder=bidder)
         bidderid.save()
 
-        # Piece 1-1 has no bids.
-        piece = Piece(artist=self.artist_1, pieceid=1, min_bid=5, buy_now=50,
-                      status=Piece.StatusInShow, location='A1')
-        piece.save()
-
-        # Piece 1-2 has a $10 bid.
-        piece = Piece(artist=self.artist_1, pieceid=2, min_bid=5, buy_now=50,
-                      status=Piece.StatusInShow, location='A1')
-        piece.save()
-
-        bid = Bid(bidder=bidder, piece=piece, amount=10)
-        bid.save()
-
-        # Piece 2-1 has no bids.
-        piece = Piece(artist=self.artist_2, pieceid=1, min_bid=5, buy_now=50,
-                      status=Piece.StatusInShow, location='B1')
-        piece.save()
-
-        # Piece 2-2 has a $20 bid.
-        piece = Piece(artist=self.artist_2, pieceid=2, min_bid=5, buy_now=50,
-                      status=Piece.StatusInShow, location='B1')
-        piece.save()
-
-        bid = Bid(bidder=bidder, piece=piece, amount=20)
-        bid.save()
+        Bid.objects.bulk_create([
+            Bid(bidder=bidder, bidderid=bidderid, piece=piece_1_2, amount=10),
+            Bid(bidder=bidder, bidderid=bidderid, piece=piece_2_2, amount=20),
+        ])
 
     def test_apply_space_fees(self):
         Artist.apply_space_fees(Artist.objects.all())
