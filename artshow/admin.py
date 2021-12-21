@@ -140,10 +140,10 @@ class ArtistAdmin(AjaxSelectAdmin):
     inlines = [AgentInline, AllocationInline, PieceInline, PaymentInline]
 
     def requested_spaces(self, artist):
-        return ", ".join("%s:%s" % (al.space.shortname, al.requested) for al in artist.allocation_set.all())
+        return artist.requested_spaces()
 
     def allocated_spaces(self, artist):
-        return ", ".join("%s:%s" % (al.space.shortname, al.allocated) for al in artist.allocation_set.all())
+        return artist.allocated_spaces()
 
     def piece_count(self, artist):
         return artist.piece_set.count()

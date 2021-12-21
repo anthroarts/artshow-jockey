@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.contrib.auth.models import Permission, User
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -63,8 +64,8 @@ class ReportTests(TestCase):
                     {
                         'artistid': 1,
                         'artist': 'Artist 1 (1)',
-                        'requested': 1.0,
-                        'allocated': 0.0,
+                        'requested': Decimal(1),
+                        'allocated': Decimal(0),
                     }
                 ],
             }),
@@ -73,16 +74,16 @@ class ReportTests(TestCase):
                     {
                         'artistid': 1,
                         'artist': 'Artist 1 (1)',
-                        'requested': 1.5,
-                        'allocated': 2.0,
+                        'requested': Decimal(1.5),
+                        'allocated': Decimal(2),
                     }
                 ],
                 'General Table': [
                     {
                         'artistid': 1,
                         'artist': 'Artist 1 (1)',
-                        'requested': 0.0,
-                        'allocated': 1.0,
+                        'requested': Decimal(0),
+                        'allocated': Decimal(1),
                     }
                 ]
             })

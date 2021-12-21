@@ -4,7 +4,7 @@
 from decimal import Decimal
 from django.shortcuts import render
 from django.db.models import (
-    Count, Exists, Max, OuterRef, Q, Subquery, Sum, Value as V
+    Case, Count, Exists, Max, OuterRef, Q, Subquery, Sum, Value as V, When
 )
 from django.db.models.fields import DecimalField
 from django.db.models.functions import Coalesce
@@ -225,22 +225,41 @@ def get_summary_statistics():
         total_invoice_payments += ip['total']
 
     spaces = Space.objects.annotate(
-        requested=Coalesce(Sum('allocation__requested'), decimal_zero),
-        allocated2=Coalesce(Sum('allocation__allocated'), decimal_zero))
+        requested=Coalesce(Sum('allocation__requested'), decimal_zero))
     total_spaces = {
         'available': 0,
+        'locations': 0,
         'requested': 0,
         'allocated': 0,
         'requested_perc': 0,
         'allocated_perc': 0
     }
     for s in spaces:
+        data = Location.objects.filter(type=s).aggregate(
+            total_count=Sum(Case(When(half_space=True, then=V(0.5)),
+                                 default=V(1),
+                                 output_field=DecimalField())),
+            artist_1_count=Sum(Case(When(Q(half_space=True) | Q(space_is_split=True),
+                                         then=V(0.5)),
+                                    default=V(1),
+                                    output_field=DecimalField()),
+                               filter=Q(artist_1__isnull=False)),
+            artist_2_count=Sum(Case(When(Q(half_space=True) | Q(space_is_split=True),
+                                         then=V(0.5)),
+                                    default=V(1),
+                                    output_field=DecimalField()),
+                               filter=Q(artist_2__isnull=False)))
+        s.locations = data['total_count'] or Decimal(0)
+        s.allocated = (data['artist_1_count'] or Decimal(0)) + \
+                      (data['artist_2_count'] or Decimal(0))
+
         total_spaces['available'] += s.available
+        total_spaces['locations'] += s.locations
         total_spaces['requested'] += s.requested
-        total_spaces['allocated'] += s.allocated2
+        total_spaces['allocated'] += s.allocated
         if s.available:
             s.requested_perc = s.requested / s.available * 100
-            s.allocated_perc = s.allocated2 / s.available * 100
+            s.allocated_perc = s.allocated / s.available * 100
         else:
             s.requested_perc = 0
             s.allocated_perc = 0
@@ -285,30 +304,34 @@ def allocations_waiting(request):
     over_allocations = {}
 
     for space in Space.objects.all():
-        subquery = Allocation.objects \
+        requested = Allocation.objects \
             .filter(artist=OuterRef('artistid'), space=space) \
-            .annotate(total_requested=Sum('requested')) \
-            .values('total_requested')
-        artists = {
-            artist.artistid: artist
-            for artist in Artist.objects.annotate(requested=Subquery(subquery))
-        }
+            .annotate(sum=Sum('requested')).values('sum')
+        artist_1_allocated = Location.objects \
+            .filter(artist_1=OuterRef('artistid'), type=space) \
+            .values('artist_1__pk') \
+            .annotate(sum=Sum(Case(When(Q(half_space=True) | Q(space_is_split=True),
+                                        then=V(0.5)),
+                                   default=V(1), output_field=DecimalField()))) \
+            .values('sum')
+        artist_2_allocated = Location.objects \
+            .filter(artist_2=OuterRef('artistid'), type=space) \
+            .values('artist_2__pk') \
+            .annotate(sum=Sum(Case(When(Q(half_space=True) | Q(space_is_split=True),
+                                        then=V(0.5)),
+                                   default=V(1), output_field=DecimalField()))) \
+            .values('sum')
+        artists = Artist.objects.annotate(
+            requested=Subquery(requested),
+            artist_1_allocated=Subquery(artist_1_allocated),
+            artist_2_allocated=Subquery(artist_2_allocated))
 
-        for artist in artists.values():
+        for artist in artists:
             if artist.requested is None:
-                artist.requested = 0.0
-            artist.allocated = 0.0
+                artist.requested = Decimal(0)
+            artist.allocated = (artist.artist_1_allocated or Decimal(0)) + \
+                               (artist.artist_2_allocated or Decimal(0))
 
-        for location in Location.objects.filter(type=space):
-            size = 1.0
-            if location.half_space or location.space_is_split:
-                size = 0.5
-            if location.artist_1:
-                artists[location.artist_1.artistid].allocated += size
-            if location.artist_2:
-                artists[location.artist_2.artistid].allocated += size
-
-        for artist in artists.values():
             map = None
             if artist.allocated > artist.requested:
                 map = over_allocations

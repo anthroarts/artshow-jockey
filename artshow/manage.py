@@ -2,7 +2,7 @@ from decimal import Decimal
 from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.core.signing import Signer, BadSignature
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.forms import HiddenInput, ModelChoiceField
 from django.forms.formsets import formset_factory
 from django.shortcuts import render, redirect, get_object_or_404
@@ -10,7 +10,7 @@ from django.utils.timezone import now
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from .models import (
-    Allocation, Artist, Payment, Piece, Space, validate_space,
+    Allocation, Artist, Location, Payment, Piece, Space, validate_space,
     validate_space_increments
 )
 from django import forms
@@ -58,6 +58,17 @@ def artist(request, artist_id):
     payments_total -= deduction_remaining
 
     allocations = artist.allocation_set.order_by("space__id")
+
+    allocation_map = {a.space.pk: a for a in allocations}
+    # Re-calculate the number of allocated spaces based on the assigned
+    # locations.
+    for a in allocations:
+        a.allocated = 0.0
+
+    locations = Location.objects.filter(Q(artist_1=artist) | Q(artist_2=artist))
+    for l in locations:
+        if l.type.pk in allocation_map:
+            allocation_map[l.type.pk].allocated += 0.5 if l.space_is_split or l.half_space else 1.0
 
     can_edit_personal_details = not settings.ARTSHOW_SHUT_USER_EDITS and \
         (request.user == artist.person.user)
@@ -223,9 +234,20 @@ def spaces(request, artist_id):
     for s in spaces:
         try:
             s.artist_allocation = s.allocation_set.get(artist=artist)
+            # Re-calculate the number of allocated spaces based on the assigned
+            # locations.
+            s.artist_allocation.allocated = 0.0
         except Allocation.DoesNotExist:
             s.artist_allocation = None
     spaces = [s for s in spaces if s.reservable is True or s.artist_allocation is not None]
+
+    locations = Location.objects.filter(Q(artist_1=artist) | Q(artist_2=artist))
+    space_map = {s.pk: s for s in spaces}
+    for l in locations:
+        if l.type.pk in space_map:
+            s = space_map[l.type.pk]
+            if s.artist_allocation is not None:
+                s.artist_allocation.allocated += 0.5 if l.space_is_split or l.half_space else 1.0
 
     if request.method == "POST":
         formset = RequestSpaceFormSet(request.POST)

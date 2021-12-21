@@ -23,18 +23,20 @@
     <br/>
 
     <table>
-    <tr><th>Space</th><th>Available</th><th>Requested</th><th>Allocated</th></tr>
+    <tr><th>Space</th><th>Available</th><th>Locations</th><th>Requested</th><th>Allocated</th></tr>
     {% for s in spaces %}
         <tr>
             <th>{{ s }}</th>
             <td>{{ s.available }}</td>
+            <td>{{ s.locations }}</td>
             <td>{{ s.requested }} ({{ s.requested_perc|floatformat:1 }}%)</td>
-            <td>{{ s.allocated2 }} ({{ s.allocated_perc|floatformat:1 }}%)</td>
+            <td>{{ s.allocated }} ({{ s.allocated_perc|floatformat:1 }}%)</td>
         </tr>
     {% endfor %}
         <tr class="totalsrow">
             <th>Total</th>
             <td>{{ total_spaces.available }}</td>
+            <td>{{ total_spaces.locations }}</td>
             <td>{{ total_spaces.requested }} ({{ total_spaces.requested_perc|floatformat:1 }}%)</td>
             <td>{{ total_spaces.allocated }} ({{ total_spaces.allocated_perc|floatformat:1 }}%)</td>
         </tr>
