@@ -244,35 +244,38 @@ class Artist (models.Model):
             payment_type_id=settings.ARTSHOW_SPACE_FEE_PK,
             artist__in=artists).delete()
 
-        allocations = Allocation.objects.filter(
-            artist__in=artists).select_related('space').order_by('artist')
-        artist_id = None
-        total = 0
-        allocated_spaces = []
+        artist_map = {}
+
+        def add_location(artist_id, location):
+            size = Decimal(0.5 if location.space_is_split or location.half_space else 1.0)
+            artist_spaces = artist_map.setdefault(artist_id, {})
+            artist_space = artist_spaces.setdefault(location.type.shortname, {
+                'cost': Decimal(0),
+                'allocated': Decimal(0)
+            })
+            artist_space['cost'] += size * location.type.price
+            artist_space['allocated'] += size
+
+        for location in Location.objects.filter(artist_1__in=artists).select_related('type'):
+            add_location(location.artist_1_id, location)
+
+        for location in Location.objects.filter(artist_2__in=artists).select_related('type'):
+            add_location(location.artist_2_id, location)
+
         payments = []
+        for (artist_id, artist_spaces) in artist_map.items():
+            total = Decimal(0)
+            allocated_spaces = []
+            for (shortname, data) in artist_spaces.items():
+                total += data['cost']
+                allocated_spaces.append(shortname + ':' + str(data['allocated']))
 
-        def make_payment():
-            if artist_id is None or total == 0:
-                return
+            payments.append(
+                Payment(artist_id=artist_id, amount=-total,
+                        payment_type_id=settings.ARTSHOW_SPACE_FEE_PK,
+                        description=', '.join(allocated_spaces),
+                        date=timezone.now()))
 
-            payments.append(Payment(artist_id=artist_id, amount=-total,
-                                    payment_type_id=settings.ARTSHOW_SPACE_FEE_PK,
-                                    description=', '.join(allocated_spaces),
-                                    date=timezone.now()))
-
-        for allocation in allocations:
-            if artist_id != allocation.artist_id:
-                make_payment()
-
-                artist_id = allocation.artist_id
-                total = 0
-                allocated_spaces = []
-
-            total += allocation.space.price * allocation.allocated
-            if total > 0:
-                allocated_spaces.append(f'{allocation.space.shortname}:{allocation.allocated}')
-
-        make_payment()
         Payment.objects.bulk_create(payments)
 
     @staticmethod

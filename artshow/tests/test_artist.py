@@ -6,7 +6,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from ..models import (
-    Allocation, Artist, Bid, Bidder, BidderId, Payment, Piece, Space)
+    Allocation, Artist, Bid, Bidder, BidderId, Location, Payment, Piece, Space)
 from peeps.models import Person
 
 
@@ -32,17 +32,30 @@ class ArtistTest(TestCase):
         at = Space.objects.get(shortname='AT')
 
         Allocation.objects.bulk_create([
-            Allocation(artist=self.artist_1, space=gp, requested=2, allocated=2),
-            Allocation(artist=self.artist_1, space=gt, requested=1.5, allocated=1.5),
-            Allocation(artist=self.artist_2, space=ap, requested=3, allocated=3),
-            Allocation(artist=self.artist_2, space=at, requested=1.5, allocated=1),  # Half-table unallocated
+            Allocation(artist=self.artist_1, space=gp, requested=2),
+            Allocation(artist=self.artist_1, space=gt, requested=1.5),
+            Allocation(artist=self.artist_2, space=ap, requested=3),
+            Allocation(artist=self.artist_2, space=at, requested=1.5),
+        ])
+
+        Location.objects.bulk_create([
+            Location(name='A1', type=gp, artist_1=self.artist_1),
+            Location(name='A2', type=gp, artist_1=self.artist_1),
+            Location(name='B1', type=gt, artist_1=self.artist_1),
+            Location(name='B2', type=gt, artist_1=self.artist_1, space_is_split=True),
+            # Use the "artist_2" slot for artist_2 for testing purposes.
+            Location(name='X1', type=ap, artist_2=self.artist_2),
+            Location(name='X2', type=ap, artist_2=self.artist_2),
+            Location(name='X3', type=ap, artist_2=self.artist_2),
+            Location(name='Y1', type=at, artist_2=self.artist_2),
+            Location(name='Y2', type=at, half_space=True)  # Unallocated
         ])
 
         pieces = [
             Piece(artist=self.artist_1, pieceid=1, min_bid=5, buy_now=50,
                   status=Piece.StatusInShow, location='A1'),
             Piece(artist=self.artist_2, pieceid=1, min_bid=5, buy_now=50,
-                  status=Piece.StatusInShow, location='B1'),
+                  status=Piece.StatusInShow, location='X1'),
         ]
         Piece.objects.bulk_create(pieces)
 
@@ -51,7 +64,7 @@ class ArtistTest(TestCase):
         piece_1_2.save()
 
         piece_2_2 = Piece(artist=self.artist_2, pieceid=2, min_bid=5, buy_now=50,
-                          status=Piece.StatusInShow, location='B1')
+                          status=Piece.StatusInShow, location='X1')
         piece_2_2.save()
 
         person = Person()
@@ -78,7 +91,7 @@ class ArtistTest(TestCase):
             payment_type_id=settings.ARTSHOW_SPACE_FEE_PK)
         self.assertEqual(payment.amount, Decimal(-35))  # 2 * $10 + 1.5 * $10
         self.assertEqual(payment.payment_type.name, 'Space Fee')
-        self.assertEqual(payment.description, 'GP:2.0, GT:1.5')
+        self.assertEqual(payment.description, 'GP:2, GT:1.5')
 
         payment = Payment.objects.get(
             artist=self.artist_2,
@@ -86,7 +99,7 @@ class ArtistTest(TestCase):
         payment = Payment.objects.get(artist=self.artist_2)
         self.assertEqual(payment.amount, Decimal(-40))  # 3 * $10 + 1 * $10
         self.assertEqual(payment.payment_type.name, 'Space Fee')
-        self.assertEqual(payment.description, 'AP:3.0, AT:1.0')
+        self.assertEqual(payment.description, 'AP:3, AT:1')
 
     def test_apply_winnings_and_commission(self):
         Artist.apply_winnings_and_commission(Artist.objects.all())
@@ -156,7 +169,7 @@ class ArtistTest(TestCase):
             payment_type_id=settings.ARTSHOW_SPACE_FEE_PK)
         self.assertEqual(payment.amount, Decimal(-35))  # 2 * $10 + 1.5 * $10
         self.assertEqual(payment.payment_type.name, 'Space Fee')
-        self.assertEqual(payment.description, 'GP:2.0, GT:1.5')
+        self.assertEqual(payment.description, 'GP:2, GT:1.5')
 
         winnings = Payment.objects.get(
             artist=self.artist_1,
@@ -175,7 +188,7 @@ class ArtistTest(TestCase):
             payment_type_id=settings.ARTSHOW_SPACE_FEE_PK)
         self.assertEqual(payment.amount, Decimal(-40))  # 3 * $10 + 1 * $10
         self.assertEqual(payment.payment_type.name, 'Space Fee')
-        self.assertEqual(payment.description, 'AP:3.0, AT:1.0')
+        self.assertEqual(payment.description, 'AP:3, AT:1')
 
         winnings = Payment.objects.get(
             artist=self.artist_2,
