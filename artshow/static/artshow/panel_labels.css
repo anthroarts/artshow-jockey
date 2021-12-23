@@ -1,0 +1,30 @@
+@page {
+  size: letter landscape;
+  margin: 0in;
+}
+
+body {
+  width: 11in;
+  margin: 0px;
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.page {
+  box-sizing: border-box;
+  width: 11in;
+  height: 4.25in;
+  padding: 0.75in;
+}
+
+.location {
+  font-size: 144px;
+  font-family: sans-serif;
+  text-align: center;
+}
+
+.artist {
+  font-size: 56px;
+  font-family: sans-serif;
+  text-align: center;
+}

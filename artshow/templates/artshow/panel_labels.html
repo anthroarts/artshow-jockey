@@ -1,0 +1,26 @@
+{% load static %}
+<html>
+<head>
+<title>Art Show Panel Labels</title>
+<link rel="stylesheet" type="text/css" href="{% static 'artshow/panel_labels.css' %}">
+</head>
+<body>
+{% for l in locations %}
+{% if l.space_is_split %}
+<div class="page">
+    <div class="location">{{ l }}</div>
+    <div class="artist">{{ l.artist_1.artistname|default:'' }}</div>
+</div>
+<div class="page">
+    <div class="location">{{ l }}</div>
+    <div class="artist">{{ l.artist_2.artistname|default:'' }}</div>
+</div>
+{% else %}
+<div class="page">
+    <div class="location">{{ l }}</div>
+    <div class="artist">{{ l.artist_1.artistname|default:'' }}{{ l.artist_2.artistname|default:'' }}</div>
+</div>
+{% endif %}
+{% endfor %}
+</body>
+</html>

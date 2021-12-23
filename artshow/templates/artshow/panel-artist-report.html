@@ -1,40 +1,57 @@
 {% extends "artshow/base_generic.html" %}
 {% block title %}Panel to Artist Report{% endblock %}
 {% block breadcrumbs %}
-    <ul class="breadcrumbs">
-        <li><a href="/">Home</a></li>
-        <li><a href="{% url 'artshow-reports' %}">Reports</a></li>
-        <li class="current">Panel to Artist Report</li>
-    </ul>
+<ul class="breadcrumbs">
+    <li><a href="/">Home</a></li>
+    <li><a href="{% url 'artshow-reports' %}">Reports</a></li>
+    <li class="current">Panel to Artist Report</li>
+</ul>
 {% endblock %}
 {% block content %}
-    <p>Artist locations</p>
-    <table>
+<p>
+    <button id="print">Print Panel Labels</button>
+</p>
+<p>Artist locations</p>
+<table>
+    <tr>
+        <th>Location</th>
+        <th>Artist 1</th>
+        <th>Artist 2</th>
+    </tr>
+    {% for l in assigned_locations %}
         <tr>
-            <th>Location</th>
-            <th>Artist 1</th>
-            <th>Artist 2</th>
+            <td>{{ l }}</td>
+            <td>{{ l.artist_1|default:'' }}</td>
+            <td>{{ l.artist_2|default:'' }}</td>
         </tr>
-        {% for l in assigned_locations %}
-            <tr>
-                <td>{{ l }}</td>
-                <td>{{ l.artist_1|default:'' }}</td>
-                <td>{{ l.artist_2|default:'' }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-    <p>Piece locations</p>
-    <table>
+    {% endfor %}
+</table>
+<p>Piece locations</p>
+<table>
+    <tr>
+        <th>Location</th>
+        <th>Artists</th>
+    </tr>
+    {% for l in locations %}
         <tr>
-            <th>Location</th>
-            <th>Artists</th>
+            <td>{{ l.location }}</td>
+            <td>{% for a in l.artists %}{{ a }} ({{ a.num_pieces }} piece{{ a.num_pieces|pluralize }})
+                {% if not forloop.last %}<br>{% endif %}{% endfor %}</td>
         </tr>
-        {% for l in locations %}
-            <tr>
-                <td>{{ l.location }}</td>
-                <td>{% for a in l.artists %}{{ a }} ({{ a.num_pieces }} piece{{ a.num_pieces|pluralize }})
-                    {% if not forloop.last %}<br>{% endif %}{% endfor %}</td>
-            </tr>
-        {% endfor %}
-    </table>
+    {% endfor %}
+</table>
+<script>
+document.getElementById('print').addEventListener('click', () => {
+    const iframe = document.createElement('iframe');
+    iframe.src = '{% url 'artshow-panel-labels' %}';
+    iframe.style = 'display: none';
+    iframe.onload = () => {
+        iframe.contentWindow.onafterprint = () => {
+            iframe.remove();
+        }
+        iframe.contentWindow.print();
+    };
+    document.body.appendChild(iframe);
+});
+</script>
 {% endblock %}

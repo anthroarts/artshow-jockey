@@ -9,6 +9,7 @@ from django.db.models import (
 from django.db.models.fields import DecimalField
 from django.db.models.functions import Coalesce
 from django.contrib.auth.decorators import permission_required
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from .models import (
     Allocation, Artist, Bid, BidderId, Invoice, InvoiceItem, InvoicePayment,
     Location, PaymentType, Piece, Space
@@ -142,6 +143,14 @@ def panel_artist_report(request):
     return render(request, "artshow/panel-artist-report.html", {
         'assigned_locations': Location.objects.sorted(),
         'locations': locations
+    })
+
+
+@permission_required('artshow.is_artshow_staff')
+@xframe_options_sameorigin
+def panel_labels(request):
+    return render(request, 'artshow/panel_labels.html', {
+        'locations': Location.objects.sorted(),
     })
 
 
