@@ -1,5 +1,6 @@
 {% extends "artshow/base_generic.html" %}
 {% load static %}
+{% load artshow_extras %}
 {% block title %}{{ artist.name }} ({{ artist.artistid }}){% endblock %}
 {% block extra_head %}
 <script type="text/javascript" src="{% static 'artshow/label_printer.js' %}"></script>
@@ -66,7 +67,7 @@ document.getElementById('select-none').addEventListener('click', () => {
       <td>{{ form.not_for_sale.errors }}{{ form.not_for_sale }}</td>
       <td>{{ form.min_bid.errors }}{{ form.min_bid }}</td>
       <td>{{ form.buy_now.errors }}{{ form.buy_now }}</td>
-      <td>{{ form.location.errors }}{{ form.location }}</td>
+      <td>{{ form.location.errors }}{{ form.location|tabindex:forloop.counter }}</td>
     </tr>
     {% endfor %}
   </table>

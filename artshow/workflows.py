@@ -105,6 +105,7 @@ def find_artist_checkin(request):
 
 
 class PieceCheckinForm(forms.ModelForm):
+    location = forms.ChoiceField(choices=[], required=False)
     print_item = forms.BooleanField(label='Print', initial=False,
                                     required=False)
 
@@ -121,13 +122,19 @@ class PieceCheckinForm(forms.ModelForm):
             'media': forms.TextInput(attrs={'size': 40}),
             'min_bid': forms.TextInput(attrs={'size': 5}),
             'buy_now': forms.TextInput(attrs={'size': 5}),
-            'location': forms.TextInput(attrs={'size': 5}),
         }
 
     def __init__(self, **kwargs):
+        try:
+            artist_locations = kwargs.pop('artist_locations')
+        except KeyError:
+            artist_locations = []
         super().__init__(**kwargs)
+        self.fields['location'].choices = [('', '---')]
+        self.fields['location'].choices.extend([(l, l) for l in artist_locations])
         if self.instance.id is not None:
-            self.fields['print_item'].initial = True
+            self.initial['print_item'] = True
+            self.initial['location'] = self.instance.location
 
 
 PieceCheckinFormSet = inlineformset_factory(Artist, Piece,
@@ -142,15 +149,23 @@ def artist_checkin(request, artistid):
         .filter(status__in=(Piece.StatusNotInShow,
                             Piece.StatusInShow)) \
         .order_by('pieceid')
+    artist_locations = [
+        l[0]
+        for l in Location.objects.sorted()
+                         .filter(Q(artist_1=artist) | Q(artist_2=artist))
+                         .values_list('name')]
     if request.method == 'POST':
         formset = PieceCheckinFormSet(request.POST, queryset=queryset,
-                                      instance=artist)
+                                      instance=artist,
+                                      form_kwargs={'artist_locations': artist_locations})
         if formset.is_valid():
             formset.save()
             # Create a fresh formset for further edits.
-            formset = PieceCheckinFormSet(queryset=queryset, instance=artist)
+            formset = PieceCheckinFormSet(queryset=queryset, instance=artist,
+                                          form_kwargs={'artist_locations': artist_locations})
     else:
-        formset = PieceCheckinFormSet(queryset=queryset, instance=artist)
+        formset = PieceCheckinFormSet(queryset=queryset, instance=artist,
+                                      form_kwargs={'artist_locations': artist_locations})
 
     c = {'artist': artist, 'formset': formset}
     return render(request, 'artshow/workflows_artist_checkin.html', c)

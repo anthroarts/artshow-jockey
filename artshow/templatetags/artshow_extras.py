@@ -20,3 +20,9 @@ def nagivation_bar(context):
     return {'user': user, 'has_add_invoice': user and user.has_perm('artshow.add_invoice'),
             'is_artshow_staff': user and user.has_perm('artshow.is_artshow_staff'),
             'announcement_counts': announcement_counts}
+
+
+@register.filter
+def tabindex(value, index):
+    value.field.widget.attrs['tabindex'] = index
+    return value
