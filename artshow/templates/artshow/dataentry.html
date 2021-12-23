@@ -1,22 +1,23 @@
 {% extends "artshow/base_generic.html" %}
 {% block title %}Data Entry{% endblock %}
 {% block breadcrumbs %}
-    <ul class="breadcrumbs">
-        <li><a href="/">Home</a></li>
-        <li class="current">Data Entry</li>
-    </ul>
+<ul class="breadcrumbs">
+    <li><a href="/">Home</a></li>
+    <li class="current">Data Entry</li>
+</ul>
 {% endblock %}
 {% block content %}
-    <ul>
-        <li><a href="{% url 'artshow-bulk-add-bidders' %}">Add Bidders</a></li>
-        <li><a href="{% url 'artshow-bulk-add-bids' %}">Add Bids</a></li>
-        <li><a href="{% url 'artshow-mobile-bid-entry' %}">Mobile Bid Entry</a></li>
-        <li>Auction Ordering
-            <ul>
-                <li><a href="{% url 'artshow-voice-auction-order' adult='y' %}">Adult</a></li>
-                <li><a href="{% url 'artshow-voice-auction-order' adult='n' %}">General</a></li>
-            </ul>
-        </li>
-
-    </ul>
+<ul>
+    <li><a href="{% url 'artshow-bulk-add-bidders' %}">Add Bidders</a></li>
+    <li><a href="{% url 'artshow-bulk-add-bids' %}">Add Bids</a></li>
+    <li><a href="{% url 'artshow-mobile-bid-entry' %}">Mobile Bid Entry</a></li>
+    <li>Voice Auction Ordering:
+        <a href="{% url 'artshow-voice-auction-order' adult='y' %}">Adult</a>
+        <a href="{% url 'artshow-voice-auction-order' adult='n' %}">General</a>
+    </li>
+    <li>Voice Auction Results:
+        <a href="{% url 'artshow-voice-auction-bids' adult='y' %}">Adult</a>
+        <a href="{% url 'artshow-voice-auction-bids' adult='n' %}">General</a>
+    </li>
+</ul>
 {% endblock %}

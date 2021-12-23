@@ -22,7 +22,7 @@ class AuctionOrderingForm(forms.ModelForm):
 AuctionOrderingFormSet = modelformset_factory(Piece, form=AuctionOrderingForm, extra=0)
 
 
-@permission_required('artshow.add_piece')
+@permission_required('artshow.is_artshow_staff')
 def order_auction(request, adult):
     adult = adult == "y"
 
@@ -81,6 +81,7 @@ class AuctionBidForm(forms.Form):
 AuctionBidFormSet = formset_factory(AuctionBidForm, extra=0)
 
 
+@permission_required('artshow.is_artshow_staff')
 def auction_bids(request, adult):
     adult = adult == "y"
     pieces = Piece.objects.filter(voice_auction=True, status=Piece.StatusInShow, adult=adult).order_by("order",
