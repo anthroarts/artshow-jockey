@@ -3,10 +3,10 @@ let saveButton;
 let statusText;
 let artistIdField;
 let pieceIdField;
-let locationField;
+let locationSelect;
+let buyNowCheckbox;
 let bidderFields;
 let bidFields;
-let buyNowBidCheckboxes;
 
 document.addEventListener('DOMContentLoaded', () => {
   loadButton = document.getElementById('load');
@@ -14,10 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
   statusText = document.getElementById('status');
   artistIdField = document.getElementById('artist');
   pieceIdField = document.getElementById('piece');
-  locationField = document.getElementById('location');
+  locationSelect = document.getElementById('location');
+  buyNowCheckbox = document.getElementById('autobuy');
   bidderFields = document.getElementsByClassName('bidder');
   bidFields = document.getElementsByClassName('bid');
-  buyNowBidCheckboxes = document.getElementsByClassName('autobuy');
 
   loadButton.addEventListener('click', load);
   saveButton.addEventListener('click', save);
@@ -26,11 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
     clearFields();
   });
   pieceIdField.addEventListener('input', clearFields);
-  locationField.addEventListener('input', setNotSaved);
+  locationSelect.addEventListener('input', setNotSaved);
+  buyNowCheckbox.addEventListener('input', setNotSaved);
   for (var i = 0; i < bidderFields.length; ++i) {
     bidderFields[i].addEventListener('input', setNotSaved);
     bidFields[i].addEventListener('input', setNotSaved);
-    buyNowBidCheckboxes[i].addEventListener('input', setNotSaved);
   }
 });
 
@@ -52,10 +52,27 @@ function updateBids(json, newStatus) {
     for (var i = 0; i < length; ++i) {
       bidderFields[i].value = json.bids[i].bidder;
       bidFields[i].value = json.bids[i].bid;
-      buyNowBidCheckboxes[i].checked = json.bids[i].buy_now_bid;
+    }
+    if (length >= 1) {
+      buyNowCheckbox.checked = json.bids[0].buy_now_bid;
     }
 
-    locationField.value = json['location']
+    while (locationSelect.firstChild) {
+      locationSelect.removeChild(locationSelect.firstChild);
+    }
+    const emptyLocation = document.createElement('option');
+    emptyLocation.value = '';
+    emptyLocation.textContent = '---';
+    locationSelect.appendChild(emptyLocation);
+    for (let location of json['locations']) {
+      const locationOption = document.createElement('option');
+      locationOption.value = location;
+      locationOption.textContent = location;
+      if (location == json['location']) {
+        locationOption.selected = true;
+      }
+      locationSelect.appendChild(locationOption);
+    }
 
     let lastUpdated = json['last_updated']
     if (lastUpdated === null)
@@ -69,11 +86,11 @@ function updateBids(json, newStatus) {
 function clearErrors() {
   artistIdField.classList.remove('error');
   pieceIdField.classList.remove('error');
+  buyNowCheckbox.classList.remove('error');
 
   for (var i = 0; i < bidderFields.length; ++i) {
     bidderFields[i].classList.remove('error');
     bidFields[i].classList.remove('error');
-    buyNowBidCheckboxes[i].classList.remove('error');
   }
 }
 
@@ -85,9 +102,15 @@ function clearFields() {
   for (var i = 0; i < bidderFields.length; ++i) {
     bidderFields[i].value = '';
     bidFields[i].value = '';
-    buyNowBidCheckboxes[i].checked = false;
   }
-  locationField.value = '';
+  while (locationSelect.firstChild) {
+    locationSelect.removeChild(locationSelect.firstChild);
+  }
+  const emptyLocation = document.createElement('option');
+  emptyLocation.value = '';
+  emptyLocation.textContent = '---';
+  locationSelect.appendChild(emptyLocation);
+  buyNowCheckbox.checked = false;
   statusText.textContent = '';
 }
 
@@ -123,8 +146,7 @@ function save() {
   for (var i = 0; i < bidderFields.length; ++i) {
     if (bidderFields[i].value === '') {
       foundEmpty = true;
-      if (bidFields[i].value !== '' ||
-          buyNowBidCheckboxes[i].checked) {
+      if (bidFields[i].value !== '' || (i == 0 && buyNowCheckbox.checked)) {
         bidderFields[i].classList.add('error');
         error = 'Missing bidder.';
         break;
@@ -145,7 +167,7 @@ function save() {
       bids.push({
         'bidder': bidderFields[i].value,
         'bid': bidFields[i].value,
-        'buy_now_bid': buyNowBidCheckboxes[i].checked,
+        'buy_now_bid': i == 0 && buyNowCheckbox.checked,
       });
     }
   }
@@ -158,7 +180,7 @@ function save() {
   statusText.textContent = 'Saving...';
   fetch(`../${artistIdField.value}/${pieceIdField.value}/`, {
     method: 'POST',
-    body: JSON.stringify({'bids': bids, 'location': locationField.value}),
+    body: JSON.stringify({'bids': bids, 'location': locationSelect.value}),
     credentials: 'include',
     mode: 'cors',
     headers: {

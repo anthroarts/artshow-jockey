@@ -2,11 +2,12 @@ from django.contrib.auth.models import Permission, User
 from django.test import Client, TestCase
 import json
 
-from ..models import Artist, Bid, Bidder, BidderId, Piece
+from ..models import Artist, Bid, Bidder, BidderId, Location, Piece, Space
 from peeps.models import Person
 
 
 class BidEntryTests(TestCase):
+    fixtures = ['artshowpaymenttypes', 'artshowspaces']
 
     def setUp(self):
         self.user = User.objects.create_user(
@@ -20,6 +21,14 @@ class BidEntryTests(TestCase):
 
         artist = Artist(person=person)
         artist.save()
+
+        gp = Space.objects.get(shortname='GP')
+
+        Location.objects.bulk_create([
+            Location(name='A1', type=gp, artist_1=artist),
+            Location(name='A2', type=gp, artist_2=artist),
+            Location(name='A3', type=gp),
+        ])
 
         bidder = Bidder(person=person)
         bidder.save()
@@ -37,7 +46,7 @@ class BidEntryTests(TestCase):
         # Piece 1-2 has 2 bids and is already in the show.
         piece = Piece(artist=artist, pieceid=2, min_bid=5, buy_now=50,
                       status=Piece.StatusInShow,
-                      location='2B')
+                      location='A1')
         piece.save()
 
         bid = Bid(bidder=bidder, piece=piece, amount=10)
@@ -79,6 +88,7 @@ class BidEntryTests(TestCase):
             'bids': [],
             'last_updated': None,
             'location': '',
+            'locations': ['A1', 'A2'],
         })
 
     def test_piece_two_bids(self):
@@ -93,7 +103,8 @@ class BidEntryTests(TestCase):
                  'buy_now_bid': False},
             ],
             'last_updated': None,
-            'location': '2B',
+            'location': 'A1',
+            'locations': ['A1', 'A2'],
         }
         self.assertEqual(response.json(), expected)
 
@@ -107,7 +118,7 @@ class BidEntryTests(TestCase):
                  'bid': 10,
                  'buy_now_bid': False},
             ],
-            'location': '1A',
+            'location': 'A1',
         }
         response = self.postJson('/artshow/entry/bids/1/1/', data)
         expected = {
@@ -126,7 +137,7 @@ class BidEntryTests(TestCase):
                  'bid': 10,
                  'buy_now_bid': False},
             ],
-            'location': '1A',
+            'location': 'A1',
         }
         response = self.postJson('/artshow/entry/bids/1/1/', data)
         expected = {
@@ -148,11 +159,11 @@ class BidEntryTests(TestCase):
                  'bid': 10,
                  'buy_now_bid': False},
             ],
-            'location': '1a',
+            'location': 'a1',
         }
         response = self.postJson('/artshow/entry/bids/1/1/', expected)
         self.assertEqual(response.json()['bids'], expected['bids'])
-        self.assertEqual(response.json()['location'], '1A')  # '1a' upper cased
+        self.assertEqual(response.json()['location'], 'A1')  # 'a1' upper cased
         self.assertIsNotNone(response.json()['last_updated'])
 
     def test_replace_bids(self):
@@ -162,7 +173,7 @@ class BidEntryTests(TestCase):
                  'bid': 50,
                  'buy_now_bid': True},
             ],
-            'location': '2B',
+            'location': 'A1',
         }
         response = self.postJson('/artshow/entry/bids/1/2/', expected)
         self.assertEqual(response.json()['bids'], expected['bids'])
@@ -179,7 +190,7 @@ class BidEntryTests(TestCase):
                  'bid': 50,
                  'buy_now_bid': True},
             ],
-            'location': '2B',
+            'location': 'A1',
         }
         response = self.postJson('/artshow/entry/bids/1/2/', data)
         expected = {
@@ -213,7 +224,7 @@ class BidEntryTests(TestCase):
                  'bid': 10,
                  'buy_now_bid': False},
             ],
-            'location': '2B',
+            'location': 'A1',
         }
         response = self.postJson('/artshow/entry/bids/1/2/', data)
         expected = {
@@ -237,6 +248,7 @@ class BidEntryTests(TestCase):
                  'buy_now_bid': False},
             ],
             'last_updated': None,
-            'location': '2B',
+            'location': 'A1',
+            'locations': ['A1', 'A2'],
         }
         self.assertEqual(response.json(), expected)

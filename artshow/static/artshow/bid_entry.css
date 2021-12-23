@@ -12,12 +12,12 @@
 
 .bid_entry {
   display: grid;
-  grid-template-columns: fit-content(25%) 1fr 1fr fit-content(25%);
+  grid-template-columns: fit-content(25%) 1fr 1fr;
   grid-gap: 10px;
   grid-auto-flow: row;
 }
 
-.location_label {
+.label {
   grid-column: 2;
 }
 
@@ -45,6 +45,10 @@
 }
 
 input[type="text"] {
+  font-size: 18pt;
+}
+
+select {
   font-size: 18pt;
 }
 

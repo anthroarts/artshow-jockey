@@ -17,16 +17,18 @@
 </div>
 <hr>
 <div class="bid_entry">
-  <div class="location_label center">Location:</div>
-  <input type="text" size="4" id="location">
-  <div class="bidder_label">Bidder Id</div>
+  <div class="label">Location:</div>
+  <select id="location">
+    <option value="">---</option>
+  </select>
+  <div class="label">Buy Now:</div>
+  <input type="checkbox" id="autobuy">
+  <div class="label">Bidder Id</div>
   <div>Bid</div>
-  <div>AB</div>
   {% for slot in bid_slots %}
   <div class="center">{{ slot }}.</div>
   <input type="text" size="8" pattern="[0-9]*" inputmode="numeric" class="bidder">
   <input type="text" size="4" pattern="[0-9]*" inputmode="numeric" class="bid">
-  <input type="checkbox" class="autobuy">
   {% endfor %}
 </div>
 <hr>
