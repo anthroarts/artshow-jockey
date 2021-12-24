@@ -14,9 +14,9 @@
     {% if artists %}
         <ul>
             {% for a in artists %}
-                {% if query == "all" or query == "req" and a.requested > 0 or query == "reqp" and a.requested > 0 or query == "alloc" and a.allocated > 0 %}
+                {% if query == "all" or query == "req" and a.requested > 0 or query == "reqp" and a.requested > 0 or query == "alloc" and a.allocated %}
                     <li>{% if a.website %}<a href="{{ a.website }}">{{ a.artistname }}</a>{% else %}
-                        {{ a.artistname }}{% endif %} {% if query == "reqp" and a.allocated == 0 %}(Pending){% endif %}
+                        {{ a.artistname }}{% endif %} {% if query == "reqp" and not a.allocated %}(Pending){% endif %}
                     </li>
                 {% endif %}
             {% endfor %}

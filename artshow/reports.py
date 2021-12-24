@@ -24,8 +24,11 @@ def index(request):
 @permission_required('artshow.is_artshow_staff')
 def artists(request):
     query = request.GET.get('q', 'all')
-    artists = Artist.objects.annotate(requested=Sum("allocation__requested"),
-                                      allocated=Sum("allocation__allocated"))
+    artist_locations = Location.objects.filter(
+        Q(artist_1=OuterRef('pk')) | Q(artist_2=OuterRef('pk')))
+    artists = Artist.objects.annotate(
+        requested=Sum("allocation__requested"),
+        allocated=Exists(artist_locations))
     artists = list(artists)
     artists.sort(key=lambda x: x.artistname().lower())
     return render(request, 'artshow/reports-artists.html', {'artists': artists, 'query': query})
@@ -208,12 +211,14 @@ def get_summary_statistics():
         highest_amt_sa_adult=Max('top_bid', filter=silent_auction & adult_rating),
     )
 
+    artist_locations = Location.objects.filter(
+        Q(artist_1=OuterRef('pk')) | Q(artist_2=OuterRef('pk')))
     artist_stats = Artist.objects.annotate(
         num_requested=Sum('allocation__requested'),
-        num_allocated=Sum('allocation__allocated')).aggregate(
+        has_allocations=Exists(artist_locations)).aggregate(
         count=Count('pk'),
         count_active=Count('pk', filter=Q(num_requested__gt=0)),
-        count_showing=Count('pk', filter=Q(num_allocated__gt=0))
+        count_showing=Count('pk', filter=Q(has_allocations=True))
     )
 
     decimal_zero = V(0, output_field=DecimalField())
