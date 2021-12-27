@@ -167,7 +167,16 @@ def artist_checkin(request, artistid):
         formset = PieceCheckinFormSet(queryset=queryset, instance=artist,
                                       form_kwargs={'artist_locations': artist_locations})
 
-    c = {'artist': artist, 'formset': formset}
+    json_data = {
+        'artistId': artist.artistid,
+        'artistName': artist.artistname(),
+    }
+
+    c = {
+        'artist': artist,
+        'formset': formset,
+        'json_data': json_data,
+    }
     return render(request, 'artshow/workflows_artist_checkin.html', c)
 
 

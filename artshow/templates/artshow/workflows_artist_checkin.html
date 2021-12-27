@@ -84,11 +84,15 @@ document.getElementById('select-none').addEventListener('click', () => {
   <span id="label-printer-status">No label printer found.</span>
 </p>
 
+{{ json_data|json_script:"json-data" }}
+
 <script>
 const mainForm = document.getElementById('main-form');
 const printPieceStickers = document.getElementById('print-piece-stickers');
 
 setUpLabelPrinter('label-printer-status');
+
+const json = JSON.parse(document.getElementById('json-data').textContent);
 
 printPieceStickers.addEventListener('click', async () => {
   const stickers = [];
@@ -98,23 +102,21 @@ printPieceStickers.addEventListener('click', async () => {
       continue;
     }
 
-    const artistId = "{{ artist.artistid|escapejs }}";
-    const artistName = "{{ artist.artistname|escapejs }}";
     const pieceId = document.getElementById(`id_piece_set-${i}-pieceid`).value;
     const pieceName = document.getElementById(`id_piece_set-${i}-name`).value;
     const media = document.getElementById(`id_piece_set-${i}-media`).value;
 
-    stickers.push({artistId, artistName, pieceId, pieceName, media});
+    stickers.push({pieceId, pieceName, media});
   }
 
   let data = '';
   for (const sticker of stickers) {
     data += `N
-A20,5,0,2,1,1,N,"${sticker.artistName.slice(0, 24)}"
-A20,45,0,2,1,1,N,"${sticker.pieceName.slice(0, 24)}"
-A20,65,0,2,1,1,N,"${sticker.pieceName.slice(24, 49)}"
-A20,105,0,2,1,1,N,"${sticker.media.slice(0, 24)}"
-A350,0,1,2,2,2,N,"${sticker.artistId}-${sticker.pieceId}"
+A25,5,0,2,1,1,N,"${json.artistName.slice(0, 24)}"
+A25,45,0,2,1,1,N,"${sticker.pieceName.slice(0, 24)}"
+A25,65,0,2,1,1,N,"${sticker.pieceName.slice(24, 49)}"
+A25,105,0,2,1,1,N,"${sticker.media.slice(0, 24)}"
+A355,5,1,2,2,2,N,"${json.artistId}-${sticker.pieceId}"
 JB
 P1
 `;
