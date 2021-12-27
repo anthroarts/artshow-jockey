@@ -186,6 +186,11 @@ class Artist (models.Model):
 
         return ", ".join("%s:%s" % (shortname, allocated) for shortname, allocated in space_map.items())
 
+    def assigned_locations(self):
+        return [l[0] for l in Location.objects.sorted()
+                                      .filter(Q(artist_1=self) | Q(artist_2=self))
+                                      .values_list('name')]
+
     def used_locations(self):
         return [x[0] for x in self.piece_set.exclude(status__in=[Piece.StatusNotInShow, Piece.StatusNotInShowLocked])
                                   .distinct().values_list("location")]

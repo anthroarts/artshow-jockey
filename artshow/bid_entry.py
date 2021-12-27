@@ -2,13 +2,12 @@ from decimal import Decimal
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 import json
 
-from .models import Artist, Bid, BidderId, Location, Piece
+from .models import Artist, Bid, BidderId, Piece
 
 
 @permission_required('artshow.is_artshow_staff')
@@ -52,12 +51,6 @@ def get_bids(piece):
     if piece.bids_updated:
         bids_updated = piece.bids_updated.isoformat()
 
-    locations = [
-        l[0]
-        for l in Location.objects.sorted()
-                         .filter(Q(artist_1=piece.artist) | Q(artist_2=piece.artist))
-                         .values_list('name')]
-
     return JsonResponse({
         'bids': [{
             'bidder': bid.bidderid.id,
@@ -66,7 +59,7 @@ def get_bids(piece):
         } for bid in bids],
         'last_updated': bids_updated,
         'location': piece.location,
-        'locations': locations,
+        'locations': piece.artist.assigned_locations(),
     })
 
 

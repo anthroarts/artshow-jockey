@@ -149,23 +149,18 @@ def artist_checkin(request, artistid):
         .filter(status__in=(Piece.StatusNotInShow,
                             Piece.StatusInShow)) \
         .order_by('pieceid')
-    artist_locations = [
-        l[0]
-        for l in Location.objects.sorted()
-                         .filter(Q(artist_1=artist) | Q(artist_2=artist))
-                         .values_list('name')]
     if request.method == 'POST':
         formset = PieceCheckinFormSet(request.POST, queryset=queryset,
                                       instance=artist,
-                                      form_kwargs={'artist_locations': artist_locations})
+                                      form_kwargs={'artist_locations': artist.assigned_locations()})
         if formset.is_valid():
             formset.save()
             # Create a fresh formset for further edits.
             formset = PieceCheckinFormSet(queryset=queryset, instance=artist,
-                                          form_kwargs={'artist_locations': artist_locations})
+                                          form_kwargs={'artist_locations': artist.assigned_locations()})
     else:
         formset = PieceCheckinFormSet(queryset=queryset, instance=artist,
-                                      form_kwargs={'artist_locations': artist_locations})
+                                      form_kwargs={'artist_locations': artist.assigned_locations()})
 
     json_data = {
         'artistId': artist.artistid,
@@ -186,7 +181,8 @@ def artist_print_checkin_control_form(request, artistid):
     artist = get_object_or_404(Artist, artistid=artistid)
     queryset = artist.piece_set.order_by('pieceid')
     formset = PieceCheckinFormSet(request.POST, queryset=queryset,
-                                  instance=artist)
+                                  instance=artist,
+                                  form_kwargs={'artist_locations': artist.assigned_locations()})
     if not formset.is_valid():
         c = {'artist': artist, 'formset': formset}
         return render(request, 'artshow/workflows_artist_checkin.html', c)
@@ -207,7 +203,8 @@ def artist_print_bid_sheets(request, artistid):
     artist = get_object_or_404(Artist, artistid=artistid)
     queryset = artist.piece_set.order_by('pieceid')
     formset = PieceCheckinFormSet(request.POST, queryset=queryset,
-                                  instance=artist)
+                                  instance=artist,
+                                  form_kwargs={'artist_locations': artist.assigned_locations()})
     if not formset.is_valid():
         c = {'artist': artist, 'formset': formset}
         return render(request, 'artshow/workflows_artist_checkin.html', c)
@@ -234,7 +231,8 @@ def artist_print_piece_stickers(request, artistid):
     artist = get_object_or_404(Artist, artistid=artistid)
     queryset = artist.piece_set.order_by('pieceid')
     formset = PieceCheckinFormSet(request.POST, queryset=queryset,
-                                  instance=artist)
+                                  instance=artist,
+                                  form_kwargs={'artist_locations': artist.assigned_locations()})
     if not formset.is_valid():
         c = {'artist': artist, 'formset': formset}
         return render(request, 'artshow/workflows_artist_checkin.html', c)
