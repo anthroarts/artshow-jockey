@@ -677,9 +677,9 @@ class InvoicePayment(models.Model):
     PAYMENT_METHOD_CHOICES = [
         (0, "Not Paid"),
         (1, "Cash"),
-        (2, "Check"),
+        # (2, "Check"),
         (3, "Card"),
-        (4, "Other"),
+        # (4, "Other"),
     ]
     payment_method = models.IntegerField(choices=PAYMENT_METHOD_CHOICES, default=0)
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
