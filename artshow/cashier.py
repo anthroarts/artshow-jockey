@@ -19,6 +19,7 @@ from . import pdfreports
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.utils import timezone
+from django.utils.dateformat import DateFormat
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 import json
 from .conf import _DISABLED as SETTING_DISABLED
@@ -186,12 +187,44 @@ def cashier_invoice(request, invoice_id):
         .filter(piece__reproduction_rights_included=True) \
         .exists()
 
+    json_items = [{
+        'code': item.piece.code,
+        'name': item.piece.name,
+        'artistName': item.piece.artistname(),
+        'price': item.price,
+        'location': item.piece.location,
+        'reproductionRightsIncluded': item.piece.reproduction_rights_included,
+    } for item in invoice.invoiceitem_set.all()]
+
+    json_payments = [{
+        'method': payment.get_payment_method_display(),
+        'notes': payment.notes,
+        'amount': payment.amount,
+    } for payment in invoice.invoicepayment_set.all()]
+
+    json_data = {
+        'invoicePrefix': settings.ARTSHOW_INVOICE_PREFIX,
+        'invoiceId': invoice.id,
+        'invoiceDate': DateFormat(invoice.paid_date).format('F jS, Y'),
+        'bidderName': invoice.payer.name(),
+        'bidderIds': invoice.payer.bidder_ids(),
+        'hasReproductionRights': has_reproduction_rights,
+        'items': json_items,
+        'itemTotal': invoice.item_total(),
+        'taxPaid': invoice.tax_paid,
+        'totalPaid': invoice.total_paid(),
+        'payments': json_payments,
+        'moneyPrecision': settings.ARTSHOW_MONEY_PRECISION,
+        'taxDescription': settings.ARTSHOW_TAX_DESCRIPTION,
+    }
+
     return render(request, 'artshow/cashier_invoice.html', {
         'invoice': invoice,
         'has_reproduction_rights': has_reproduction_rights,
         'money_precision': settings.ARTSHOW_MONEY_PRECISION,
         'tax_description': settings.ARTSHOW_TAX_DESCRIPTION,
         'invoice_prefix': settings.ARTSHOW_INVOICE_PREFIX,
+        'json_data': json_data,
     })
 
 

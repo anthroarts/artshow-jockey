@@ -43,8 +43,12 @@
   <span id="receipt-printer-status">No receipt printer detected.</span>
 </p>
 
+{{ json_data|json_script:"json-data" }}
+
 <script>
 setUpReceiptPrinter('receipt-printer-status');
+
+const json = JSON.parse(document.getElementById('json-data').textContent);
 
 function stringElipsis(text, length) {
     if (text.length > length) {
@@ -71,38 +75,50 @@ function sliceAndPadEnd(text, width) {
 
 function invoiceBody(encoder, pageWidth) {
   encoder
-      .line(layoutSliceRight('Invoice: ', '{{ invoice_prefix|escapejs }}{{ invoice.id|escapejs }}', pageWidth))
-      .line(layoutSliceRight('Date: ', '{{ invoice.paid_date|date:"F jS, Y" }}', pageWidth))
-      .line(layoutSliceRight('Bidder name: ', '{{ invoice.payer.name|escapejs }}', pageWidth))
-      .line(layoutSliceRight('Bidder ID{{ invoice.payer.bidder_ids|pluralize }}: ', '{{ invoice.payer.bidder_ids|join:", "|escapejs }}', pageWidth))
+      .line(layoutSliceRight('Invoice: ', `${json.invoicePrefix}${json.invoiceId}`, pageWidth))
+      .line(layoutSliceRight('Date: ', json.invoiceDate, pageWidth))
+      .line(layoutSliceRight('Bidder name: ', json.bidderName, pageWidth))
+      .line(layoutSliceRight('Bidder ID: ', json.bidderIds.join(', '), pageWidth))
       .newline()
-      .bold(true).line(layoutSliceRight('Item', 'Amount', pageWidth)).bold(false)
-{% for item in invoice.invoiceitems %}
-      .line(layoutSliceLeft('{{ item.piece.code|escapejs }}{% if item.piece.reproduction_rights_included %}*{% endif %} - {{ item.piece.artistname|escapejs }}', ' ${{ item.price|floatformat:money_precision|escapejs }}', pageWidth))
-      .line('"' + stringElipsis('{{ item.piece.name|escapejs }}', pageWidth - 2) + '"')
-{% endfor %}
+      .bold(true).line(layoutSliceRight('Item', 'Amount', pageWidth)).bold(false);
+
+  for (let item of json.items) {
+    encoder
+        .line(layoutSliceLeft(
+            `${item.code}${item.reproductionRightsIncluded ? '*' : ''} - ${item.artistName}`,
+            ` \$${item.price}`, pageWidth))
+        .line('"' + stringElipsis(item.name, pageWidth - 2) + '"');
+  }
+
+  encoder
       .newline()
-      .line(layoutSliceRight('Items: ', '{{ invoice.invoiceitems.count }}', pageWidth))
+      .line(layoutSliceRight('Items: ', `${json.items.length}`, pageWidth))
       .newline()
-      .line(layoutSliceLeft('Sub-total', ' ${{ invoice.item_total|floatformat:money_precision|escapejs }}', pageWidth))
-      .line(layoutSliceLeft('{{ tax_description }}', ' ${{ invoice.tax_paid|floatformat:money_precision|escapejs }}', pageWidth))
+      .line(layoutSliceLeft('Sub-total', ` \$${json.itemTotal}`, pageWidth))
+      .line(layoutSliceLeft(json.taxDescription, ` \$${json.taxPaid}`, pageWidth))
       .newline()
-      .line(layoutSliceLeft('Total', ' ${{ invoice.total_paid|floatformat:money_precision|escapejs }}', pageWidth))
+      .line(layoutSliceLeft('Total', ` \$${json.totalPaid}`, pageWidth))
       .newline()
-      .bold(true).line(layoutSliceRight('Payment', 'Amount', pageWidth)).bold(false)
-{% for payment in invoice.invoicepayment_set.all %}
-      .line(layoutSliceLeft('{{ payment.get_payment_method_display|escapejs }} {{ payment.notes|escapejs }}', ' ${{ payment.amount|floatformat:money_precision|escapejs }}', pageWidth))
-{% endfor %}
-      .newline()
-{% if has_reproduction_rights %}
-      .line('This sale includes reproduction rights for')
-      .line('the piece numbers marked above with the')
-      .text('asterisk (*) symbol. All other pieces ').bold(true).line('do')
-      .text('not').bold(false).line(' include reproduction rights.');
-{% else %}
-      .text('This transaction ').bold(true).text('does not').bold(false).line(' include')
-      .line('reproduction rights to the pieces sold.');
-{% endif %}
+      .bold(true).line(layoutSliceRight('Payment', 'Amount', pageWidth)).bold(false);
+
+  for (let payment of json.payments) {
+    encoder.line(layoutSliceLeft(
+        `${payment.method} ${payment.notes}`, ` \$${payment.amount}`, pageWidth));
+  }
+
+  encoder.newline();
+
+  if (json.hasReproductionRights) {
+    encoder
+        .line('This sale includes reproduction rights for')
+        .line('the piece numbers marked above with the')
+        .text('asterisk (*) symbol. All other pieces ').bold(true).line('do')
+        .text('not').bold(false).line(' include reproduction rights.');
+  } else {
+    encoder
+        .text('This transaction ').bold(true).text('does not').bold(false).line(' include')
+        .line('reproduction rights to the pieces sold.');
+  }
 }
 
 document.getElementById('print-invoice').addEventListener('click', async () => {
@@ -120,14 +136,20 @@ document.getElementById('print-invoice').addEventListener('click', async () => {
       .width(1)
       .height(1)
       .align('left')
-      .line(layoutSliceRight('Bidder ID{{ invoice.payer.bidder_ids|pluralize }}: ', '{{ invoice.payer.bidder_ids|join:", "|escapejs }}', pageWidth))
+      .line(layoutSliceRight('Bidder ID: ', json.bidderIds.join(', '), pageWidth))
       .newline()
-      .bold(true).line(layoutSliceLeft('Item', 'Location', pageWidth)).bold(false)
-{% for item in invoice.invoiceitems %}
-      .line(layoutSliceLeft('{{ item.piece.code|escapejs }} - {{ item.piece.artistname|escapejs }}', ' {{ item.piece.location|escapejs }}', pageWidth))
-      .line('"' + stringElipsis('{{ item.piece.name|escapejs }}', pageWidth - 2) + '"')
-{% endfor %}
-      // Feed and cut.
+      .bold(true).line(layoutSliceLeft('Item', 'Location', pageWidth)).bold(false);
+
+  for (let item of json.items) {
+    encoder
+        .line(layoutSliceLeft(
+            `${item.code} - ${item.artistName}`,
+            ` ${item.location}`, pageWidth))
+        .line('"' + stringElipsis(item.name, pageWidth - 2) + '"');
+  }
+
+  // Feed and cut.
+  encoder
       .raw([0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A])
       .raw([0x1D, 0x56, 66, 0])
 
@@ -173,6 +195,4 @@ document.getElementById('print-invoice').addEventListener('click', async () => {
 });
 
 </script>
-
-
 {% endblock %}
