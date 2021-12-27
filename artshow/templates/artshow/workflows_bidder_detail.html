@@ -54,18 +54,14 @@
   <button id="print_form">Print Bidder Agreement</button>
 </p>
 
-{% if bidder.bidder_ids %}
 <p>
   <button id="print-bid-stickers">Print Bid Stickers</button>
   <span id="label-printer-status">No label printer detected.</span>
 </p>
-{% else %}
-<p>
-  <button disabled>Print Bid Stickers</button>
-</p>
-{% endif %}
 
 <iframe id="form_iframe" src="{% url 'artshow-bidder-agreement' bidder.pk %}" style="display: none"></iframe>
+
+{{ json_data|json_script:"json-data" }}
 
 <script>
 document.getElementById('print_form').addEventListener('click', function () {
@@ -73,14 +69,14 @@ document.getElementById('print_form').addEventListener('click', function () {
   return false;
 });
 
-{% if bidder.bidder_ids %}
 setUpLabelPrinter('label-printer-status');
 
-document.getElementById('print-bid-stickers').addEventListener('click', async () => {
-  const bidderId = "{{ bidder.bidder_ids|first|escapejs }}";
-
+const json = JSON.parse(document.getElementById('json-data').textContent);
+const printButton = document.getElementById('print-bid-stickers');
+printButton.disabled = json.bidderId == null;
+printButton.addEventListener('click', async () => {
   const data = `N
-A50,40,0,7,2,2,N,"${bidderId}"
+A50,40,0,7,2,2,N,"${json.bidderId}"
 A160,46,0,5,1,1,N,"$"
 LO160,100,165,5
 P10
@@ -88,6 +84,5 @@ P10
 
   printLabels(data);
 });
-{% endif %}
 </script>
 {% endblock %}

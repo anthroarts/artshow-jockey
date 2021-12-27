@@ -279,10 +279,19 @@ def bidder_detail(request, pk):
         manual_id_formset = BidderIdAddFormSet()
         auto_id_form = AssignBidderIdForm()
 
+    bidder_id = bidder.bidderid_set.order_by('id').values('id').first()
+    if bidder_id is not None:
+        bidder_id = bidder_id['id']
+
+    json_data = {
+        'bidderId': bidder_id
+    }
+
     context = {
         'manual_id_formset': manual_id_formset,
         'auto_id_form': auto_id_form,
-        'bidder': bidder
+        'bidder': bidder,
+        'json_data': json_data,
     }
     return render(request, 'artshow/workflows_bidder_detail.html', context)
 
