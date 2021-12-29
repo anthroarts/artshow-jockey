@@ -1,4 +1,5 @@
 @page {
+  size: letter portrait;
   margin: 0in;
 }
 
@@ -60,17 +61,10 @@ body {
   font-variant: small-caps;
 }
 
-.option {
-  align-self: end;
-}
-
-.bid-stickers {
-}
-
 .bid-sticker {
   grid-row: 2 / 4;
   display: table;
-  height: calc(2in / 3);
+  height: 0.75in;
   width: 1.75in;
   justify-self: center;
   border: 1px dashed black;
