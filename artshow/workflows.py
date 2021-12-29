@@ -190,6 +190,7 @@ def artist_print_checkin_control_form(request, artistid):
 
     c = {
         'artists': [artist],
+        'check_in': True,
         'print': True,
         'redirect': reverse('artshow-workflow-artist-checkin',
                             kwargs={'artistid': artist.artistid}),
@@ -339,6 +340,7 @@ def artist_print_checkout_control_form(request, artistid):
     artist = get_object_or_404(Artist, artistid=artistid)
     c = {
         'artists': [artist],
+        'check_out': True,
         'print': True,
         'redirect': reverse('artshow-workflow-artist-checkout',
                             kwargs={'artistid': artist.artistid}),

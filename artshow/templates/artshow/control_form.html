@@ -126,27 +126,35 @@
 </table>
 
 <p>
-  Please sign below to acknowledge satisfactory check-in and check-out. Do not
-  sign until you are at the show and have finished check-in with the staff.
+  Please sign below to acknowledge satisfactory
+  {% if check_in and not check_out %}check in.
+  {% elif check_out and not check_in %}check out.
+  {% else %}check-in and check-out.
+  {% endif %}
+  Do not sign until you are at the show and have checked with staff.
 </p>
 
 <div class="bottom-fields">
+  {% if check_in %}
   <div class="field">
     <div class="field-label">Artist check-in</div>
-    <div class="field-line">&nbsp;</div>
-  </div>
-  <div class="field">
-    <div class="field-label">Artist check-out</div>
     <div class="field-line">&nbsp;</div>
   </div>
   <div class="field">
     <div class="field-label">Staff check-in</div>
     <div class="field-line">&nbsp;</div>
   </div>
+  {% endif %}
+  {% if check_out %}
+  <div class="field">
+    <div class="field-label">Artist check-out</div>
+    <div class="field-line">&nbsp;</div>
+  </div>
   <div class="field">
     <div class="field-label">Staff check-out</div>
     <div class="field-line">&nbsp;</div>
   </div>
+  {% endif %}
 </div>
 </div>
 {% endfor %}

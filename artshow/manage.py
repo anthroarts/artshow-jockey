@@ -190,8 +190,11 @@ def control_forms(request, artist_id):
     artist = get_object_or_404(Artist.objects.viewable_by(request.user),
                                pk=artist_id)
 
-    return render(request, "artshow/control_form.html",
-                  {'artists': [artist]})
+    return render(request, "artshow/control_form.html", {
+        'artists': [artist],
+        'check_in': True,
+        'check_out': True,
+    })
 
 
 def requestspaceform_factory(artist):
