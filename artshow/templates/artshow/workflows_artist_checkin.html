@@ -74,7 +74,6 @@ document.getElementById('select-none').addEventListener('click', () => {
   <p>
     <button type="submit" formaction="{% url 'artshow-workflow-artist-checkin-control-form' artistid=artist.artistid %}">Save & Print Control Form</button>
     <button type="submit" formaction="{% url 'artshow-workflow-artist-bid-sheets' artistid=artist.artistid %}">Save & Print Bid Sheets</button>
-    <button type="submit" formaction="{% url 'artshow-workflow-artist-piece-stickers' artistid=artist.artistid %}">Save & Print Piece Stickers</button>
     <button type="submit" formaction="{% url 'artshow-workflow-artist-checkin' artistid=artist.artistid %}">Save</button>
   </p>
 </form>
