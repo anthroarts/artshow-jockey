@@ -26,7 +26,11 @@
     <div class="field-label">Artist name</div>
     <div class="field-line">{{ artist.artistname|default:"&nbsp" }}</div>
   </div>
-  <div class="field" style="grid-row: span 2">
+  <div class="field">
+    <div class="field-label">Assigned locations</div>
+    <div class="field-line">{{ artist.assigned_locations|join:', ' }}</div>
+  </div>
+  <div class="field">
     <div class="field-label">Address</div>
     <div class="field-line">{{ person.address1|default:"&nbsp" }}{% if person.address2 %}<br>{{ person.address2 }}{% endif %}</div>
   </div>
