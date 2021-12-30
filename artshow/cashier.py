@@ -202,10 +202,13 @@ def cashier_invoice(request, invoice_id):
         'amount': payment.amount,
     } for payment in invoice.invoicepayment_set.all()]
 
+    invoice_date = invoice.paid_date.astimezone(timezone.get_current_timezone())
+    formatted_date = DateFormat(invoice_date).format(settings.DATETIME_FORMAT)
+
     json_data = {
         'invoicePrefix': settings.ARTSHOW_INVOICE_PREFIX,
         'invoiceId': invoice.id,
-        'invoiceDate': DateFormat(invoice.paid_date).format('F jS, Y'),
+        'invoiceDate': formatted_date,
         'bidderName': invoice.payer.name(),
         'bidderIds': invoice.payer.bidder_ids(),
         'hasReproductionRights': has_reproduction_rights,
