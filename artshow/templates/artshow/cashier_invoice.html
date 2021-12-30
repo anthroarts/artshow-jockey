@@ -150,7 +150,7 @@ document.getElementById('print-invoice').addEventListener('click', async () => {
 
   // Feed and cut.
   encoder
-      .raw([0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A])
+      .raw([0x0A, 0x0A])
       .raw([0x1D, 0x56, 66, 0])
 
       // Merchant copy
@@ -173,7 +173,7 @@ document.getElementById('print-invoice').addEventListener('click', async () => {
       .newline()
       .line('Sign: ____________________________________')
       // Feed and cut.
-      .raw([0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A])
+      .raw([0x0A, 0x0A])
       .raw([0x1D, 0x56, 66, 0])
 
       // Customer copy
@@ -188,7 +188,7 @@ document.getElementById('print-invoice').addEventListener('click', async () => {
   invoiceBody(encoder, pageWidth);
   encoder
       // Feed and cut.
-      .raw([0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A, 0x0A])
+      .raw([0x0A, 0x0A])
       .raw([0x1D, 0x56, 66, 0]);
 
   printReceipt(encoder.encode());
