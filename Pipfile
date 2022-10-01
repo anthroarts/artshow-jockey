@@ -19,6 +19,7 @@ pdfrw = "*"
 Pillow = "==5.2.0"
 reportlab = "==3.5.68"
 requests = "*"
+requests-oauthlib = "*"
 psycopg2 = "*"
 supervisor = "*"
 environs = {extras = ["django"],version = "*"}
