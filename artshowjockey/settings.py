@@ -11,6 +11,9 @@ DEBUG = env.bool('DEBUG', default=False)
 SECRET_KEY = env.str('SECRET_KEY')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
+with env.prefixed('TEST_'):
+    TEST_OAUTH_PROVIDER = env.bool('OAUTH_PROVIDER', default=False)
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -160,7 +163,7 @@ ROOT_URLCONF = 'artshowjockey.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'artshowjockey.wsgi.application'
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'tinyreg',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -181,7 +184,12 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     # Uncomment the next line to enable the debug toolbar.
     # 'debug_toolbar',
-)
+]
+
+if TEST_OAUTH_PROVIDER:
+    INSTALLED_APPS.extend([
+        'tinyreg.tests'
+    ])
 
 # Uncomment the following when using the debug toolbar.
 # if DEBUG:
@@ -284,4 +292,18 @@ with env.prefixed('ARTSHOW_SQUARE_'):
 
 SITE_ID = 1
 SITE_NAME = ARTSHOW_SHOW_NAME
-SITE_ROOT_URL = 'https://artshow.furcon.org'
+SITE_ROOT_URL = 'http://localhost:8000'
+
+if TEST_OAUTH_PROVIDER:
+    OAUTH_AUTHORIZE_URL = SITE_ROOT_URL + '/test/oauth/authorize'
+    OAUTH_CLIENT_ID = 'TestOAuthClientId'
+    OAUTH_CLIENT_SECRET = 'TestOAuthClientSecret'
+    OAUTH_TOKEN_URL = SITE_ROOT_URL + '/test/oauth/token'
+    CONCAT_API = SITE_ROOT_URL + '/test/oauth/api'
+else:
+    with env.prefixed('OAUTH_'):
+        OAUTH_AUTHORIZE_URL = env.str('AUTHORIZE_URL')
+        OAUTH_CLIENT_ID = env.str('CLIENT_ID')
+        OAUTH_CLIENT_SECRET = env.str('CLIENT_SECRET')
+        OAUTH_TOKEN_URL = env.str('TOKEN_URL')
+    CONCAT_API = env.str('CONCAT_API')

@@ -18,7 +18,7 @@
                 Welcome,
                 <strong>{% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}</strong>.
                 <a href="{% url 'view_announcements' %}">View Announcements</a> /
-                <a href="{% url 'password_change' %}">Change password</a> / <a href="{% url 'logout' %}">Log out</a>
+                <a href="{% url 'logout' %}">Log out</a>
             {% else %}
                 <a href="{% url 'login' %}">Log in</a>
             {% endif %}
