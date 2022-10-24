@@ -28,6 +28,7 @@ celery = {extras = ["sqs"],version = "*"}
 [dev-packages]
 "django-debug-toolbar" = "*"
 "flake8" = "*"
+oauthlib = "*"
 
 [requires]
 python_version = "3.10"
