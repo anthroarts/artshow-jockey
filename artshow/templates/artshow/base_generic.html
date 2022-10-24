@@ -16,7 +16,7 @@
         <div id="user-tools">
             {% if user.is_active %}
                 Welcome,
-                <strong>{% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}</strong>.
+                <strong>{% if user.person %}{{ user.person.display_name }}{% else %}{{ user.username }}{% endif %}</strong>.
                 <a href="{% url 'view_announcements' %}">View Announcements</a> /
                 <a href="{% url 'logout' %}">Log out</a>
             {% else %}

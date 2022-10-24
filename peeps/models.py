@@ -4,7 +4,7 @@ from django.utils.html import format_html
 
 
 class Person (models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, default=None, blank=True, null=True, on_delete=models.SET_NULL)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, default=None, blank=True, null=True, on_delete=models.SET_NULL)
     name = models.CharField(max_length=100)
     address1 = models.CharField(max_length=100, blank=True, verbose_name="address")
     address2 = models.CharField(max_length=100, blank=True, verbose_name="address line 2")
@@ -22,6 +22,10 @@ class Person (models.Model):
             return "%s (%s)" % (self.name, ",".join([x for x in (self.reg_id, self.comment) if x]))
         else:
             return self.name
+
+    @property
+    def display_name(self):
+        return self.name
 
     def clickable_email(self):
         return format_html('<a href="mailto:{}">{}</a>',
