@@ -47,14 +47,15 @@ def oauth_complete(request):
         person = Person(
             name=user_info['firstName'] + ' ' + user_info['lastName'],
             address1=user_info['addressLine1'],
-            address2=user_info['addressLine2'],
+            address2=user_info.get('addressLine2', ''),
             city=user_info['addressCity'],
             state=user_info['addressState'],
             postcode=user_info['addressZipcode'],
             country=user_info['addressCountry'],
             phone=user_info['phone'],
             email=user_info['email'],
-            reg_id=user_info['id'])
+            reg_id=user_info['id'],
+            preferred_name=user_info.get('preferredName', ''))
 
     try:
         user = User.objects.get(username=person.reg_id)

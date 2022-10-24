@@ -15,6 +15,7 @@ class Person (models.Model):
     phone = models.CharField(max_length=40, blank=True)
     email = models.CharField(max_length=100, blank=True)
     reg_id = models.CharField(max_length=40, blank=True, verbose_name="Reg ID")
+    preferred_name = models.CharField(max_length=100, blank=True)
     comment = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
@@ -25,7 +26,7 @@ class Person (models.Model):
 
     @property
     def display_name(self):
-        return self.name
+        return self.preferred_name or self.name
 
     def clickable_email(self):
         return format_html('<a href="mailto:{}">{}</a>',
