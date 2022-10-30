@@ -95,20 +95,6 @@ class PaymentInline(admin.TabularInline):
     extra = 1
 
 
-def send_password_reset_email(artist, user, subject, body_template):
-    from django.utils.http import int_to_base36
-    from django.contrib.auth.tokens import default_token_generator
-
-    c = {
-        'artist': artist,
-        'user': user,
-        'uid': int_to_base36(user.id),
-        'token': default_token_generator.make_token(user),
-    }
-    body = email1.make_email2(c, body_template)
-    send_mail(subject, body, settings.ARTSHOW_EMAIL_SENDER, [user.email], fail_silently=False)
-
-
 class ArtistForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         if 'instance' not in kwargs:
@@ -271,72 +257,8 @@ class ArtistAdmin(AjaxSelectAdmin):
                     spaces_remaining[alloc.space.id] -= to_allocate
                     alloc.save()
 
-    def create_management_users(self, request, artists):
-        opts = self.model._meta
-        app_label = opts.app_label
-        template_id = None
-        if request.POST.get('post'):
-            template_id = request.POST.get('template')
-            if template_id:
-                selected_template = EmailTemplate.objects.get(pk=template_id)
-            else:
-                selected_template = None
-            # TODO this will not work if Person doesn't have a 'user' field that is the user model.
-            for artist in artists:
-                if artist.person.user:
-                    messages.warning(request, "Artist %s already has a login user %s" % (artist, artist.person.user))
-                    continue
-
-                artist_email = artist.person.email
-                if not artist_email:
-                    messages.warning(request, "Artist %s does not have an email address." % artist)
-                    continue
-
-                try:
-                    User.objects.get(username=artist_email)
-                except User.DoesNotExist:
-                    pass
-                else:
-                    messages.warning(request,
-                                     "Artist %s has email address %s, "
-                                     "but there is already a user with that "
-                                     "address as a login." % (
-                                         artist, artist_email))
-                    continue
-
-                user = User(username=artist_email, email=artist_email, first_name=artist.person.name, password='')
-                user.set_unusable_password()
-                user.save()
-                artist.person.user = user
-                artist.person.save()
-                messages.info(request, "Artist %s has a login created" % artist)
-
-                if selected_template:
-                    try:
-                        send_password_reset_email(artist, user, selected_template.subject,
-                                                  selected_template.template)
-                        self.message_user(request, "Mail to %s succeeded." % artist_email)
-                    except smtplib.SMTPException as x:
-                        # Note: ModelAdmin message_user only supports sending info-level messages.
-                        messages.error(request, "Mail to %s failed: %s" % (artist_email, x))
-            return None
-        templates = EmailTemplate.objects.all()
-        context = {
-            "title": "Create Management Users",
-            "queryset": artists,
-            "opts": opts,
-            "app_label": app_label,
-            "action_checkbox_name": helpers.ACTION_CHECKBOX_NAME,
-            "templates": templates,
-            "template_id": template_id,
-        }
-        return render(request, "admin/create_management_users.html", context)
-
-    create_management_users.short_description = "Create Management Users"
-
     actions = ('send_email', 'print_bidsheets', 'print_control_forms', 'print_mailing_labels', 'apply_space_fees',
-               'apply_winnings_and_commission', 'create_cheques', 'allocate_spaces', 'create_management_users',
-               'print_piece_stickers')
+               'apply_winnings_and_commission', 'create_cheques', 'allocate_spaces', 'print_piece_stickers')
     filter_horizontal = ('checkoffs',)
 
 
