@@ -1,14 +1,28 @@
 {% extends "registration/base.html" %}
 {% block title %}Login{% endblock %}
 {% block content %}
-<p><a href="{% url 'oauth-redirect' %}?next={{ next }}">Click here</a> to sign in using your convention registration.</p>
+<p>
+  This site requires you to log in using your convention registration. When you
+  click the button below you will be asked to log in using the username and
+  password you used to register for the convention. If you have not yet
+  registered you must create an account before returning to this page.
+</p>
 
-<form method="post">{% csrf_token %}
-<input type="hidden" name="next" value="{{ next }}" />
-<table class="loginbox">
-  {{ form.as_table }}
-  <tr class="buttonrow"><td colspan="2"><input type="submit" value="Log In"/></td></tr>
-</table>
-</form>
+<p>
+  <a class="btn" href="{% url 'oauth-redirect' %}?next={{ next|default:'/' }}">Log in</a>
+</p>
+
+<details>
+  <summary>Administrator login</summary>
+  <p>
+    <form method="post">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}" />
+      <table class="loginbox">
+        {{ form.as_table }}
+        <tr class="buttonrow"><td colspan="2"><input type="submit" value="Log In"/></td></tr>
+      </table>
+    </form>
+  </p>
+</details>
 
 {% endblock %}
