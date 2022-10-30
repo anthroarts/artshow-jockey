@@ -3,9 +3,10 @@
         "pk": 1,
         "model": "artshow.space",
         "fields": {
-            "available": "100",
+            "available": 145,
             "shortname": "GP",
-            "price": "10",
+            "price": 15,
+            "allow_half_spaces": true,
             "name": "General Panel"
         }
     },
@@ -13,9 +14,10 @@
         "pk": 2,
         "model": "artshow.space",
         "fields": {
-            "available": "15",
+            "available": 15,
             "shortname": "GT",
-            "price": "10",
+            "price": 25,
+            "allow_half_spaces": true,
             "name": "General Table"
         }
     },
@@ -23,9 +25,10 @@
         "pk": 3,
         "model": "artshow.space",
         "fields": {
-            "available": "30",
+            "available": 33,
             "shortname": "AP",
-            "price": "10",
+            "price": 15,
+            "allow_half_spaces": true,
             "name": "Adult Panel"
         }
     },
@@ -33,9 +36,10 @@
         "pk": 4,
         "model": "artshow.space",
         "fields": {
-            "available": "3",
+            "available": 6,
             "shortname": "AT",
-            "price": "10",
+            "price": 25,
+            "allow_half_spaces": true,
             "name": "Adult Table"
         }
     }
