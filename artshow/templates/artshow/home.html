@@ -3,8 +3,8 @@
     <p>Welcome to the {{ artshow_settings.ARTSHOW_SHOW_NAME }} management website.</p>
     <p>If you want to exhibit your artwork in the show, you will need to:</p>
     <ol>
-        <li>Read and agree to our <a href="{{ artshow_settings.ARTSHOW_ARTIST_AGREEMENT_URL }}">Rules</a></li>
-        <li><a href="{% url 'artshow-register' %}">Register</a>.</li>
+        <li>Read and agree to our <a href="{{ artshow_settings.ARTSHOW_ARTIST_AGREEMENT_URL }}">rules</a>.</li>
+        <li><a href="{% url 'artshow-register' %}">Register</a> for the show.</li>
     </ol>
-    <p>If you have already created an account for this year click here to <a href="{% url 'login' %}">log in</a>. Exhibitors from last year must register again.</p>
+    <p>If you have already registered for this year <a href="{% url 'artshow-manage' %}">click here</a> to manage your registration.</p>
 {% endblock %}

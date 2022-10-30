@@ -89,7 +89,7 @@ class ArtistTest(TestCase):
         payment = Payment.objects.get(
             artist=self.artist_1,
             payment_type_id=settings.ARTSHOW_SPACE_FEE_PK)
-        self.assertEqual(payment.amount, Decimal(-35))  # 2 * $10 + 1.5 * $10
+        self.assertEqual(payment.amount, Decimal(-67.50))  # 2 * $15 + 1.5 * $25
         self.assertEqual(payment.payment_type.name, 'Space Fee')
         self.assertEqual(payment.description, 'GP:2, GT:1.5')
 
@@ -97,7 +97,7 @@ class ArtistTest(TestCase):
             artist=self.artist_2,
             payment_type_id=settings.ARTSHOW_SPACE_FEE_PK)
         payment = Payment.objects.get(artist=self.artist_2)
-        self.assertEqual(payment.amount, Decimal(-40))  # 3 * $10 + 1 * $10
+        self.assertEqual(payment.amount, Decimal(-70))  # 3 * $15 + 1 * $25
         self.assertEqual(payment.payment_type.name, 'Space Fee')
         self.assertEqual(payment.description, 'AP:3, AT:1')
 
@@ -167,7 +167,7 @@ class ArtistTest(TestCase):
         payment = Payment.objects.get(
             artist=self.artist_1,
             payment_type_id=settings.ARTSHOW_SPACE_FEE_PK)
-        self.assertEqual(payment.amount, Decimal(-35))  # 2 * $10 + 1.5 * $10
+        self.assertEqual(payment.amount, Decimal(-67.50))  # 2 * $15 + 1.5 * $25
         self.assertEqual(payment.payment_type.name, 'Space Fee')
         self.assertEqual(payment.description, 'GP:2, GT:1.5')
 
@@ -186,7 +186,7 @@ class ArtistTest(TestCase):
         payment = Payment.objects.get(
             artist=self.artist_2,
             payment_type_id=settings.ARTSHOW_SPACE_FEE_PK)
-        self.assertEqual(payment.amount, Decimal(-40))  # 3 * $10 + 1 * $10
+        self.assertEqual(payment.amount, Decimal(-70))  # 3 * $15 + 1 * $25
         self.assertEqual(payment.payment_type.name, 'Space Fee')
         self.assertEqual(payment.description, 'AP:3, AT:1')
 

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls import include
 from django.contrib import admin
 from django.urls import re_path
@@ -17,3 +18,8 @@ urlpatterns = [
     # re_path(r'^__debug__/', include('debug_toolbar.urls')),
     re_path(r'^$', artshow.views.home, name="home"),
 ]
+
+if settings.TEST_OAUTH_PROVIDER:
+    urlpatterns.extend([
+        re_path(r'^test/oauth/', include('tinyreg.tests.urls'))
+    ])

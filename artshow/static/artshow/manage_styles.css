@@ -43,7 +43,6 @@ body {
 table.loginbox {
 	background-color: #ddddff;
 	border: 1px solid black;
-	margin: auto;
 	padding: 10px;
 }
 .loginbox th { 
@@ -242,3 +241,15 @@ table.winning-bidders-report tr:nth-child(even) { background-color:white; }
 table.winning-bidders-report tr:nth-child(odd) { background-color:lightgray; }
 table.winning-bidders-report tr.header { background-color:white; }
 table.winning-bidders-report th.bidder { background-color:black; color:white; border: 3px solid white; }
+
+a.btn {
+	background: #603a22;
+	border-radius: 5px;
+	color: white;
+	display: block;
+	height: 25px;
+	width: 120px;
+	padding: 10px;
+	text-align: center;
+	text-decoration: none;
+}

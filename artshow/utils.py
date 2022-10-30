@@ -3,12 +3,8 @@ import csv
 import io
 from django.contrib.auth import get_user_model
 from decimal import Decimal
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
 
 from .conf import settings
-from django.template.loader import get_template
-from django.core.mail import send_mail
 
 User = get_user_model()
 
@@ -60,54 +56,6 @@ class UnicodeCSVWriter:
     def writerows(self, rows):
         for row in rows:
             self.writerow(row)
-
-
-def create_user_from_email(email):
-    max_username_length = User._meta.get_field('username').max_length
-    if len(email) > max_username_length:
-        username = email.split("@")[0]
-        if User.objects.filter(username=username).exists():
-            for i in range(1, 1000):
-                test_username = username + str(i)
-                if len(test_username) > 30:
-                    return ValueError("Could not create user. Pre-@ part is too long to add a unique number.")
-                if not User.objects.filter(username=test_username).exists():
-                    username = test_username
-                    break
-            else:
-                return ValueError("Could not create user. Ran out of numbers to add.")
-    else:
-        username = email
-    password = User.objects.make_random_password()
-    user = User.objects.create_user(username=username, email=email,
-                                    password=password)
-    return user
-
-
-def send_password_reset_email(artist, user, subject=None, template=None):
-    from django.contrib.auth.tokens import default_token_generator
-    from artshow.email1 import wrap, default_wrap_cols
-
-    if template is None:
-        template = artshow_settings.ARTSHOW_PASSWORD_RESET_TEMPLATE
-    if not hasattr(template, 'render'):
-        template = get_template(template)
-
-    if subject is None:
-        subject = artshow_settings.ARTSHOW_PASSWORD_RESET_SUBJECT
-
-    c = {
-        'artist': artist,
-        'user': user,
-        'uid': urlsafe_base64_encode(force_bytes(user.id)),
-        'token': default_token_generator.make_token(user),
-        'artshow_settings': artshow_settings
-    }
-
-    body = template.render(c)
-    body = wrap(body, default_wrap_cols)
-    send_mail(subject, body, settings.ARTSHOW_EMAIL_SENDER, [user.email],
-              fail_silently=False)
 
 
 _quantization_value = Decimal(10) ** -settings.ARTSHOW_MONEY_PRECISION

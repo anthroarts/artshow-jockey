@@ -33,8 +33,14 @@
             </tr>
         {% endfor %}
     </table>
-    <p>If you have any issues regarding these pages, please <a href="mailto:{{ artshow_settings.ARTSHOW_ADMIN_EMAIL }}">contact
-        us</a>.</p>
-    <p>If you want to create additional artist "identities", such as a separate name for mature audience work, please
-        contact us about that, too.</p>
+    <p>
+        <a href="{% url 'artshow-register' %}">Click here</a> to register a new
+        artist. You can register multiple artist "identities", such as a
+        separate name for mature audience work.
+    </p>
+    <p>
+        If you have any issues regarding these pages, please
+        <a href="mailto:{{ artshow_settings.ARTSHOW_ADMIN_EMAIL }}">contact
+        us</a>.
+    </p>
 {% endblock %}

@@ -1,4 +1,4 @@
-FROM python:3.9-alpine AS native-deps
+FROM python:3.10-alpine AS native-deps
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -23,7 +23,13 @@ CMD ["/usr/local/bin/supervisord", "-c", "/code/supervisord.conf"]
 
 COPY . /code/
 
-RUN flake8 && python manage.py test && python manage.py collectstatic
+# Setup OAuth provider required for automated tests.
+ENV OAUTHLIB_INSECURE_TRANSPORT=1
+ENV TEST_OAUTH_PROVIDER=1
+
+RUN flake8 && \
+    python manage.py test && \
+    python manage.py collectstatic
 
 # Production environment.
 FROM pipfile AS prod

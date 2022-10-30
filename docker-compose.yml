@@ -13,6 +13,8 @@ services:
     environment:
       - DATABASE_URL=postgres://postgres:insecuredefaultpassword@db/postgres
       - BROKER_URL=amqp://broker
+      - OAUTHLIB_INSECURE_TRANSPORT=1
+      - TEST_OAUTH_PROVIDER=1
     volumes:
       - ./:/code # Map source directory over /code for development purposes.
   db:
