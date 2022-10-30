@@ -292,7 +292,7 @@ with env.prefixed('ARTSHOW_SQUARE_'):
 
 SITE_ID = 1
 SITE_NAME = ARTSHOW_SHOW_NAME
-SITE_ROOT_URL = 'http://localhost:8000'
+SITE_ROOT_URL = env.str('SITE_ROOT_URL', default='http://localhost:8000')
 
 if TEST_OAUTH_PROVIDER:
     OAUTH_AUTHORIZE_URL = SITE_ROOT_URL + '/test/oauth/authorize'
