@@ -157,17 +157,19 @@ class TokenView(View):
         scopes=['pii:basic', 'pii:email', 'pii:phone', 'pii:address']),
     name='dispatch')
 class CurrentUserView(View):
+    current_user = {
+        'id': 42,
+        'firstName': 'Foxy',
+        'lastName': 'McFoxerson',
+        'addressLine1': '123 Main St.',
+        'addressLine2': 'Apt 3',
+        'addressCity': 'New York',
+        'addressState': 'NY',
+        'addressZipcode': '12345',
+        'addressCountry': 'US',
+        'phone': '800-555-1234',
+        'email': 'fox@example.com',
+    }
+
     def get(self, request):
-        return JsonResponse({
-            'id': 42,
-            'firstName': 'Foxy',
-            'lastName': 'McFoxerson',
-            'addressLine1': '123 Main St.',
-            'addressLine2': 'Apt 3',
-            'addressCity': 'New York',
-            'addressState': 'NY',
-            'addressZipcode': '12345',
-            'addressCountry': 'USA',
-            'phone': '800-555-1234',
-            'email': 'fox@example.com',
-        })
+        return JsonResponse(self.current_user)

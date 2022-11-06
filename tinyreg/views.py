@@ -52,7 +52,7 @@ def oauth_complete(request):
             state=user_info['addressState'],
             postcode=user_info['addressZipcode'],
             country=user_info['addressCountry'],
-            phone=user_info['phone'],
+            phone=user_info.get('phone', ''),
             email=user_info['email'],
             reg_id=user_info['id'],
             preferred_name=user_info.get('preferredName', ''))
