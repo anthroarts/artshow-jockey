@@ -1,4 +1,5 @@
 # Django settings for artshowjockey project.
+from email.utils import getaddresses
 from environs import Env, EnvError
 import os
 
@@ -14,9 +15,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 with env.prefixed('TEST_'):
     TEST_OAUTH_PROVIDER = env.bool('OAUTH_PROVIDER', default=False)
 
-ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
-)
+ADMINS = getaddresses([env('DJANGO_ADMINS', default='')])
 
 MANAGERS = ADMINS
 
