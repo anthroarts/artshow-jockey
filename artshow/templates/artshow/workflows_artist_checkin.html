@@ -94,8 +94,11 @@ setUpLabelPrinter('label-printer-status');
 
 const json = JSON.parse(document.getElementById('json-data').textContent);
 
+function escape(text) {
+  return text.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+}
+
 function squashEncoding(text) {
-  text = text.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
   const encoded = CodepageEncoder.encode(text, 'cp437');
   return new TextDecoder().decode(encoded);
 }
@@ -123,10 +126,10 @@ printPieceStickers.addEventListener('click', async () => {
     const media = squashEncoding(sticker.media);
 
     data += `N
-A25,5,0,2,1,1,N,"${artistName.slice(0, 24)}"
-A25,45,0,2,1,1,N,"${pieceName.slice(0, 24)}"
-A25,65,0,2,1,1,N,"${pieceName.slice(24, 49)}"
-A25,105,0,2,1,1,N,"${media.slice(0, 24)}"
+A25,5,0,2,1,1,N,"${escape(artistName.slice(0, 24))}"
+A25,45,0,2,1,1,N,"${escape(pieceName.slice(0, 24))}"
+A25,65,0,2,1,1,N,"${escape(pieceName.slice(24, 49))}"
+A25,105,0,2,1,1,N,"${escape(media.slice(0, 24))}"
 A355,5,1,2,2,2,N,"${json.artistId}-${sticker.pieceId}"
 JB
 P1
