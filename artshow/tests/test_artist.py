@@ -78,6 +78,7 @@ class ArtistTest(TestCase):
 
         Bid.objects.bulk_create([
             Bid(bidder=bidder, bidderid=bidderid, piece=piece_1_2, amount=10),
+            Bid(bidder=bidder, bidderid=bidderid, piece=piece_2_2, amount=15),
             Bid(bidder=bidder, bidderid=bidderid, piece=piece_2_2, amount=20),
         ])
 
