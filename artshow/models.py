@@ -292,8 +292,10 @@ class Artist (models.Model):
         ).delete()
 
         artists = artists.annotate(
-            pieces=Count('piece'),
-            pieces_with_bids=Count('piece', filter=Q(piece__bid__invalid=False)),
+            pieces=Count('piece', distinct=True),
+            pieces_with_bids=Count('piece',
+                                   distinct=True,
+                                   filter=Q(piece__bid__invalid=False)),
         )
         payments = []
         for artist in artists:
