@@ -95,6 +95,7 @@ setUpLabelPrinter('label-printer-status');
 const json = JSON.parse(document.getElementById('json-data').textContent);
 
 function squashEncoding(text) {
+  text = text.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
   const encoded = CodepageEncoder.encode(text, 'cp437');
   return new TextDecoder().decode(encoded);
 }
