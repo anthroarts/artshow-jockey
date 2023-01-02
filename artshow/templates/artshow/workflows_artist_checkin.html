@@ -3,6 +3,7 @@
 {% load artshow_extras %}
 {% block title %}{{ artist.name }} ({{ artist.artistid }}){% endblock %}
 {% block extra_head %}
+<script type="text/javascript" src="{% static 'artshow/codepage-encoder-3125d35.js' %}"></script>
 <script type="text/javascript" src="{% static 'artshow/label_printer.js' %}"></script>
 {% endblock %}
 {% block breadcrumbs %}
@@ -93,6 +94,11 @@ setUpLabelPrinter('label-printer-status');
 
 const json = JSON.parse(document.getElementById('json-data').textContent);
 
+function squashEncoding(text) {
+  const encoded = CodepageEncoder.encode(text, 'cp437');
+  return new TextDecoder().decode(encoded);
+}
+
 printPieceStickers.addEventListener('click', async () => {
   const stickers = [];
   const formCount = Number(document.getElementById('id_piece_set-TOTAL_FORMS').value);
@@ -108,13 +114,18 @@ printPieceStickers.addEventListener('click', async () => {
     stickers.push({pieceId, pieceName, media});
   }
 
+  const codePage = 'cp437';
   let data = '';
   for (const sticker of stickers) {
+    const artistName = squashEncoding(json.artistName);
+    const pieceName = squashEncoding(sticker.pieceName);
+    const media = squashEncoding(sticker.media);
+
     data += `N
-A25,5,0,2,1,1,N,"${json.artistName.slice(0, 24)}"
-A25,45,0,2,1,1,N,"${sticker.pieceName.slice(0, 24)}"
-A25,65,0,2,1,1,N,"${sticker.pieceName.slice(24, 49)}"
-A25,105,0,2,1,1,N,"${sticker.media.slice(0, 24)}"
+A25,5,0,2,1,1,N,"${artistName.slice(0, 24)}"
+A25,45,0,2,1,1,N,"${pieceName.slice(0, 24)}"
+A25,65,0,2,1,1,N,"${pieceName.slice(24, 49)}"
+A25,105,0,2,1,1,N,"${media.slice(0, 24)}"
 A355,5,1,2,2,2,N,"${json.artistId}-${sticker.pieceId}"
 JB
 P1
