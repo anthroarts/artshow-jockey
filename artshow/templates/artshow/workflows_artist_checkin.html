@@ -118,7 +118,6 @@ printPieceStickers.addEventListener('click', async () => {
     stickers.push({pieceId, pieceName, media});
   }
 
-  const codePage = 'cp437';
   let data = '';
   for (const sticker of stickers) {
     const artistName = squashEncoding(json.artistName);
