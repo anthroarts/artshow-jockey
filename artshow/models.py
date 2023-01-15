@@ -302,6 +302,10 @@ class Artist (models.Model):
             artist.winnings = Piece.objects.filter(artist=artist).annotate(
                 top_bid=Max('bid__amount', filter=Q(bid__invalid=False))
             ).aggregate(winnings=Sum('top_bid'))['winnings']
+
+            if artist.winnings is None:
+                continue
+
             if artist.pieces > 0:
                 payments.append(
                     Payment(artist=artist, amount=artist.winnings,

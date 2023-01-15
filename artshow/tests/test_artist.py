@@ -26,6 +26,18 @@ class ArtistTest(TestCase):
         self.artist_2 = Artist(person=person)
         self.artist_2.save()
 
+        person = Person()
+        person.save()
+
+        self.artist_3 = Artist(person=person)
+        self.artist_3.save()
+
+        person = Person()
+        person.save()
+
+        self.artist_4 = Artist(person=person)
+        self.artist_4.save()
+
         gp = Space.objects.get(shortname='GP')
         gt = Space.objects.get(shortname='GT')
         ap = Space.objects.get(shortname='AP')
@@ -48,7 +60,8 @@ class ArtistTest(TestCase):
             Location(name='X2', type=ap, artist_2=self.artist_2),
             Location(name='X3', type=ap, artist_2=self.artist_2),
             Location(name='Y1', type=at, artist_2=self.artist_2),
-            Location(name='Y2', type=at, half_space=True)  # Unallocated
+            Location(name='Y2', type=at, half_space=True),  # Unallocated
+            Location(name='C1', type=gp, artist_1=self.artist_4),
         ])
 
         pieces = [
@@ -56,6 +69,8 @@ class ArtistTest(TestCase):
                   status=Piece.StatusInShow, location='A1'),
             Piece(artist=self.artist_2, pieceid=1, min_bid=5, buy_now=50,
                   status=Piece.StatusInShow, location='X1'),
+            Piece(artist=self.artist_4, pieceid=1, min_bid=5, buy_now=50,
+                  status=Piece.StatusInShow, location='C1'),
         ]
         Piece.objects.bulk_create(pieces)
 
@@ -85,7 +100,7 @@ class ArtistTest(TestCase):
     def test_apply_space_fees(self):
         Artist.apply_space_fees(Artist.objects.all())
 
-        self.assertEqual(Payment.objects.count(), 2)
+        self.assertEqual(Payment.objects.count(), 3)
 
         payment = Payment.objects.get(
             artist=self.artist_1,
@@ -97,10 +112,16 @@ class ArtistTest(TestCase):
         payment = Payment.objects.get(
             artist=self.artist_2,
             payment_type_id=settings.ARTSHOW_SPACE_FEE_PK)
-        payment = Payment.objects.get(artist=self.artist_2)
         self.assertEqual(payment.amount, Decimal(-70))  # 3 * $15 + 1 * $25
         self.assertEqual(payment.payment_type.name, 'Space Fee')
         self.assertEqual(payment.description, 'AP:3, AT:1')
+
+        payment = Payment.objects.get(
+            artist=self.artist_4,
+            payment_type_id=settings.ARTSHOW_SPACE_FEE_PK)
+        self.assertEqual(payment.amount, Decimal(-15))  # 1 * $15
+        self.assertEqual(payment.payment_type.name, 'Space Fee')
+        self.assertEqual(payment.description, 'GP:1')
 
     def test_apply_winnings_and_commission(self):
         Artist.apply_winnings_and_commission(Artist.objects.all())
@@ -136,7 +157,8 @@ class ArtistTest(TestCase):
         Artist.apply_winnings_and_commission(Artist.objects.all())
         Artist.create_cheques(Artist.objects.all())
 
-        self.assertEqual(Payment.objects.count(), 6)
+        self.assertEqual(Payment.objects.filter(
+            payment_type_id=settings.ARTSHOW_PAYMENT_SENT_PK).count(), 2)
 
         cheque = Payment.objects.get(
             artist=self.artist_1,
@@ -163,7 +185,7 @@ class ArtistTest(TestCase):
         response = c.post(reverse('artshow-workflow-close-show'))
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(Payment.objects.count(), 6)
+        self.assertEqual(Payment.objects.count(), 7)
 
         payment = Payment.objects.get(
             artist=self.artist_1,
@@ -202,3 +224,10 @@ class ArtistTest(TestCase):
             payment_type_id=settings.ARTSHOW_COMMISSION_PK)
         self.assertEqual(commission.amount, Decimal(-2))
         self.assertEqual(commission.description, '10.0% of sales')
+
+        payment = Payment.objects.get(
+            artist=self.artist_4,
+            payment_type_id=settings.ARTSHOW_SPACE_FEE_PK)
+        self.assertEqual(payment.amount, Decimal(-15))  # 1 * $15
+        self.assertEqual(payment.payment_type.name, 'Space Fee')
+        self.assertEqual(payment.description, 'GP:1')
