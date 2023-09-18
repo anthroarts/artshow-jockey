@@ -49,4 +49,5 @@ CMD ["/usr/local/bin/supervisord", "-c", "/code/supervisord.conf"]
 
 COPY . /code/
 
-RUN python manage.py collectstatic
+RUN DATABASE_URL="sqlite:///data/artshowjockey.db" \
+    python manage.py collectstatic
