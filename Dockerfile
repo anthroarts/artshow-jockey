@@ -1,4 +1,4 @@
-FROM python:3.10-alpine AS native-deps
+FROM python:3.11-alpine AS native-deps
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -6,10 +6,12 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /code
 
 # Install native dependencies.
-RUN mkdir /data /run/nginx \
- && pip install --upgrade pip pipenv \
- && apk add --no-cache jpeg libcurl libpq nginx zlib \
- && apk add --no-cache --virtual .build-deps build-base curl-dev jpeg-dev postgresql-dev zlib-dev
+RUN mkdir /data /run/nginx
+RUN pip install --upgrade pip pipenv
+RUN apk add --no-cache jpeg libcurl libpq nginx zlib
+RUN apk add --no-cache --virtual .build-deps
+RUN apk add --no-cache build-base
+RUN apk add --no-cache curl-dev jpeg-dev postgresql-dev zlib-dev
 
 FROM native-deps AS pipfile
 COPY Pipfile Pipfile.lock /code/
