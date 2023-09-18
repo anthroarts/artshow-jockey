@@ -172,7 +172,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django_ses',
-    'nocaptcha_recaptcha',
+    'captcha',
     'peeps',
     'artshow',
     'ajax_select',
@@ -195,6 +195,9 @@ if TEST_OAUTH_PROVIDER:
 #     import socket
 #     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
 #     INTERNAL_IPS = [ip[:-1] + '1' for ip in ips] + ['127.0.0.1', '10.0.2.2']
+
+if DEBUG:
+    SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -259,11 +262,9 @@ ARTSHOW_MAX_PIECE_ID = 99
 
 PEEPS_DEFAULT_COUNTRY = "USA"
 
-with env.prefixed('NORECAPTCHA_'):
-    # Visit https://www.google.com/recaptcha/admin/create to create a keypair.
-    # These are test keys.
-    NORECAPTCHA_SITE_KEY = env.str('SITE_KEY')
-    NORECAPTCHA_SECRET_KEY = env.str('SECRET_KEY')
+with env.prefixed('RECAPTCHA_'):
+    RECAPTCHA_PUBLIC_KEY = env.str('PUBLIC_KEY')
+    RECAPTCHA_PRIVATE_KEY = env.str('PRIVATE_KEY')
 
 with env.prefixed('ARTSHOW_PAYPAL_'):
     ARTSHOW_PAYPAL_ACCOUNT = env.str('ACCOUNT')
