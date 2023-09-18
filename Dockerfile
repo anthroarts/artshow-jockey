@@ -25,6 +25,10 @@ CMD ["/usr/local/bin/supervisord", "-c", "/code/supervisord.conf"]
 
 COPY . /code/
 
+ENV DEBUG=1
+ENV SECRET_KEY="Secret key for development"
+ENV DATABASE_URL="sqlite:///data/artshowjockey.db"
+
 # Setup OAuth provider required for automated tests.
 ENV OAUTHLIB_INSECURE_TRANSPORT=1
 ENV TEST_OAUTH_PROVIDER=1
