@@ -6,7 +6,6 @@ from django.urls import re_path
 
 from . import announcement
 from . import manage
-from . import paypal
 from . import register
 
 urlpatterns = [
@@ -31,15 +30,9 @@ urlpatterns = [
             name='artshow-manage-make-payment'),
     re_path(r'^artist/(?P<artist_id>\d+)/makepayment/complete/mail/$',
             manage.payment_made_mail, name='artshow-manage-payment-mail'),
-    re_path(r'^artist/(?P<artist_id>\d+)/makepayment/complete/paypal/$',
-            manage.payment_made_paypal, name='artshow-manage-payment-paypal'),
-    re_path(r'^artist/(?P<artist_id>\d+)/makepayment/cancelled/paypal/$',
-            manage.payment_cancelled_paypal,
-            name='artshow-manage-payment-paypal-cancelled'),
     re_path(r'^artist/(?P<artist_id>\d+)/makepayment/complete/square/$',
             manage.payment_made_square, name='artshow-manage-payment-square'),
     re_path(r'^register/$', register.main, name='artshow-register'),
-    re_path(r'^ipn/$', paypal.ipn_handler),
     re_path(r'^announcement/$', announcement.index, name="view_announcements"),
     re_path(r'^announcement/(?P<announcement_id>\d+)/$', announcement.show,
             name='artshow-announcement'),

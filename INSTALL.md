@@ -23,8 +23,6 @@ pip install -r requirements.txt
 | SECRET_KEY                   | Random string used to encrypt session data |
 | RECAPTCHA_PUBLIC_KEY         | reCAPTCHA public API key |
 | RECAPTCHA_PRIVATE_KEY        | reCAPTCHA private API key |
-| ARTSHOW_PAYPAL_ACCOUNT       | PayPal account to which artist payments are sent |
-| ARTSHOW_PAYPAL_URL           | PayPal API base URL |
 
 3. Create the database:
 

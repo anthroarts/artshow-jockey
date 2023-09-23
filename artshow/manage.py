@@ -1,14 +1,12 @@
 from decimal import Decimal
 from django.apps import apps
 from django.core.exceptions import ValidationError
-from django.core.signing import Signer, BadSignature
 from django.db.models import Sum, Q
 from django.forms import HiddenInput, ModelChoiceField
 from django.forms.formsets import formset_factory
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
 from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
 from .models import (
     Allocation, Artist, Location, Payment, Piece, Space, validate_space,
     validate_space_increments
@@ -21,7 +19,6 @@ from django.contrib import messages
 from .utils import artshow_settings
 from . import square
 from . import utils
-from .paypal import make_paypal_url, ipn_received
 import re
 from django.conf import settings
 
@@ -370,13 +367,6 @@ def make_payment(request, artist_id):
                               description="",
                               date=now())
 
-            via_paypal = request.POST.get("via_paypal", "")
-            if via_paypal:
-                payment.description = "PayPal pending confirmation"
-                payment.save()
-                url = make_paypal_url(request, payment)
-                return redirect(url)
-
             transaction = square.charge(payment, form.cleaned_data["nonce"])
             if transaction:
                 payment.payment_type_id = settings.ARTSHOW_PAYMENT_RECEIVED_PK
@@ -414,42 +404,3 @@ def payment_made_mail(request, artist_id):
 def payment_made_square(request, artist_id):
     artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
     return render(request, "artshow/payment_made_square.html", {"artist": artist})
-
-
-@login_required
-@csrf_exempt
-def payment_made_paypal(request, artist_id):
-    artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
-    payment = None
-    if request.method == "POST":
-        ipn_received.send(None, query=request.body)
-        try:
-            signer = Signer()
-            item_number = request.POST['item_number']
-            payment_id = signer.unsign(item_number)
-            payment = Payment.objects.get(id=payment_id)
-        except (KeyError, BadSignature, Payment.DoesNotExist):
-            pass
-    return render(request, "artshow/payment_made_paypal.html",
-                  {"artist": artist, "payment": payment, "pr_pk": settings.ARTSHOW_PAYMENT_RECEIVED_PK})
-
-
-@login_required
-@csrf_exempt
-def payment_cancelled_paypal(request, artist_id):
-    artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
-    signer = Signer()
-    payment_found_and_deleted = False
-    try:
-        item_number = request.GET["item_number"]
-        payment_id = signer.unsign(item_number)
-        payment = Payment.objects.get(id=payment_id)
-        if payment.artist == artist and payment.payment_type_id == settings.ARTSHOW_PAYMENT_PENDING_PK:
-            payment.delete()
-            payment_found_and_deleted = True
-    except (KeyError, BadSignature, Payment.DoesNotExist):
-        pass
-
-    return render(request, "artshow/payment_cancelled_paypal.html",
-                  {"artist": artist,
-                   "payment_found_and_deleted": payment_found_and_deleted})
