@@ -38,6 +38,8 @@ def main(request):
         artist_form = ArtistRegisterForm()
         agreement_form = AgreementForm()
 
+    artists = Artist.objects.viewable_by(request.user)
     return render(request, "artshow/manage_register_main.html",
-                  {"artist_form": artist_form,
+                  {"artists": artists,
+                   "artist_form": artist_form,
                    "agreement_form": agreement_form})
