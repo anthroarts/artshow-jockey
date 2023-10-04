@@ -11,10 +11,21 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - DEBUG=1
+      - SECRET_KEY="Not so secret developer key"
       - DATABASE_URL=postgres://postgres:insecuredefaultpassword@db/postgres
       - BROKER_URL=amqp://broker
+
+      # Internal test OAuth provider configuration
       - OAUTHLIB_INSECURE_TRANSPORT=1
       - TEST_OAUTH_PROVIDER=1
+
+      # ConCat testing configuration
+      # - CONCAT_API="https://reg-test.furtherconfusion.org/api"
+      # - OAUTH_AUTHORIZE_URL="https://reg-test.furtherconfusion.org/oauth/authorize"
+      # - OAUTH_TOKEN_URL="https://reg-test.furtherconfusion.org/api/oauth/token"
+      # - OAUTH_CLIENT_ID="<FILL IN>"
+      # - OAUTH_CLIENT_SECRET="<FILL IN>"
     volumes:
       - ./:/code # Map source directory over /code for development purposes.
   db:

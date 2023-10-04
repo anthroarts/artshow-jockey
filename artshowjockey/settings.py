@@ -9,8 +9,9 @@ env.read_env()
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 DEBUG = env.bool('DEBUG', default=False)
-SECRET_KEY = env.str('SECRET_KEY')
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+SECRET_KEY = env.str('SECRET_KEY', default='')
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost'])
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=['http://localhost:8000'])
 
 with env.prefixed('TEST_'):
     TEST_OAUTH_PROVIDER = env.bool('OAUTH_PROVIDER', default=False)
@@ -19,7 +20,7 @@ ADMINS = getaddresses([env('DJANGO_ADMINS', default='')])
 
 MANAGERS = ADMINS
 
-DATABASES = {"default": env.dj_db_url("DATABASE_URL")}
+DATABASES = {'default': env.dj_db_url('DATABASE_URL')}
 
 try:
     email = env.dj_email_url("EMAIL_URL")
@@ -75,10 +76,6 @@ LANGUAGE_CODE = 'en-us'
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
 USE_I18N = True
-
-# If you set this to False, Django will not format dates, numbers and
-# calendars according to the current locale.
-USE_L10N = True
 
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
@@ -172,7 +169,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django_ses',
-    'nocaptcha_recaptcha',
     'peeps',
     'artshow',
     'ajax_select',
@@ -195,6 +191,9 @@ if TEST_OAUTH_PROVIDER:
 #     import socket
 #     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
 #     INTERNAL_IPS = [ip[:-1] + '1' for ip in ips] + ['127.0.0.1', '10.0.2.2']
+
+if DEBUG:
+    SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -245,7 +244,8 @@ with env.prefixed('ARTSHOW_'):
     ARTSHOW_COMMISSION = env.str('COMMISSION', default='0.1')
     ARTSHOW_INVOICE_PREFIX = env.str('INVOICE_PREFIX', default='INV-')
     ARTSHOW_EMAIL_FOOTER = env.str('EMAIL_FOOTER', default="")
-    ARTSHOW_ARTIST_AGREEMENT_URL = env.str('ARTIST_AGREEMENT_URL')
+    ARTSHOW_ARTIST_AGREEMENT_URL = \
+        env.str('ARTIST_AGREEMENT_URL', default='https://example.com')
 
 ARTSHOW_CHEQUE_THANK_YOU = \
     "Thank you for exhibiting at the " + ARTSHOW_SHOW_NAME
@@ -259,20 +259,14 @@ ARTSHOW_MAX_PIECE_ID = 99
 
 PEEPS_DEFAULT_COUNTRY = "USA"
 
-with env.prefixed('NORECAPTCHA_'):
-    # Visit https://www.google.com/recaptcha/admin/create to create a keypair.
-    # These are test keys.
-    NORECAPTCHA_SITE_KEY = env.str('SITE_KEY')
-    NORECAPTCHA_SECRET_KEY = env.str('SECRET_KEY')
-
 with env.prefixed('ARTSHOW_PAYPAL_'):
-    ARTSHOW_PAYPAL_ACCOUNT = env.str('ACCOUNT')
+    ARTSHOW_PAYPAL_ACCOUNT = env.str('ACCOUNT', default='')
     ARTSHOW_PAYPAL_URL = env.str('URL', 'https://www.paypal.com/cgi-bin/webscr')
 
 with env.prefixed('ARTSHOW_SQUARE_'):
-    ARTSHOW_SQUARE_APPLICATION_ID = env.str('APPLICATION_ID')
-    ARTSHOW_SQUARE_LOCATION_ID = env.str('LOCATION_ID')
-    ARTSHOW_SQUARE_ACCESS_TOKEN = env.str('ACCESS_TOKEN')
+    ARTSHOW_SQUARE_APPLICATION_ID = env.str('APPLICATION_ID', default='')
+    ARTSHOW_SQUARE_LOCATION_ID = env.str('LOCATION_ID', default='')
+    ARTSHOW_SQUARE_ACCESS_TOKEN = env.str('ACCESS_TOKEN', default='')
 
 SITE_ID = 1
 SITE_NAME = ARTSHOW_SHOW_NAME
@@ -286,8 +280,8 @@ if TEST_OAUTH_PROVIDER:
     CONCAT_API = SITE_ROOT_URL + '/test/oauth/api'
 else:
     with env.prefixed('OAUTH_'):
-        OAUTH_AUTHORIZE_URL = env.str('AUTHORIZE_URL')
-        OAUTH_CLIENT_ID = env.str('CLIENT_ID')
-        OAUTH_CLIENT_SECRET = env.str('CLIENT_SECRET')
-        OAUTH_TOKEN_URL = env.str('TOKEN_URL')
-    CONCAT_API = env.str('CONCAT_API')
+        OAUTH_AUTHORIZE_URL = env.str('AUTHORIZE_URL', default='')
+        OAUTH_CLIENT_ID = env.str('CLIENT_ID', default='')
+        OAUTH_CLIENT_SECRET = env.str('CLIENT_SECRET', default='')
+        OAUTH_TOKEN_URL = env.str('TOKEN_URL', default='')
+    CONCAT_API = env.str('CONCAT_API', default='')

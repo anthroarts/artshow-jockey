@@ -4,23 +4,21 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "==3.2.*"
+django = "==4.2.*"
 django-ajax-selects = "*"
 django-appconf = "*"
 django-celery-results = "*"
 django-celery-email = "*"
 django-formtools = "*"
-django-nocaptcha-recaptcha = "*"
 django-ses = "*"
 gunicorn = "*"
 "num2words" = "*"
 squareconnect = "*"
 pdfrw = "*"
-Pillow = "==5.2.0"
-reportlab = "==3.5.68"
+reportlab = "*"
 requests = "*"
 requests-oauthlib = "*"
-psycopg2 = "*"
+psycopg = "*"
 supervisor = "*"
 environs = {extras = ["django"],version = "*"}
 celery = {extras = ["sqs"],version = "*"}
@@ -31,7 +29,7 @@ celery = {extras = ["sqs"],version = "*"}
 oauthlib = "*"
 
 [requires]
-python_version = "3.10"
+python_version = "3.11"
 
 [scripts]
 gunicorn = "gunicorn wsgi"
