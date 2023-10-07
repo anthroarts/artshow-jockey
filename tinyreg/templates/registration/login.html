@@ -2,14 +2,22 @@
 {% block title %}Login{% endblock %}
 {% block content %}
 <p>
-  This site requires you to log in using your convention registration. When you
-  click the button below you will be asked to log in using the username and
-  password you used to register for the convention. If you have not yet
-  registered you must create an account before returning to this page.
+  This site <i>no longer</i> requires a separate password. Clicking the button
+  below will redirect you to the convention registration site to log in and you
+  will then be returned back to this site.
 </p>
 
 <p>
-  <a class="btn" href="{% url 'oauth-redirect' %}?next={{ next|default:'/' }}">Log in</a>
+  If you have not yet created an account in the registration system you will
+  need to do so and <i>will not</i> be automatically returned to this site. Once
+  your account is created please visit <b>{{ SITE_ROOT_URL }}</b> again to
+  complete your art show registration.
+</p>
+
+<p>
+  <a class="btn" href="{% url 'oauth-redirect' %}?next={{ next|default:'/' }}">
+    Log in
+  </a>
 </p>
 
 <details>
@@ -19,7 +27,9 @@
       <input type="hidden" name="next" value="{{ next }}" />
       <table class="loginbox">
         {{ form.as_table }}
-        <tr class="buttonrow"><td colspan="2"><input type="submit" value="Log In"/></td></tr>
+        <tr class="buttonrow">
+          <td colspan="2"><input type="submit" value="Log In"/></td>
+        </tr>
       </table>
     </form>
   </p>
