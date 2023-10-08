@@ -13,7 +13,6 @@ django-formtools = "*"
 django-ses = "*"
 gunicorn = "*"
 "num2words" = "*"
-squareconnect = "*"
 pdfrw = "*"
 reportlab = "*"
 requests = "*"
@@ -22,6 +21,7 @@ psycopg = "*"
 supervisor = "*"
 environs = {extras = ["django"],version = "*"}
 celery = {extras = ["sqs"],version = "*"}
+squareup = "*"
 
 [dev-packages]
 "django-debug-toolbar" = "*"
