@@ -8,10 +8,10 @@ WORKDIR /code
 # Install native dependencies.
 RUN mkdir /data /run/nginx
 RUN pip install --upgrade pip pipenv
-RUN apk add --no-cache jpeg libcurl libpq nginx zlib
+RUN apk add --no-cache libcurl nginx
 RUN apk add --no-cache --virtual .build-deps
 RUN apk add --no-cache build-base
-RUN apk add --no-cache curl-dev jpeg-dev postgresql-dev zlib-dev
+RUN apk add --no-cache curl-dev
 
 FROM native-deps AS pipfile
 COPY Pipfile Pipfile.lock /code/
