@@ -234,8 +234,11 @@ with env.prefixed('ARTSHOW_'):
     ARTSHOW_TAX_RATE = env.str('TAX_RATE', default='0.1')
     ARTSHOW_TAX_DESCRIPTION = \
         env.str('TAX_DESCRIPTION', default='Sales Tax 10%')
+    ARTSHOW_ADMIN_EMAIL = \
+        env.str('ADMIN_EMAIL', default='artshow@example.com')
     ARTSHOW_EMAIL_SENDER = \
-        env.str('EMAIL_SENDER', default='Art Show <artshow@example.com>')
+        env.str('EMAIL_SENDER',
+                default=f'{ARTSHOW_SHOW_NAME} <{ARTSHOW_ADMIN_EMAIL}>')
     ARTSHOW_COMMISSION = env.str('COMMISSION', default='0.1')
     ARTSHOW_INVOICE_PREFIX = env.str('INVOICE_PREFIX', default='INV-')
     ARTSHOW_EMAIL_FOOTER = env.str('EMAIL_FOOTER', default="")
@@ -258,6 +261,9 @@ with env.prefixed('ARTSHOW_SQUARE_'):
     ARTSHOW_SQUARE_APPLICATION_ID = env.str('APPLICATION_ID', default='')
     ARTSHOW_SQUARE_LOCATION_ID = env.str('LOCATION_ID', default='')
     ARTSHOW_SQUARE_ACCESS_TOKEN = env.str('ACCESS_TOKEN', default='')
+    ARTSHOW_SQUARE_SIGNATURE_KEY = env.str('SIGNATURE_KEY', default='')
+    ARTSHOW_SQUARE_ENVIRONMENT = env.str('ENVIRONMENT', default='sandbox')
+    ARTSHOW_SQUARE_NOTIFICATION_URL = env.str('NOTIFICATION_URL', default='')
 
 SITE_ID = 1
 SITE_NAME = ARTSHOW_SHOW_NAME

@@ -5,10 +5,9 @@ from django.db.models import Sum, Q
 from django.forms import HiddenInput, ModelChoiceField
 from django.forms.formsets import formset_factory
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils.timezone import now
 from django.urls import reverse
 from .models import (
-    Allocation, Artist, Location, Payment, Piece, Space, validate_space,
+    Allocation, Artist, Location, Piece, Space, SquarePayment, validate_space,
     validate_space_increments
 )
 from django import forms
@@ -339,57 +338,45 @@ def person_details(request, artist_id):
                                                                   "artshow_settings": artshow_settings})
 
 
-class PaymentForm(forms.Form):
-    amount = forms.DecimalField(required=True, max_digits=7, decimal_places=2)
-    nonce = forms.CharField(required=False)
-
-    def clean_amount(self):
-        amount = self.cleaned_data["amount"]
-        if amount <= 0:
-            raise forms.ValidationError("Amount must be above zero")
-        return amount
-
-
 @login_required
-@user_edits_allowable
 def make_payment(request, artist_id):
     artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
     total_requested_cost, deduction_to_date, deduction_remaining, payment_remaining = \
         artist.payment_remaining_with_details()
 
     payment_remaining = Decimal(payment_remaining).quantize(Decimal('1.00'))
-    if request.method == "POST":
-        form = PaymentForm(request.POST)
-        if form.is_valid():
-            payment = Payment(artist=artist,
-                              amount=form.cleaned_data["amount"],
-                              payment_type_id=settings.ARTSHOW_PAYMENT_PENDING_PK,
-                              description="",
-                              date=now())
+    if request.method == "POST" and payment_remaining > 0:
+        payment_url = square.create_payment_url(
+            artist,
+            f'Art Show space reservation for {artist}',
+            payment_remaining,
+            request.build_absolute_uri(reverse('artshow-manage-payment-square',
+                                               args=(artist_id,))),
+        )
+        if payment_url is not None:
+            return redirect(payment_url)
+        else:
+            return redirect(reverse('artshow-manage-payment-square-error',
+                                    args=(artist_id,)))
 
-            transaction = square.charge(payment, form.cleaned_data["nonce"])
-            if transaction:
-                payment.payment_type_id = settings.ARTSHOW_PAYMENT_RECEIVED_PK
-                payment.description = "Square " + transaction
-                payment.save()
-                return redirect(reverse("artshow-manage-payment-square",
-                                args=(artist_id,)))
-            else:
-                form.add_error(None, "Failed to charge payment.")
-    else:
-        form = PaymentForm(initial={'amount': payment_remaining})
+    pending_square_payment = SquarePayment.objects.filter(
+        artist=artist,
+        payment_type_id=settings.ARTSHOW_PAYMENT_PENDING_PK,
+    ).first()
+    pending_payment_url = None
+    if pending_square_payment is not None:
+        pending_payment_url = pending_square_payment.payment_link_url
 
-    context = {"form": form,
-               "artist": artist,
-               "allocations": artist.allocation_set.order_by("id"),
-               "total_requested_cost": total_requested_cost,
-               "deduction_to_date": deduction_to_date,
-               "deduction_remaining": deduction_remaining,
-               "account_balance": artist.balance(),
-               "payment_remaining": payment_remaining,
-               "sq_application_id": settings.ARTSHOW_SQUARE_APPLICATION_ID,
-               "sq_location_id": settings.ARTSHOW_SQUARE_LOCATION_ID,
-               }
+    context = {
+        "artist": artist,
+        "allocations": artist.allocation_set.order_by("id"),
+        "total_requested_cost": total_requested_cost,
+        "deduction_to_date": deduction_to_date,
+        "deduction_remaining": deduction_remaining,
+        "account_balance": artist.balance(),
+        "payment_remaining": payment_remaining,
+        "payment_url": pending_payment_url,
+    }
 
     return render(request, "artshow/make_payment.html", context)
 
@@ -404,3 +391,9 @@ def payment_made_mail(request, artist_id):
 def payment_made_square(request, artist_id):
     artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
     return render(request, "artshow/payment_made_square.html", {"artist": artist})
+
+
+@login_required
+def payment_error_square(request, artist_id):
+    artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
+    return render(request, "artshow/payment_error_square.html", {"artist": artist})

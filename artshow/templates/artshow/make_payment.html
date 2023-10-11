@@ -1,14 +1,5 @@
 {% extends "artshow/manage_base.html" %}
 {% load static %}
-{% block extra_head %}
-<script>
-  sqApplicationId = "{{ sq_application_id }}";
-  sqLocationId = "{{ sq_location_id }}";
-</script>
-<script type="text/javascript" src="https://js.squareup.com/v2/paymentform"></script>
-<script type="text/javascript" src="{% static "artshow/sqpaymentform.js" %}"></script>
-<link rel="stylesheet" type="text/css" href="{% static "artshow/sqpaymentform.css" %}">
-{% endblock %}
 {% block breadcrumbs %}
 <ul class="breadcrumbs">
   <li><a href="/">Home</a></li>
@@ -23,60 +14,8 @@
       To secure your space requests, we require pre-payment for the cost of
       that space. We can only accept payment using a credit card.
     </p>
-    <p>
-      The "suggested payment" below takes into account what spaces you have
-      requested, what payments you have made so far, and what fees have already
-      been deducted. You may choose to pay more if you desire; any over-payments
-      will be returned to you at the completion of the show. Refunds for unused
-      space requests will be made according to the Artist Agreement.
-    </p>
 
-    <p>Suggested payment: ${{ payment_remaining|floatformat:2 }}</p>
-    <form id="nonce-form" novalidate method="post">{% csrf_token %}
-      {{ form.non_field_errors }}
-      {% if form.amount.errors %}<p>{{ form.amount.errors }}</p>{% endif %}
-      <p>{{ form.amount.label_tag }} {{ form.amount }}</p>
-
-      <p>
-        To pay via a credit card, enter the desired payment amount above and 
-        your card information below and press "Pay with card". Your transaction
-        will be processed securely via our payment processor. Your card
-        information will <em>not</em> be transmitted to or stored on our
-        systems.
-      </p>
-
-      <table>
-      <tbody>
-        <tr>
-          <td>Card Number:</td>
-          <td><div id="sq-card-number"></div></td>
-        </tr>
-        <tr>
-          <td>CVV:</td>
-          <td><div id="sq-cvv"></div></td>
-        </tr>
-        <tr>
-          <td>Expiration Date: </td>
-          <td><div id="sq-expiration-date"></div></td>
-        </tr>
-        <tr>
-          <td>Postal Code:</td>
-          <td><div id="sq-postal-code"></div></td>
-        </tr>
-        <tr>
-          <td colspan="2">
-            <button id="sq-creditcard" class="button-credit-card" onclick="requestCardNonce(event)">
-              Pay with card
-            </button>
-          </td>
-        </tr>
-      </tbody>
-      </table>
-
-      <input type="hidden" id="card-nonce" name="nonce">
-    </form>
-    <hr/>
-    <p>Here's how we arrived at the above figure.</p>
+    <p>Summary of your current account balance:</p>
     <table>
         <tr>
             <th>Space</th>
@@ -112,17 +51,25 @@
                 <td colspan="2">Minus account balance</td>
                 <td class="money">${{ account_balance|floatformat:2 }}</td>
                 <td class="tablenotes">&larr; You have a positive account balance. Before the show, this is most often
-                    used to secure your space requests, and is thus taken into account here. If it is to be used for
-                    something else that has not shown up in your accounting, please make your own adjustments to the
-                    suggested payment.
+                    used to secure your space requests, and is thus taken into account here.
                 </td>
             </tr>
         {% endif %}
         <tr class="totalsrow">
-            <td colspan="2">Suggested payment</td>
+            <td colspan="2">Payment required</td>
             <td class="money">${{ payment_remaining|floatformat:2 }}</td>
         </tr>
-
     </table>
+
+    {% if payment_url %}
+    <p>You have an unpaid invoice, <a href="{{ payment_url }}">click here</a> to complete payment.</p>
+    {% elif payment_remaining %}
+    <p>
+        <form id="nonce-form" novalidate method="post">
+            {% csrf_token %}
+            <button type="submit">Make payment</button>
+        </form>
+    </p>
+    {% endif %}
 
 {% endblock %}
