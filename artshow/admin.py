@@ -19,6 +19,8 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.html import format_html
 
+import json
+
 from . import email1
 from . import processbatchscan
 from .models import (
@@ -594,15 +596,38 @@ class ChequePaymentAdmin(admin.ModelAdmin):
 admin.site.register(ChequePayment, ChequePaymentAdmin)
 
 
+@admin.register(SquarePayment)
 class SquarePaymentAdmin(admin.ModelAdmin):
     pass
 
 
-admin.site.register(SquarePayment, SquarePaymentAdmin)
-
-
+@admin.register(SquareWebhook)
 class SquareWebhookAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('webhook_event_id', 'timestamp', 'webhook_type', 'webhook_data_id')
+    fields = ('timestamp', 'pretty_json')
+    readonly_fields = ('timestamp', 'pretty_json')
 
+    @admin.display(description='ID')
+    def webhook_event_id(self, webhook):
+        if 'event_id' in webhook.body:
+            return webhook.body['event_id']
+        return '(unknown)'
 
-admin.site.register(SquareWebhook, SquareWebhookAdmin)
+    @admin.display(description='Type')
+    def webhook_type(self, webhook):
+        if 'type' in webhook.body:
+            return webhook.body['type']
+        return '(unknown)'
+
+    @admin.display(description='Object ID')
+    def webhook_data_id(self, webhook):
+        if 'data' in webhook.body and 'id' in webhook.body['data']:
+            return webhook.body['data']['id']
+        return '(unknown)'
+
+    @admin.display(description='Body')
+    def pretty_json(self, webhook):
+        return format_html(
+            '<pre>{}</pre>',
+            json.dumps(webhook.body, sort_keys=True, indent=2),
+        )
