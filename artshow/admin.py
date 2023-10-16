@@ -598,7 +598,17 @@ admin.site.register(ChequePayment, ChequePaymentAdmin)
 
 @admin.register(SquarePayment)
 class SquarePaymentAdmin(admin.ModelAdmin):
-    pass
+    @admin.display(description='Artist')
+    def clickable_artist(self, obj):
+        return format_html('<a href="{}">{}</a>',
+                           reverse('admin:artshow_artist_change',
+                                   args=(obj.artist.pk,)),
+                           str(obj.artist))
+
+    list_display = ('id', 'clickable_artist', 'amount', 'payment_type', 'date')
+    list_filter = ('payment_type',)
+    raw_id_fields = ('artist',)
+    readonly_fields = ('payment_link_id', 'payment_link_url', 'order_id')
 
 
 @admin.register(SquareWebhook)
