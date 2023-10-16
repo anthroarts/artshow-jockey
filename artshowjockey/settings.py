@@ -214,11 +214,6 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-        'paypal': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
     }
 }
 
@@ -258,10 +253,6 @@ ARTSHOW_SHOW_ALLOCATED_SPACES = True
 ARTSHOW_MAX_PIECE_ID = 99
 
 PEEPS_DEFAULT_COUNTRY = "USA"
-
-with env.prefixed('ARTSHOW_PAYPAL_'):
-    ARTSHOW_PAYPAL_ACCOUNT = env.str('ACCOUNT', default='')
-    ARTSHOW_PAYPAL_URL = env.str('URL', 'https://www.paypal.com/cgi-bin/webscr')
 
 with env.prefixed('ARTSHOW_SQUARE_'):
     ARTSHOW_SQUARE_APPLICATION_ID = env.str('APPLICATION_ID', default='')
