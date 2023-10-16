@@ -78,12 +78,6 @@ class ArtshowAppConf(AppConf):
     # Disallow piece IDs greater than
     MAX_PIECE_ID = 999
 
-    # URL To the paypal standard payments API. Don't put a trailing comma or
-    # questionmark.
-    PAYPAL_URL = "https://www.paypal.com/cgi-bin/webscr"
-
-    PAYPAL_ACCOUNT = _UNCONFIGURED
-
     SQUARE_APPLICATION_ID = _UNCONFIGURED
     SQUARE_LOCATION_ID = _UNCONFIGURED
     SQUARE_ACCESS_TOKEN = _UNCONFIGURED
