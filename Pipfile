@@ -17,7 +17,7 @@ pdfrw = "*"
 reportlab = "*"
 requests = "*"
 requests-oauthlib = "*"
-psycopg = "*"
+psycopg = {extras = ["binary"],version = "*"}
 supervisor = "*"
 environs = {extras = ["django"],version = "*"}
 celery = {extras = ["sqs"],version = "*"}
