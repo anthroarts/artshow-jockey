@@ -653,6 +653,13 @@ class ChequePayment (Payment):
         return '%s dollars and %s cents' % (num2words(dollars), num2words(cents))
 
 
+class SquarePayment (Payment):
+    payment_link_id = models.CharField(max_length=192)
+    payment_link_url = models.CharField(max_length=255)
+    order_id = models.CharField(max_length=192)
+    payment_id = models.CharField(max_length=192, blank=True)
+
+
 class Invoice (models.Model):
     payer = models.ForeignKey(Bidder, on_delete=models.CASCADE)
     tax_paid = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
@@ -759,3 +766,8 @@ class Agent(models.Model):
                                               help_text="Person is allowed to retrieve pieces from the show")
     can_arbitrate = models.BooleanField(default=False,
                                         help_text="Person is allowed to make executive decisions regarding pieces")
+
+
+class SquareWebhook(models.Model):
+    timestamp = models.DateTimeField()
+    body = models.JSONField()

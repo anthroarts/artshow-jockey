@@ -5,6 +5,7 @@
 .DS_Store
 /data/
 con_specific
+.env
 .idea
 .vscode
 artshow-utils/*.csv

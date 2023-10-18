@@ -32,6 +32,8 @@ urlpatterns = [
             manage.payment_made_mail, name='artshow-manage-payment-mail'),
     re_path(r'^artist/(?P<artist_id>\d+)/makepayment/complete/square/$',
             manage.payment_made_square, name='artshow-manage-payment-square'),
+    re_path(r'^artist/(?P<artist_id>\d+)/makepayment/error/square/$',
+            manage.payment_error_square, name='artshow-manage-payment-square-error'),
     re_path(r'^register/$', register.main, name='artshow-register'),
     re_path(r'^announcement/$', announcement.index, name="view_announcements"),
     re_path(r'^announcement/(?P<announcement_id>\d+)/$', announcement.show,

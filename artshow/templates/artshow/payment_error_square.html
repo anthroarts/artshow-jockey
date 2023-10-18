@@ -1,0 +1,15 @@
+{% extends "artshow/manage_base.html" %}
+{% block breadcrumbs %}
+<ul class="breadcrumbs">
+  <li><a href="/">Home</a></li>
+  <li><a href="{% url 'artshow-manage' %}">Manage Artists</a></li>
+  <li><a href="{% url 'artshow-manage-artist' artist_id=artist.artistid %}">{{ artist.artistname }}</a></li>
+  <li class="current">Make Payment</li>
+</ul>
+{% endblock %}
+{% block content %}
+    <p>
+      Unable to complete payments at this time. If this error persists, please
+      email <a href="mailto:{{ artshow_settings.ARTSHOW_ADMIN_EMAIL }}">{{ artshow_settings.ARTSHOW_ADMIN_EMAIL }}</a>.
+    </p>
+{% endblock %}
