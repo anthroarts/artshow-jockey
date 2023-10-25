@@ -350,8 +350,8 @@ def make_payment(request, artist_id):
             artist,
             f'Art Show space reservation for {artist}',
             payment_remaining,
-            request.build_absolute_uri(reverse('artshow-manage-payment-square',
-                                               args=(artist_id,))),
+            settings.SITE_ROOT_URL + reverse('artshow-manage-payment-square',
+                                             args=(artist_id,)),
         )
         if payment_url is not None:
             return redirect(payment_url)

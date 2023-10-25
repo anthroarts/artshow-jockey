@@ -5,6 +5,7 @@ import uuid
 from decimal import Decimal
 
 from django.http import HttpResponse
+from django.urls import reverse
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 
@@ -72,11 +73,14 @@ def process_payment_created_or_updated(body):
     payment_id = payment['id']
     payment_amount = Decimal(payment['total_money']['amount'] / 100)
 
-    square_payment = SquarePayment.objects.get(order_id=order_id)
-    square_payment.amount = payment_amount
-    square_payment.payment_type_id = settings.ARTSHOW_PAYMENT_RECEIVED_PK
-    square_payment.payment_id = payment_id
-    square_payment.save()
+    try:
+        square_payment = SquarePayment.objects.get(order_id=order_id)
+        square_payment.amount = payment_amount
+        square_payment.payment_type_id = settings.ARTSHOW_PAYMENT_RECEIVED_PK
+        square_payment.payment_id = payment_id
+        square_payment.save()
+    except SquarePayment.DoesNotExist:
+        logger.info(f'Got webhook for unknown order: {order_id}')
 
 
 def process_webhook(body):
@@ -91,7 +95,7 @@ def webhook(request):
         body,
         request.headers['x-square-hmacsha256-signature'],
         settings.ARTSHOW_SQUARE_SIGNATURE_KEY,
-        settings.ARTSHOW_SQUARE_NOTIFICATION_URL)
+        settings.SITE_ROOT_URL + reverse('square-webhook'))
 
     if not valid:
         logger.debug('Received invalid webhook!')

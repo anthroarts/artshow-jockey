@@ -263,7 +263,6 @@ with env.prefixed('ARTSHOW_SQUARE_'):
     ARTSHOW_SQUARE_ACCESS_TOKEN = env.str('ACCESS_TOKEN', default='')
     ARTSHOW_SQUARE_SIGNATURE_KEY = env.str('SIGNATURE_KEY', default='')
     ARTSHOW_SQUARE_ENVIRONMENT = env.str('ENVIRONMENT', default='sandbox')
-    ARTSHOW_SQUARE_NOTIFICATION_URL = env.str('NOTIFICATION_URL', default='')
 
 SITE_ID = 1
 SITE_NAME = ARTSHOW_SHOW_NAME
