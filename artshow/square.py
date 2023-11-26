@@ -83,6 +83,27 @@ def create_device_code(name):
         return None
 
 
+def create_terminal_checkout(device_id, amount, reference_id, note):
+    client().terminal.create_terminal_checkout({
+        'idempotency_key': str(uuid.uuid4()),
+        'checkout': {
+            'amount_money': {
+                'amount': int(amount * 100),
+                'currency': 'USD',
+            },
+            'reference_id': reference_id,
+            'device_options': {
+                'device_id': device_id,
+                'skip_receipt_screen': True,
+                'tip_settings': {
+                    'allow_tipping': False,
+                },
+            },
+            'note': note,
+        },
+    })
+
+
 def process_payment_created_or_updated(body):
     payment = body['data']['object']['payment']
 
