@@ -768,6 +768,12 @@ class Agent(models.Model):
                                         help_text="Person is allowed to make executive decisions regarding pieces")
 
 
+class SquareTerminal(models.Model):
+    device_id = models.CharField(max_length=128)
+    code = models.CharField(max_length=128)
+    name = models.CharField(max_length=128)
+
+
 class SquareWebhook(models.Model):
     timestamp = models.DateTimeField()
     body = models.JSONField()

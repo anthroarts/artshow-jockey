@@ -131,6 +131,8 @@ urlpatterns = [
     re_path(r'^workflows/printing/cheques/print/$',
             workflows.print_cheques_print,
             name='artshow-workflow-print-cheques-print'),
+    re_path(r'^workflows/pair_terminal/$', workflows.pair_terminal,
+            name='artshow-workflow-pair-terminal'),
     re_path(r'^workflows/artist_checkout/$', workflows.find_artist_checkout,
             name='artshow-workflow-artist-checkout-lookup'),
     re_path(r'^workflows/artist_checkout/(?P<artistid>\d+)/$',

@@ -9,21 +9,26 @@ from django.urls import reverse
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 
+from functools import cache
+
 from square.client import Client
 from square.utilities.webhooks_helper import is_valid_webhook_event_signature
 
 from .conf import settings
-from .models import SquarePayment, SquareWebhook
+from .models import SquarePayment, SquareTerminal, SquareWebhook
 
 logger = logging.getLogger(__name__)
 
 
-def create_payment_url(artist, name, amount, redirect_url):
-    client = Client(
+@cache
+def client():
+    return Client(
         access_token=settings.ARTSHOW_SQUARE_ACCESS_TOKEN,
         environment=settings.ARTSHOW_SQUARE_ENVIRONMENT)
 
-    result = client.checkout.create_payment_link({
+
+def create_payment_url(artist, name, amount, redirect_url):
+    result = client().checkout.create_payment_link({
         'idempotency_key': str(uuid.uuid4()),
         'quick_pay': {
             'name': name,
@@ -59,6 +64,25 @@ def create_payment_url(artist, name, amount, redirect_url):
         return None
 
 
+def create_device_code(name):
+    result = client().devices.create_device_code({
+        'idempotency_key': str(uuid.uuid4()),
+        'device_code': {
+            'name': name,
+            'location_id': settings.ARTSHOW_SQUARE_LOCATION_ID,
+            'product_type': 'TERMINAL_API',
+        },
+    })
+
+    if result.is_success():
+        return result.body['device_code']['code']
+
+    elif result.is_error():
+        for error in result.errors:
+            logger.error(f"Square error {error['category']}:{error['code']}: {error['detail']}")
+        return None
+
+
 def process_payment_created_or_updated(body):
     payment = body['data']['object']['payment']
 
@@ -83,9 +107,24 @@ def process_payment_created_or_updated(body):
         logger.info(f'Got webhook for unknown order: {order_id}')
 
 
+def process_device_paired(body):
+    device_code = body['data']['object']['device_code']
+
+    if device_code['status'] != 'PAIRED':
+        return
+
+    device = SquareTerminal()
+    device.device_id = device_code['device_id']
+    device.code = device_code['code']
+    device.name = device_code['name']
+    device.save()
+
+
 def process_webhook(body):
     if body['type'] in ('payment.created', 'payment.updated'):
         process_payment_created_or_updated(body)
+    if body['type'] == 'device.code.paired':
+        process_device_paired(body)
 
 
 @csrf_exempt
