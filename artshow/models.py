@@ -673,6 +673,9 @@ class Invoice (models.Model):
     def item_and_tax_total(self):
         return self.item_total() + (self.tax_paid or 0)
 
+    def payment_remaining(self):
+        return self.item_and_tax_total() - self.total_paid()
+
     def invoiceitems(self):
         return self.invoiceitem_set.order_by('piece__location', 'piece')
 

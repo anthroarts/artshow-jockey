@@ -9,7 +9,6 @@ from .models import Bidder, Piece, InvoicePayment, InvoiceItem, Invoice
 from django import forms
 from django.db.models import Q
 from django.forms import ModelForm
-from django.forms.models import modelformset_factory, BaseModelFormSet
 from .conf import settings
 from django.core.exceptions import ValidationError
 from decimal import Decimal
@@ -21,7 +20,6 @@ from django.contrib.auth.decorators import permission_required
 from django.utils import timezone
 from django.utils.dateformat import DateFormat
 from django.views.decorators.clickjacking import xframe_options_sameorigin
-import json
 from .conf import _DISABLED as SETTING_DISABLED
 
 
@@ -53,10 +51,6 @@ def cashier(request):
     return render(request, 'artshow/cashier.html', c)
 
 
-class ItemsForm (forms.Form):
-    tax_paid = forms.DecimalField()
-
-
 class PaymentForm (ModelForm):
     class Meta:
         model = InvoicePayment
@@ -68,17 +62,6 @@ class PaymentForm (ModelForm):
         if amount <= 0:
             raise ValidationError("amount must be greater than 0")
         return amount
-
-
-class PaymentFormSet (BaseModelFormSet):
-    def clean(self):
-        total = sum([form.cleaned_data['amount'] for form in self.forms], Decimal(0))
-        # self.items_total is set from the cashier_bidder function.
-        if total != self.items_total:
-            raise ValidationError("payments (%s) must equal invoice total (%s)" % (total, self.items_total))
-
-
-PaymentFormSet = modelformset_factory(InvoicePayment, form=PaymentForm, formset=PaymentFormSet, extra=0)
 
 
 class SelectPieceForm (forms.Form):
@@ -95,76 +78,55 @@ def cashier_bidder(request, bidder_id):
     all_bids = bidder.top_bids(unsold_only=True)
     available_bids = []
     pending_bids = []
-    bid_dict = {}
     for bid in all_bids:
         if bid.piece.status == Piece.StatusWon:
             available_bids.append(bid)
-            bid_dict[bid.pk] = bid
         else:
             pending_bids.append(bid)
+
+    tax_rate = settings.ARTSHOW_TAX_RATE
+    error = None
 
     if request.method == "POST":
         for bid in available_bids:
             form = SelectPieceForm(request.POST, prefix="bid-%d" % bid.pk)
             bid.form = form
-        items_form = ItemsForm(request.POST, prefix="items")
-        payment_formset = PaymentFormSet(request.POST, prefix="payment", queryset=InvoicePayment.objects.none())
-        if all(bid.form.is_valid() for bid in available_bids) and items_form.is_valid():
+
+        if all(bid.form.is_valid() for bid in available_bids):
 
             logger.debug("Bids and Items Form passed")
 
             selected_bids = [bid for bid in available_bids if bid.form.cleaned_data['select']]
 
             if len(selected_bids) == 0:
-                items_form._errors['__all__'] = items_form.error_class(["Invoice must contain at least one item"])
-                payment_formset.items_total = total = Decimal(0)
+                error = "Invoice must contain at least one item"
             else:
                 subtotal = sum([bid.amount for bid in selected_bids], Decimal(0))
-                tax_paid = items_form.cleaned_data['tax_paid']
-                total = subtotal + tax_paid
+                tax_paid = subtotal * Decimal(tax_rate)
 
-                payment_formset.items_total = total
-                if payment_formset.is_valid():
+                invoice = Invoice(payer=bidder, tax_paid=tax_paid, paid_date=timezone.now(),
+                                  created_by=request.user)
+                invoice.save()
 
-                    logger.debug("payment formset passed")
+                for bid in selected_bids:
+                    invoice_item = InvoiceItem(piece=bid.piece, price=bid.amount, invoice=invoice)
+                    invoice_item.save()
+                    bid.piece.status = Piece.StatusSold
+                    bid.piece.save()
 
-                    invoice = Invoice(payer=bidder, tax_paid=tax_paid, paid_date=timezone.now(),
-                                      created_by=request.user)
-                    invoice.save()
-                    payments = payment_formset.save(commit=False)
-                    for payment in payments:
-                        payment.invoice = invoice
-                        payment.save()
-                    for bid in selected_bids:
-                        invoice_item = InvoiceItem(piece=bid.piece, price=bid.amount, invoice=invoice)
-                        invoice_item.save()
-                        bid.piece.status = Piece.StatusSold
-                        bid.piece.save()
-
-                    return redirect(cashier_invoice, invoice_id=invoice.id)
+                return redirect(cashier_invoice, invoice_id=invoice.id)
     else:
         for bid in available_bids:
             form = SelectPieceForm(prefix="bid-%d" % bid.pk, initial={"select": False})
             bid.form = form
-        items_form = ItemsForm(prefix="items")
-        payment_formset = PaymentFormSet(prefix="payment", queryset=InvoicePayment.objects.none())
-
-    payment_types = dict(InvoicePayment.PAYMENT_METHOD_CHOICES[1:])
-    payment_types_json = json.dumps(payment_types, sort_keys=True)
-
-    tax_rate = settings.ARTSHOW_TAX_RATE
-    money_precision = settings.ARTSHOW_MONEY_PRECISION
 
     return render(request, 'artshow/cashier_bidder.html', {
         'bidder': bidder,
         'available_bids': available_bids,
         'pending_bids': pending_bids,
-        'items_form': items_form,
-        'payment_formset': payment_formset,
-        'payment_types': payment_types,
-        'payment_types_json': payment_types_json,
         'tax_rate': tax_rate,
-        'money_precision': money_precision,
+        'money_precision': settings.ARTSHOW_MONEY_PRECISION,
+        'error': error,
     })
 
 
@@ -186,6 +148,17 @@ def cashier_invoice(request, invoice_id):
     has_reproduction_rights = invoice.invoiceitem_set \
         .filter(piece__reproduction_rights_included=True) \
         .exists()
+
+    if request.method == "POST":
+        payment_form = PaymentForm(request.POST)
+        if payment_form.is_valid():
+            payment = payment_form.save(commit=False)
+            payment.invoice = invoice
+            payment.save()
+
+            return redirect(cashier_invoice, invoice_id=invoice.id)
+    else:
+        payment_form = PaymentForm()
 
     json_items = [{
         'code': item.piece.code,
@@ -223,11 +196,13 @@ def cashier_invoice(request, invoice_id):
 
     return render(request, 'artshow/cashier_invoice.html', {
         'invoice': invoice,
+        'payment_form': payment_form,
         'has_reproduction_rights': has_reproduction_rights,
         'money_precision': settings.ARTSHOW_MONEY_PRECISION,
         'tax_description': settings.ARTSHOW_TAX_DESCRIPTION,
         'invoice_prefix': settings.ARTSHOW_INVOICE_PREFIX,
         'json_data': json_data,
+        'payment_types': InvoicePayment.PAYMENT_METHOD_CHOICES[1:],
     })
 
 
