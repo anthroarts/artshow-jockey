@@ -699,8 +699,9 @@ class InvoicePayment(models.Model):
         (0, "Not Paid"),
         (1, "Cash"),
         # (2, "Check"),
-        (3, "Card"),
+        (3, "Card"), # Manually processed credit card transaction.
         # (4, "Other"),
+        (5, "Card"), # Credit card captured by Square Terminal.
     ]
     payment_method = models.IntegerField(choices=PAYMENT_METHOD_CHOICES, default=0)
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)

@@ -154,6 +154,8 @@ $(function() {
           if (!notes) {
             return;
           }
+        } else if (paymenttype == 5 /* square */) {
+          // Payment is handled server-side.
         } else {
           return;
         }

@@ -5,7 +5,9 @@ from io import StringIO
 import subprocess
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseBadRequest
-from .models import Bidder, Piece, InvoicePayment, InvoiceItem, Invoice
+from .models import (
+    Bidder, Piece, InvoicePayment, InvoiceItem, Invoice, SquareTerminal
+)
 from django import forms
 from django.db.models import Q
 from django.forms import ModelForm
@@ -15,6 +17,7 @@ from decimal import Decimal
 import logging
 from . import invoicegen
 from . import pdfreports
+from . import square
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.utils import timezone
@@ -153,6 +156,16 @@ def cashier_invoice(request, invoice_id):
         payment_form = PaymentForm(request.POST)
         if payment_form.is_valid():
             payment = payment_form.save(commit=False)
+            if payment.payment_method == 5:
+                terminal = get_object_or_404(SquareTerminal,
+                                             pk=request.session.get('terminal'))
+                square.create_terminal_checkout(
+                    terminal.device_id,
+                    payment.amount,
+                    f'{settings.ARTSHOW_INVOICE_PREFIX}{invoice.id}',
+                    f'Art Show Bidder {",".join(invoice.payer.bidder_ids())}'
+                )
+
             payment.invoice = invoice
             payment.save()
 
