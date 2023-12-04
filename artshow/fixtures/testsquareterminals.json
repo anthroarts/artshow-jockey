@@ -1,0 +1,38 @@
+[
+    {
+        "pk": 1,
+        "model": "artshow.squareterminal",
+        "fields": {
+            "name": "Approve up to $25",
+            "device_id": "9fa747a2-25ff-48ee-b078-04381f7c828f",
+            "code": "TEST1"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "artshow.squareterminal",
+        "fields": {
+            "name": "Cancel checkout",
+            "device_id": "841100b9-ee60-4537-9bcf-e30b2ba5e215",
+            "code": "TEST2"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "artshow.squareterminal",
+        "fields": {
+            "name": "Time out checkout",
+            "device_id": "0a956d49-619a-4530-8e5e-8eac603ffc5e",
+            "code": "TEST3"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "artshow.squareterminal",
+        "fields": {
+            "name": "Offline terminal",
+            "device_id": "da40d603-c2ea-4a65-8cfd-f42e36dab0c7",
+            "code": "TEST4"
+        }
+    }
+]
