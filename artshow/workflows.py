@@ -551,7 +551,17 @@ def pair_terminal(request):
 
     c = {
         'devices': SquareTerminal.objects.all(),
+        'selected_device': request.session.get('terminal', default=None),
         'form': form,
         'device_code': device_code,
     }
     return render(request, 'artshow/workflows_pair_terminal.html', c)
+
+
+@permission_required('artshow.is_artshow_staff')
+@require_POST
+def select_terminal(request, pk):
+    device = get_object_or_404(SquareTerminal, pk=pk)
+    request.session['terminal'] = device.pk
+
+    return redirect(pair_terminal)
