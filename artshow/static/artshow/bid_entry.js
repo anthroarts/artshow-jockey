@@ -28,11 +28,24 @@ document.addEventListener('DOMContentLoaded', () => {
   pieceIdField.addEventListener('input', clearFields);
   locationSelect.addEventListener('input', setNotSaved);
   buyNowCheckbox.addEventListener('input', setNotSaved);
+  buyNowCheckbox.addEventListener('input', toggleDisableOnNonBuyNowElements);
   for (var i = 0; i < bidderFields.length; ++i) {
     bidderFields[i].addEventListener('input', setNotSaved);
     bidFields[i].addEventListener('input', setNotSaved);
   }
 });
+
+function toggleDisableOnNonBuyNowElements() {
+  const maybeDisabled = !!buyNowCheckbox.checked;
+  const nFields = bidderFields.length;
+  for (var i = 1; i < nFields; i++) {
+    /* for every bidder but the first bidder */
+    bidderFields[i].disabled = maybeDisabled;
+    bidFields[i].disabled = maybeDisabled;
+  }
+  /* we still need the first bidder's bidder ID */
+  bidFields[0].disabled = maybeDisabled;
+}
 
 function updateBids(json, newStatus) {
   if ('error' in json) {

@@ -14,7 +14,7 @@
       <div class="label">Minimum Bid</div>
       <div>${{ piece.min_bid }}</div>
       <div class="label">Auto Buy</div>
-      <div>{% if piece.buy_now %}${{ piece.buy_now }}{% else %}N/A{% endif %}</div>
+      <div>{% if piece.buy_now %}1st bid only; please see below{% else %}N/A{% endif %}</div>
       {% endif %}
     </div>
     <div class="piece-id">{{ piece.code }}</div>
@@ -36,7 +36,7 @@
     </div>
     {% else %}
     <div class="bid-stickers">
-      <div class="bid-sticker"><span>Place 1st bid{% if piece.buy_now %} or auto-buy{% endif %} here.</span></div>
+      <div class="bid-sticker"><span>Place 1st bid{% if piece.buy_now %} or auto buy of ${{ piece.buy_now }}{% endif %} here.</span></div>
       <div class="bid-sticker"><span>Place 2nd bid here.</span></div>
       <div class="bid-sticker"><span>Place 3rd bid here.</span></div>
       <div class="bid-sticker"><span>Place 4th bid here.</span></div>
