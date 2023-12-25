@@ -1,12 +1,14 @@
 # Artshow Jockey
 # Copyright (C) 2009, 2010, 2011 Chris Cogdon
 # See file COPYING for licence details
+from collections import OrderedDict
 from io import StringIO
 import subprocess
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseBadRequest
 from .models import (
-    Bidder, Piece, InvoicePayment, InvoiceItem, Invoice, SquareTerminal
+    Bidder, Piece, InvoicePayment, InvoiceItem, Invoice, SquareInvoicePayment,
+    SquareTerminal
 )
 from django import forms
 from django.db.models import Q
@@ -24,6 +26,12 @@ from django.utils import timezone
 from django.utils.dateformat import DateFormat
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from .conf import _DISABLED as SETTING_DISABLED
+
+ALLOWED_PAYMENT_METHODS = OrderedDict([
+    (InvoicePayment.PaymentMethod.CASH, "Cash"),
+    (InvoicePayment.PaymentMethod.MANUAL_CARD, "Manual Card"),
+    (InvoicePayment.PaymentMethod.SQUARE_CARD, "Square Terminal"),
+])
 
 
 logger = logging.getLogger(__name__)
@@ -65,6 +73,12 @@ class PaymentForm (ModelForm):
         if amount <= 0:
             raise ValidationError("amount must be greater than 0")
         return amount
+
+    def clean_payment_method(self):
+        payment_method = self.cleaned_data['payment_method']
+        if payment_method not in ALLOWED_PAYMENT_METHODS:
+            raise ValidationError("payment method is not allowed")
+        return payment_method
 
 
 class SelectPieceForm (forms.Form):
@@ -157,19 +171,39 @@ def cashier_invoice(request, invoice_id):
         if payment_form.is_valid():
             payment = payment_form.save(commit=False)
             if payment.payment_method == 5:
-                terminal = get_object_or_404(SquareTerminal,
-                                             pk=request.session.get('terminal'))
-                square.create_terminal_checkout(
-                    terminal.device_id,
-                    payment.amount,
-                    f'{settings.ARTSHOW_INVOICE_PREFIX}{invoice.id}',
-                    f'Art Show Bidder {",".join(invoice.payer.bidder_ids())}'
-                )
+                try:
+                    terminal = SquareTerminal.objects.get(pk=request.session.get('terminal'))
+                    invoice_id = f'{settings.ARTSHOW_INVOICE_PREFIX}{invoice.id}'
+                    note = f'{invoice_id} for Art Show Bidder {",".join(invoice.payer.bidder_ids())}'
+                    result = square.create_terminal_checkout(
+                        terminal.device_id,
+                        payment.amount,
+                        invoice_id,
+                        note,
+                    )
+                    if result is None:
+                        payment_form.add_error(None, 'Failed to create Square checkout')
+                        payment = None
+                    else:
+                        payment = SquareInvoicePayment(
+                            amount=payment.amount,
+                            payment_method=InvoicePayment.PaymentMethod.SQUARE_CARD,
+                            notes=payment.notes,
+                            checkout_id=result,
+                        )
 
-            payment.invoice = invoice
-            payment.save()
+                except SquareTerminal.DoesNotExist:
+                    payment_form.add_error(None, 'No Square terminal selected')
+                    payment = None
 
-            return redirect(cashier_invoice, invoice_id=invoice.id)
+            else:
+                payment.complete = True
+
+            if payment is not None:
+                payment.invoice = invoice
+                payment.save()
+
+                return redirect(cashier_invoice, invoice_id=invoice.id)
     else:
         payment_form = PaymentForm()
 
@@ -188,6 +222,11 @@ def cashier_invoice(request, invoice_id):
         'amount': payment.amount,
     } for payment in invoice.invoicepayment_set.all()]
 
+    json_pending_payments = [
+        payment.pk
+        for payment in invoice.invoicepayment_set.filter(complete=False)
+    ]
+
     invoice_date = invoice.paid_date.astimezone(timezone.get_current_timezone())
     formatted_date = DateFormat(invoice_date).format(settings.DATETIME_FORMAT)
 
@@ -203,6 +242,7 @@ def cashier_invoice(request, invoice_id):
         'taxPaid': invoice.tax_paid,
         'totalPaid': invoice.total_paid(),
         'payments': json_payments,
+        'pendingPayments': json_pending_payments,
         'moneyPrecision': settings.ARTSHOW_MONEY_PRECISION,
         'taxDescription': settings.ARTSHOW_TAX_DESCRIPTION,
     }
@@ -215,7 +255,7 @@ def cashier_invoice(request, invoice_id):
         'tax_description': settings.ARTSHOW_TAX_DESCRIPTION,
         'invoice_prefix': settings.ARTSHOW_INVOICE_PREFIX,
         'json_data': json_data,
-        'payment_types': InvoicePayment.PAYMENT_METHOD_CHOICES[1:],
+        'payment_types': ALLOWED_PAYMENT_METHODS,
     })
 
 

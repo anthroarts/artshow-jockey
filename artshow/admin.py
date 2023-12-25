@@ -26,8 +26,8 @@ from . import processbatchscan
 from .models import (
     Agent, Allocation, Artist, BatchScan, Bid, Bidder, BidderId, Checkoff,
     ChequePayment, EmailSignature, EmailTemplate, Invoice, InvoiceItem,
-    InvoicePayment, Payment, PaymentType, Piece, Location, Space, SquarePayment,
-    SquareTerminal, SquareWebhook
+    InvoicePayment, Payment, PaymentType, Piece, Location, Space,
+    SquareInvoicePayment, SquarePayment, SquareTerminal, SquareWebhook
 )
 
 User = get_user_model()
@@ -531,6 +531,13 @@ class InvoiceAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Invoice, InvoiceAdmin)
+
+
+@admin.register(SquareInvoicePayment)
+class SquareInvoicePaymentAdmin(admin.ModelAdmin):
+    model = SquareInvoicePayment
+    fields = ('complete', 'amount', 'checkout_id', 'payment_ids')
+    readonly_fields = ('checkout_id', 'payment_ids')
 
 
 class BidAdmin(admin.ModelAdmin):
