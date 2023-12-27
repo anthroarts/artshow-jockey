@@ -5,6 +5,7 @@
 <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'artshow/decimal.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'artshow/esc-pos-encoder-415c2c8.js' %}"></script>
+<script type="text/javascript" src="{% static 'artshow/js.cookie-2.2.0.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'artshow/receipt_printer.js' %}"></script>
 {% endblock %}
 {% block breadcrumbs %}
@@ -107,11 +108,22 @@
 const json = JSON.parse(document.getElementById('json-data').textContent);
 
 async function checkPendingPayments() {
-  for (payment in json.pendingPayments) {
-    const response = await fetch(`/artshow/cashier/payment/{payment}`);
+  for (payment of json.pendingPayments) {
+    const response = await fetch(`/artshow/cashier/payment/${payment}/`, {
+      credentials: 'include',
+      mode: 'cors',
+      headers: {
+        'Accept': 'text/plain',
+        'X-CSRFToken': Cookies.get('csrftoken'),
+      }
+    });
+    if (!response.ok) {
+      window.location.reload();
+      return;
+    }
     const status = await response.text();
-    if (status == 'COMPLETE') {
-      window.reload();
+    if (status != 'PENDING') {
+      window.location.reload();
       return;
     }
   }

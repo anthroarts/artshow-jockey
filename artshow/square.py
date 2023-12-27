@@ -29,6 +29,13 @@ def client():
         environment=settings.ARTSHOW_SQUARE_ENVIRONMENT)
 
 
+def log_errors(result):
+    assert result.is_error()
+
+    for error in result.errors:
+        logger.error(f"Square error {error['category']}:{error['code']}: {error['detail']}")
+
+
 def create_payment_url(artist, name, amount, redirect_url):
     result = client().checkout.create_payment_link({
         'idempotency_key': str(uuid.uuid4()),
@@ -61,8 +68,7 @@ def create_payment_url(artist, name, amount, redirect_url):
         return payment.payment_link_url
 
     elif result.is_error():
-        for error in result.errors:
-            logger.error(f"Square error {error['category']}:{error['code']}: {error['detail']}")
+        log_errors(result)
         return None
 
 
@@ -80,8 +86,7 @@ def create_device_code(name):
         return result.body['device_code']['code']
 
     elif result.is_error():
-        for error in result.errors:
-            logger.error(f"Square error {error['category']}:{error['code']}: {error['detail']}")
+        log_errors(result)
         return None
 
 
@@ -112,9 +117,15 @@ def create_terminal_checkout(device_id, amount, reference_id, note):
         return result.body['checkout']['id']
 
     elif result.is_error():
-        for error in result.errors:
-            logger.error(f"Square error {error['category']}:{error['code']}: {error['detail']}")
+        log_errors(result)
         return None
+
+
+def cancel_terminal_checkout(checkout_id):
+    result = client.terminal.cancel_terminal_checkout(checkout_id)
+
+    if result.is_error():
+        log_errors(result)
 
 
 def process_payment_created_or_updated(body):

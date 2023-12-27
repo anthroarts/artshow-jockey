@@ -75,6 +75,7 @@ urlpatterns = [
             pdfreports.pdf_invoice),
     re_path(r'^cashier/invoice/(?P<invoice_id>\d+)/picklist/$',
             pdfreports.pdf_picklist),
+    re_path(r'^cashier/payment/(?P<payment_id>\d+)/$', cashier.payment_status),
     re_path(r'^reports/winning-bidders-pdf/$', pdfreports.winning_bidders,
             name='artshow-winning-bidders-pdf'),
     re_path(r'^reports/bid-entry-by-location-pdf/$',

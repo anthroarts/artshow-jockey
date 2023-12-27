@@ -5,7 +5,7 @@ from collections import OrderedDict
 from io import StringIO
 import subprocess
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest
 from .models import (
     Bidder, Piece, InvoicePayment, InvoiceItem, Invoice, SquareInvoicePayment,
     SquareTerminal
@@ -25,6 +25,9 @@ from django.contrib.auth.decorators import permission_required
 from django.utils import timezone
 from django.utils.dateformat import DateFormat
 from django.views.decorators.clickjacking import xframe_options_sameorigin
+from django.views.decorators.http import (
+    require_GET, require_POST, require_http_methods
+)
 from .conf import _DISABLED as SETTING_DISABLED
 
 ALLOWED_PAYMENT_METHODS = OrderedDict([
@@ -41,6 +44,7 @@ class BidderSearchForm (forms.Form):
     text = forms.CharField(label="Search Text")
 
 
+@require_http_methods(['GET', 'POST'])
 @permission_required('artshow.add_invoice')
 def cashier(request):
     search_executed = False
@@ -87,6 +91,7 @@ class SelectPieceForm (forms.Form):
 
 # TODO probably need a @transaction.commit_on_success here
 
+@require_http_methods(['GET', 'POST'])
 @permission_required('artshow.add_invoice')
 def cashier_bidder(request, bidder_id):
 
@@ -147,6 +152,7 @@ def cashier_bidder(request, bidder_id):
     })
 
 
+@require_GET
 @permission_required('artshow.add_invoice')
 def cashier_bidder_invoices(request, bidder_id):
 
@@ -159,6 +165,7 @@ def cashier_bidder_invoices(request, bidder_id):
     })
 
 
+@require_http_methods(['GET', 'POST'])
 @permission_required('artshow.add_invoice')
 def cashier_invoice(request, invoice_id):
     invoice = get_object_or_404(Invoice, pk=invoice_id)
@@ -259,6 +266,7 @@ def cashier_invoice(request, invoice_id):
     })
 
 
+@require_GET
 @permission_required('artshow.add_invoice')
 @xframe_options_sameorigin
 def cashier_print_invoice(request, invoice_id):
@@ -274,6 +282,29 @@ def cashier_print_invoice(request, invoice_id):
         'has_reproduction_rights': has_reproduction_rights,
         'invoice_prefix': settings.ARTSHOW_INVOICE_PREFIX,
     })
+
+
+@require_GET
+@permission_required('artshow.add_invoice')
+def payment_status(request, payment_id):
+    payment = get_object_or_404(InvoicePayment, pk=payment_id)
+
+    if payment.complete:
+        return HttpResponse('COMPLETE', content_type='text/plain')
+    else:
+        return HttpResponse('PENDING', content_type='text/plain')
+
+
+@require_POST
+@permission_required('artshow.add_invoice')
+def payment_cancel(request, payment_id):
+    payment = get_object_or_404(SquareInvoicePayment, pk=payment_id)
+
+    if not payment.complete:
+        return HttpResponseBadRequest('Payment is complete')
+
+    square.cancel_terminal_checkout(payment.checkout_id)
+    return HttpResponse()
 
 
 class PrintInvoiceForm (forms.Form):
