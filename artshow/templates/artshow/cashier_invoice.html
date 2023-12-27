@@ -52,7 +52,10 @@
     <td>{{ payment.notes }}</td>
     <td class="money">{{ payment.amount|floatformat:money_precision }}</td>
     {% if not payment.complete %}
-    <td>Pending...</td>
+    <td>
+      Pending...
+      <button payment="{{ payment.pk }}" class="cancelpaymentbutton">Cancel</button>
+    </td>
     {% endif %}
   </tr>
 {% endfor %}
@@ -198,6 +201,23 @@ $(function() {
       paymentform.find("[name=notes]").val(notes);
       paymentform.find("[name=amount]").val(amount);
       paymentform.submit();
+    });
+
+    paymenttable.find('.cancelpaymentbutton').click(function(event) {
+      event.preventDefault();
+
+      this.disabled = true;
+
+      const payment = $(this).attr('payment');
+      fetch(`/artshow/cashier/payment/${payment}/cancel/`, {
+        method: 'POST',
+        credentials: 'include',
+        mode: 'cors',
+        headers: {
+          'Accept': 'text/plain',
+          'X-CSRFToken': Cookies.get('csrftoken'),
+        }
+      });
     });
   });
 });

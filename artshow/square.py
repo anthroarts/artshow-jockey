@@ -122,7 +122,7 @@ def create_terminal_checkout(device_id, amount, reference_id, note):
 
 
 def cancel_terminal_checkout(checkout_id):
-    result = client.terminal.cancel_terminal_checkout(checkout_id)
+    result = client().terminal.cancel_terminal_checkout(checkout_id)
 
     if result.is_error():
         log_errors(result)

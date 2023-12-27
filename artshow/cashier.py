@@ -300,7 +300,7 @@ def payment_status(request, payment_id):
 def payment_cancel(request, payment_id):
     payment = get_object_or_404(SquareInvoicePayment, pk=payment_id)
 
-    if not payment.complete:
+    if payment.complete:
         return HttpResponseBadRequest('Payment is complete')
 
     square.cancel_terminal_checkout(payment.checkout_id)
