@@ -28,23 +28,31 @@ document.addEventListener('DOMContentLoaded', () => {
   pieceIdField.addEventListener('input', clearFields);
   locationSelect.addEventListener('input', setNotSaved);
   buyNowCheckbox.addEventListener('input', setNotSaved);
-  buyNowCheckbox.addEventListener('input', toggleDisableOnNonBuyNowElements);
+  buyNowCheckbox.addEventListener('input', toggleBuyNowBid);
   for (var i = 0; i < bidderFields.length; ++i) {
     bidderFields[i].addEventListener('input', setNotSaved);
     bidFields[i].addEventListener('input', setNotSaved);
   }
 });
 
-function toggleDisableOnNonBuyNowElements() {
-  const maybeDisabled = !!buyNowCheckbox.checked;
-  const nFields = bidderFields.length;
-  for (var i = 1; i < nFields; i++) {
-    /* for every bidder but the first bidder */
-    bidderFields[i].disabled = maybeDisabled;
-    bidFields[i].disabled = maybeDisabled;
+function toggleBuyNowBid() {
+  /* for every bidder but the first bidder */
+  for (var i = 1; i < bidderFields.length; i++) {
+    bidderFields[i].disabled = buyNowCheckbox.checked;
+    bidFields[i].disabled = buyNowCheckbox.checked;
+    if (buyNowCheckbox.checked) {
+      bidderFields[i].value = '';
+      bidFields[i].value = '';
+    }
   }
-  /* we still need the first bidder's bidder ID */
-  bidFields[0].disabled = maybeDisabled;
+  /**
+   * we still need the first bidder's bidder ID but can automatically populate
+   * the buy-now price
+   */
+  bidFields[0].disabled = buyNowCheckbox.checked;
+  if (buyNowCheckbox.checked) {
+    bidFields[0].value = buyNowPrice;
+  }
 }
 
 function updateBids(json, newStatus) {
@@ -66,8 +74,21 @@ function updateBids(json, newStatus) {
       bidderFields[i].value = json.bids[i].bidder;
       bidFields[i].value = json.bids[i].bid;
     }
+
     if (length >= 1) {
       buyNowCheckbox.checked = json.bids[0].buy_now_bid;
+    }
+    if (buyNowCheckbox.checked) {
+      bidFields[0].disabled = true;
+      for (var i = 1; i < bidderFields.length; ++i) {
+        bidderFields[i].disabled = true;
+        bidFields[i].disabled = true;
+      }
+    }
+
+    buyNowPrice = json.buy_now;
+    if (buyNowPrice) {
+      buyNowCheckbox.disabled = false;
     }
 
     while (locationSelect.firstChild) {
@@ -113,8 +134,10 @@ function setNotSaved() {
 
 function clearFields() {
   for (var i = 0; i < bidderFields.length; ++i) {
+    bidderFields[i].disabled = false;
     bidderFields[i].value = '';
     bidFields[i].value = '';
+    bidFields[i].disabled = false;
   }
   while (locationSelect.firstChild) {
     locationSelect.removeChild(locationSelect.firstChild);
@@ -124,6 +147,8 @@ function clearFields() {
   emptyLocation.textContent = '---';
   locationSelect.appendChild(emptyLocation);
   buyNowCheckbox.checked = false;
+  buyNowCheckbox.disabled = true;
+  buyNowPrice = undefined;
   statusText.textContent = '';
 }
 

@@ -60,6 +60,7 @@ def get_bids(piece):
         'last_updated': bids_updated,
         'location': piece.location,
         'locations': piece.artist.assigned_locations(),
+        'buy_now': piece.buy_now,
     })
 
 

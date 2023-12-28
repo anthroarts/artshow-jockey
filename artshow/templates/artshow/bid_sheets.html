@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <html>
 <head>
 <title>Art Show Bid Sheets {% if artist %}({{ artist.name }}){% endif %}</title>
@@ -12,9 +13,9 @@
     <div class="bid-info">
       {% if not piece.not_for_sale %}
       <div class="label">Minimum Bid</div>
-      <div>${{ piece.min_bid }}</div>
+      <div>${{ piece.min_bid|intcomma }}</div>
       <div class="label">Auto Buy</div>
-      <div>{% if piece.buy_now %}1st bid only; please see below{% else %}N/A{% endif %}</div>
+      <div>{% if piece.buy_now %}1st bid only{% else %}N/A{% endif %}</div>
       {% endif %}
     </div>
     <div class="piece-id">{{ piece.code }}</div>
@@ -36,7 +37,7 @@
     </div>
     {% else %}
     <div class="bid-stickers">
-      <div class="bid-sticker"><span>Place 1st bid{% if piece.buy_now %} or auto buy of ${{ piece.buy_now }}{% endif %} here.</span></div>
+      <div class="bid-sticker"><span>Place 1st bid here{% if piece.buy_now %}, or auto buy for ${{ piece.buy_now|intcomma }}{% endif %}.</span></div>
       <div class="bid-sticker"><span>Place 2nd bid here.</span></div>
       <div class="bid-sticker"><span>Place 3rd bid here.</span></div>
       <div class="bid-sticker"><span>Place 4th bid here.</span></div>
