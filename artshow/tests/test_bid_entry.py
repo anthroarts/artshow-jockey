@@ -86,6 +86,7 @@ class BidEntryTests(TestCase):
         response = self.client.get('/artshow/entry/bids/1/1/')
         self.assertEqual(response.json(), {
             'bids': [],
+            'buy_now': 50,
             'last_updated': None,
             'location': '',
             'locations': ['A1', 'A2'],
@@ -102,6 +103,7 @@ class BidEntryTests(TestCase):
                  'bid': 20,
                  'buy_now_bid': False},
             ],
+            'buy_now': 50,
             'last_updated': None,
             'location': 'A1',
             'locations': ['A1', 'A2'],
@@ -247,6 +249,7 @@ class BidEntryTests(TestCase):
                  'bid': 20,
                  'buy_now_bid': False},
             ],
+            'buy_now': 50,
             'last_updated': None,
             'location': 'A1',
             'locations': ['A1', 'A2'],
