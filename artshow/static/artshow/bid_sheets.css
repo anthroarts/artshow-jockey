@@ -92,6 +92,7 @@ body {
 
 .bid-sticker span {
   display: table-cell;
+  padding: 5px;
   vertical-align: middle;
 }
 

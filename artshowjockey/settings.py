@@ -163,6 +163,7 @@ INSTALLED_APPS = [
     'tinyreg',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.humanize',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
