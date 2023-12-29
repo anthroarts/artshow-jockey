@@ -1,9 +1,11 @@
 from django.conf import settings
-from django.contrib import auth
+from django.contrib import auth, messages
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
+
+from oauthlib.oauth2 import MismatchingStateError
 
 from requests_oauthlib import OAuth2Session
 
@@ -14,11 +16,16 @@ def get_absolute_url(url):
     return settings.SITE_ROOT_URL + url
 
 
-def oauth_redirect(request):
-    oauth = OAuth2Session(
+def get_oauth_session(request):
+    return OAuth2Session(
         settings.OAUTH_CLIENT_ID,
         redirect_uri=get_absolute_url(reverse('oauth-complete')),
-        scope=['pii:basic', 'pii:email', 'pii:phone', 'pii:address'])
+        scope=['pii:basic', 'pii:email', 'pii:phone', 'pii:address'],
+        state=request.session.get('oauth_state'))
+
+
+def oauth_redirect(request):
+    oauth = get_oauth_session(request)
     authorization_url, state = \
         oauth.authorization_url(settings.OAUTH_AUTHORIZE_URL)
 
@@ -28,16 +35,25 @@ def oauth_redirect(request):
 
 
 def oauth_complete(request):
-    oauth = OAuth2Session(
-        settings.OAUTH_CLIENT_ID,
-        redirect_uri=get_absolute_url(reverse('oauth-complete')),
-        scope=['pii:basic', 'pii:email', 'pii:phone', 'pii:address'],
-        state=request.session['oauth_state'])
-    oauth.fetch_token(
-        settings.OAUTH_TOKEN_URL,
-        client_secret=settings.OAUTH_CLIENT_SECRET,
-        authorization_response=get_absolute_url(request.get_full_path()),
-        include_client_id=True)
+    state = request.session.get('oauth_state')
+    if state is None:
+        if request.user.is_authenticated:
+            return HttpResponseRedirect(request.session.get('oauth_next', '/'))
+
+        messages.error(request, 'Something went wrong. Please try again.')
+        return redirect(reverse('login'))
+
+    oauth = get_oauth_session(request)
+
+    try:
+        oauth.fetch_token(
+            settings.OAUTH_TOKEN_URL,
+            client_secret=settings.OAUTH_CLIENT_SECRET,
+            authorization_response=get_absolute_url(request.get_full_path()),
+            include_client_id=True)
+    except MismatchingStateError:
+        messages.error(request, 'Something went wrong. Please try again.')
+        return redirect(reverse('login'))
 
     user_info = oauth.get(settings.CONCAT_API + '/users/current').json()
     reg_id = str(user_info['id'])
