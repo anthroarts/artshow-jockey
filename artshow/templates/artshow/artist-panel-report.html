@@ -12,7 +12,18 @@
 <table>
 <tr><th>Artist ID</th><th>Artist Name</th><th>Locations Assigned</th><th>Locations Used</th><th>Spaces Assigned</th></tr>
 {% for artist in artists %}
-<tr><td>{{ artist.artistid }}</td><td>{{ artist.artistname }}</td><td>{{ artist.locations|join:', ' }}</td><td>{{ artist.used_locations|join:", " }}</td><td>{{ artist.allocated_spaces }}</td></tr>{% endfor %}
+<tr>
+    <td>{{ artist.artistid }}</td>
+    <td>
+        {% if artist.website %}
+        <a href="{{ artist.website }}">{{ artist.artistname }}</a>
+        {% else %}
+        {{ artist.artistname }}
+        {% endif %}
+    </td>
+    <td>{{ artist.locations|join:', ' }}</td>
+    <td>{{ artist.used_locations|join:", " }}</td>
+    <td>{{ artist.allocated_spaces }}</td></tr>{% endfor %}
 </table>
 
 {% endblock %}
