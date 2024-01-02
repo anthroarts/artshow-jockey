@@ -234,6 +234,9 @@ class Artist (models.Model):
     def ordered_pieces(self):
         return self.piece_set.order_by('pieceid')
 
+    def agent_names(self):
+        return [agent.person.display_name for agent in self.agent_set.prefetch_related('person').all()]
+
     def save(self, **kwargs):
         if self.artistid is None:
             try:
