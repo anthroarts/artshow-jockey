@@ -21,8 +21,24 @@
     {% for l in assigned_locations %}
         <tr>
             <td>{{ l }}</td>
-            <td>{{ l.artist_1|default:'' }}</td>
-            <td>{{ l.artist_2|default:'' }}</td>
+            <td>
+                {% if l.artist_1 %}
+                {% if l.artist_1.website %}
+                <a href="{{ l.artist_1.website }}">{{ l.artist_1 }}</a>
+                {% else %}
+                {{ l.artist_1 }}
+                {% endif %}
+                {% endif %}
+            </td>
+            <td>
+                {% if l.artist_2 %}
+                {% if l.artist_2.website %}
+                <a href="{{ l.artist_2.website }}">{{ l.artist_2 }}</a>
+                {% else %}
+                {{ l.artist_2 }}
+                {% endif %}
+                {% endif %}
+            </td>
         </tr>
     {% endfor %}
 </table>
