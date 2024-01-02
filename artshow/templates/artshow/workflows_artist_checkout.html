@@ -10,6 +10,12 @@
 {% endblock %}
 {% block content %}
 
+{% if artist.agent_names %}
+<p>
+  <b>Agent{{ artist.agent_names|pluralize }}</b>: {{ artist.agent_names|join:', ' }}
+</p>
+{% endif %}
+
 <form method="post">{% csrf_token %}
   {{ formset.management_form }}
   <p>Sold pieces:</p>
