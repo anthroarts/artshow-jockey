@@ -173,6 +173,7 @@ def process_checkout_created_or_updated(body):
         payment = SquareInvoicePayment.objects.get(checkout_id=checkout_id)
     except SquareInvoicePayment.DoesNotExist:
         logger.info(f'Got webhook for unknown checkout: {checkout_id}')
+        return
 
     currency = checkout['amount_money']['currency']
     if currency != 'USD':
