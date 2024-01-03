@@ -47,7 +47,7 @@ body {
   grid-gap: 0px 10px;
   grid-auto-flow: column;
   grid-template-rows: 20px repeat(2, 1fr);
-  grid-template-columns: 2fr repeat(3, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   background-color: lightgrey;
   border: 1px solid black;
   border-radius: 5px;
@@ -63,6 +63,7 @@ body {
 
 .bid-sticker {
   grid-row: 2 / 4;
+  grid-column: 3;
   display: table;
   height: 0.75in;
   width: 1.75in;

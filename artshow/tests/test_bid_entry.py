@@ -55,6 +55,12 @@ class BidEntryTests(TestCase):
         bid = Bid(bidder=bidder, piece=piece, amount=20)
         bid.save()
 
+        # Piece 1-3 has no buy now price.
+        piece = Piece(artist=artist, pieceid=3, min_bid=5,
+                      status=Piece.StatusInShow,
+                      location='A2')
+        piece.save()
+
         self.client = Client()
         self.client.login(username='test', password='test')
 
@@ -73,7 +79,7 @@ class BidEntryTests(TestCase):
         self.assertEqual(response.json(), expected)
 
     def test_invalid_piece(self):
-        response = self.client.get('/artshow/entry/bids/1/3/')
+        response = self.client.get('/artshow/entry/bids/1/4/')
         expected = {
             'error': {
                 'field': 'piece_id',
@@ -106,6 +112,17 @@ class BidEntryTests(TestCase):
             'buy_now': 50,
             'last_updated': None,
             'location': 'A1',
+            'locations': ['A1', 'A2'],
+        }
+        self.assertEqual(response.json(), expected)
+
+    def test_piece_no_buy_now(self):
+        response = self.client.get('/artshow/entry/bids/1/3/')
+        expected = {
+            'bids': [],
+            'buy_now': None,
+            'last_updated': None,
+            'location': 'A2',
             'locations': ['A1', 'A2'],
         }
         self.assertEqual(response.json(), expected)

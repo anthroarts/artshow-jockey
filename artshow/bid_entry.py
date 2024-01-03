@@ -60,7 +60,7 @@ def get_bids(piece):
         'last_updated': bids_updated,
         'location': piece.location,
         'locations': piece.artist.assigned_locations(),
-        'buy_now': float(piece.buy_now),
+        'buy_now': None if piece.buy_now is None else float(piece.buy_now),
     })
 
 
