@@ -37,6 +37,12 @@ document.getElementById('select-none').addEventListener('click', () => {
 });
 </script>
 
+{% if artist.agent_names %}
+<p>
+  <b>Agent{{ artist.agent_names|pluralize }}</b>: {{ artist.agent_names|join:', ' }}
+</p>
+{% endif %}
+
 <form id="main-form" method="post">{% csrf_token %}
   {{ formset.management_form }}
   <table>
