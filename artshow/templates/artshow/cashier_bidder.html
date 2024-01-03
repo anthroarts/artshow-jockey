@@ -15,15 +15,6 @@
   <script>
 	Decimal.set({ rounding: Decimal.ROUND_HALF_EVEN });
 
-    payment_types = {{ payment_types_json|safe }};
-    function reset_to_remaining(o) {
-	    $(o).trigger("update");
-    }
-    function removepayment(o) {
-       var table = $($(o).parents('table')[0]);
-       $($(o).parents('tr')[0]).remove();
-       table.trigger('update');
-    }
     $(function() {
     	$('.selecttable').each(function() {
     		var selecttable = $(this);
@@ -45,6 +36,7 @@
     		autocheck_selectall();
     	});
     });
+
     $(function() {
     	$('.purchasetable').each(function() {
     		var purchasetable = $(this);
@@ -67,134 +59,12 @@
     			});
     			subtotalfield.text(subtotal.toFixed(2));
     			var tax = subtotal.times(taxrate);
-    			taxfield.text(tax.toFixed(2)).val(tax.toFixed(2)); // sets both innertext and values
+    			taxfield.text(tax.toFixed(2));
     			var total = subtotal.plus(tax);
     			totalfield.text(total.toFixed(2));
     			totalfield.trigger('totalupdated');
     		}
     		purchasetable.bind('update', update);
-    		update();
-
-    	});
-    });
-    $(function() {
-    	$('.paymenttable').each(function() {
-    		var paymenttable = $(this);
-    		var totalfrom = $(document.getElementById(paymenttable.attr('totalfrom')));
-    		var precision = Math.floor(paymenttable.attr('precision'));
-    		var formprefix = paymenttable.attr('formprefix');
-    		var paymenttendered = paymenttable.find('.paymenttendered');
-    		// var paymenttypes = {{ payment_types_json }};
-    		var paymentrowtemplate = paymenttable.find('.paymentrowtemplate');
-    		var paymentsgohere = paymenttable.find('.paymentsgohere');
-    		var createinvoicebutton = paymenttable.find('.createinvoicebutton');
-    		function get_payment_remaining() {
-    			var acc = new Decimal(totalfrom.text());
-    			paymenttable.find(".paymentrow").each(function() {
-    				acc = acc.minus(new Decimal($(this).find("[name$=-amount]").val()));
-    			});
-    			return acc;
-    		}
-    		function get_total_tendered() {
-    			var acc = new Decimal(0);
-    			paymenttable.find(".paymentrow").each(function() {
-    				acc = acc.plus(new Decimal($(this).find("[name$=-amount]").val()));
-    			});
-    			return acc;
-    		}
-    		function update() {
-    			paymenttable.find(".paymentrow").each(function() {
-    				var row=$(this);
-    				var amount=new Decimal(row.find("[name$=-amount]").val());
-    				var notes=row.find("[name$=-notes]").val();
-    				var type=row.find("[name$=-payment_method]").val();
-    				row.find(".paymenttypetext").text(payment_types[type]);
-    				row.find(".paymentnotestext").text(notes);
-    				row.find(".paymentamount").text(amount.toFixed(2));
-    			});
-    			var acc = get_total_tendered();
-       			paymenttable.find(".totaltendered").text(acc.toFixed(2));
-    			acc = get_payment_remaining();
-       			paymenttable.find(".paymentremaining").text(acc.toFixed(2));
-       			paymenttendered.val(acc.toFixed(2));
-       			createinvoicebutton.prop('disabled', acc != 0);
-       			
-    		}
-    		paymenttable.bind('update', update);
-    		totalfrom.bind('totalupdated', function() { paymenttable.trigger('update'); });
-    		paymenttable.find('.paymentbutton').click(function(event) {
-    			event.preventDefault();
-    			paymenttendered.focus();
-    			var paymenttype = Math.floor($(this).attr("paymenttype"));
-    			var amount = new Decimal(paymenttendered.val());
-    			if (amount <= 0) {
-    				return;
-    			}
-    			var paymentremaining = get_payment_remaining();
-    			var change = amount.minus(paymentremaining);
-    			if (change < 0) {
-    				change = new Decimal(0);
-    			}
-    			var notes = "";
-    			if (paymenttype == 1 /* cash */) {
-    				var tendered = amount;
-    				if (change > 0) {
-    					amount = paymentremaining;
-    					if (! window.confirm("Give " + change.toFixed(2) + " change ")) {
-	    					return;
-    					}
-    				}
-    				notes = "tendered: " + tendered.toFixed(2) + "  change: " + change.toFixed(2);
-    			} else {
-	    			if (change > 0) {
-		    			window.alert("Amount cannot be larger than payment remaining.");
-		    			return;
-	    			}
-	    			if (paymenttype == 2 /* check */) {
-	    				if (!window.confirm("Ask for Identification. Does it match?")) {
-		    				return;
-	    				}
-	    			} else if (paymenttype == 3 /* card */) {
-	    				if (!window.confirm("Charge card amount " + amount.toFixed(2) + "\nWas this sucesssful?")) {
-		    				return;
-	    				}
-	    			} else if (paymenttype == 4 /* other */) {
-	    				notes = window.prompt("Enter details of payment.");
-	    				if (!notes) {
-		    				return;
-	    				}
-	    			} else {
-		    			return;
-	    			}
-	    		}
-    			paymenttendered.val('');
-    			
-    			var newrow = paymentrowtemplate.clone();
-    			newrow.removeClass('paymentrowtemplate').addClass('paymentrow').show();
-    			newrow.find("[name$=-payment_method]").val(paymenttype);
-    			newrow.find("[name$=-notes]").val(notes);
-    			newrow.find("[name$=-amount]").val(amount);
-    			paymentsgohere.before(newrow);
-    			update();    			
-    		});
-    		paymenttable.find("[type=submit]").click(function(event) {
-    			console.log('clicked submit button');
-    			var acc = get_payment_remaining();
-    			if (acc != 0) {
-    				window.alert("Payment remaining must be zero before invoice can be created.");
-    				return false;
-    			}
-    			var paymentrows = paymenttable.find(".paymentrow");
-    			paymentrows.each(function(index) {
-    				var row=$(this);
-    				row.find("[name$=-payment_method]").attr('name', formprefix + "-" + index + "-payment_method");
-    				row.find("[name$=-notes]").attr('name', formprefix + "-" + index + "-notes");
-    				row.find("[name$=-amount]").attr('name', formprefix + "-" + index + "-amount");
-    			});
-    			console.log('paymentrows', paymentrows, paymentrows.length);
-    			paymenttable.find('[name$=-TOTAL_FORMS]').val(paymentrows.length);
-    			return true;
-    		});
     		update();
     	});
     });
@@ -233,47 +103,14 @@
 {% empty %}
 <tr><td colspan="4">No pieces to select from.</td></tr>
 {% endfor %}
-{% if items_form.non_field_errors or items_form.tax_paid.errors %}
-<tr><td colspan="4">{{ items_form.non_field_errors }}{{ items_form.tax_paid.errors }}</td></tr>
+{% if error %}
+<tr><td colspan="4">{{ error }}</td></tr>
 {% endif %}
-<tr><td colspan="3" align="right"><input type="hidden" id="id_{{items_form.tax_paid.html_name}}" name="{{items_form.tax_paid.html_name}}" class="taxfield" /> Subtotal: <span class="subtotalfield"></span> &mdash; Tax:</td><td class="taxfield money"></td></tr>
+<tr><td colspan="3" align="right">Subtotal: <span class="subtotalfield"></span> &mdash; Tax:</td><td class="taxfield money"></td></tr>
 <tr class="lastrow"><td colspan="3" style="text-align: right;">Total:</td><td class="totalfield money" id="totalwithtax" ></td></tr>
 </table>
 
-<h3>Payments</h3>
-<div class="paymenttable" totalfrom="totalwithtax" precision="{{ money_precision }}" formprefix="{{ payment_formset.prefix }}">
-{{ payment_formset.management_form }}
-
-<table>
-  <tr class="paymentrowtemplate" style="display:none"><td>{{ payment_formset.empty_form }}<span class="paymenttypetext"></span></td><td><span class="paymentnotestext"></span></td><td class="paymentamount" align="right"></td><td><input class="delbutton" type="button" onclick="removepayment(this);return false;" value="Del"></td></tr>
-  <tr><th>Type</th><th>Notes</th><th>Amount</th><th></th></tr>
-{% if payment_formset.non_form_errors %}
-  <tr><td colspan="4">{{ payment_formset.non_form_errors }}</td></tr>
-{% endif %}
-{% for f in payment_formset %}
-{% if f.errors %}
-  <tr><td colspan="4"><ul>{% for formerrors in f.errors %}{% for field in formerrors %}{% for error in field.errors %}<li>{{ error }}</li>{% endfor %}{% endfor %}{% endfor %}</ul></td></tr>
-{% endif %}
-  <tr class="paymentrow"><td>{{ f }}<span class="paymenttypetext"></span></td><td><span class="paymentnotestext"></span></td><td class="paymentamount" class="money"></td><td><input type="button" class="delbutton" onclick="removepayment(this);return false;" value="Del" /></td></tr>
-{% endfor %}
-  <tr class="paymentsgohere" style="display:none"></tr>
-  <tr class="lastrow"><td colspan="2" style="text-align: right;">Total Tendered</td><td class="money"><span class="totaltendered"></span></td><td></td></tr>
-  <tr><td colspan="2" style="text-align: right;">Remaining to Pay</td><td class="money"><span class="paymentremaining"></span></td><td></td></tr>
-  
-  <tr class="paymenttenderedrow lastrow"><td colspan="4">
-      <label>
-          Pay:
-          <input class="paymenttendered" type="text" value=""/>
-      </label>
-    <input type="button" value="Remaining" onclick="reset_to_remaining(this);" /> by
-{% for pt_id, pt_name in payment_types.items %}<input class="paymentbutton" type="button" paymenttype="{{ pt_id }}" value="{{ pt_name }}" />
-{% endfor %}
-  </td></tr>
-  <tr><td colspan="4" style="text-align: right;"><input class="createinvoicebutton" type="submit" value="Create Invoice"/></td></tr>
-
-</table>
-
-</div>
+<input class="createinvoicebutton" type="submit" value="Create Invoice"/>
 
 </form>
 

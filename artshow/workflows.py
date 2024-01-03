@@ -10,7 +10,10 @@ from django.views.decorators.http import require_POST
 
 from .conf import settings
 from .mod11codes import make_check
-from .models import Artist, BidderId, ChequePayment, Location, Piece, Space
+from .models import (
+    Artist, BidderId, ChequePayment, Location, Piece, Space, SquareTerminal
+)
+from . import square
 
 
 @permission_required('artshow.is_artshow_staff')
@@ -530,3 +533,35 @@ def print_cheques_print(request):
         'redirect': reverse('artshow-workflow-print-cheques'),
     }
     return render(request, 'artshow/cheque.html', c)
+
+
+class PairTerminalForm(forms.Form):
+    name = forms.CharField(label='Name', max_length=128)
+
+
+@permission_required('artshow.is_artshow_staff')
+def pair_terminal(request):
+    device_code = None
+    if request.method == 'POST':
+        form = PairTerminalForm(request.POST)
+        if form.is_valid():
+            device_code = square.create_device_code(form.cleaned_data['name'])
+    else:
+        form = PairTerminalForm()
+
+    c = {
+        'devices': SquareTerminal.objects.all(),
+        'selected_device': request.session.get('terminal', default=None),
+        'form': form,
+        'device_code': device_code,
+    }
+    return render(request, 'artshow/workflows_pair_terminal.html', c)
+
+
+@permission_required('artshow.is_artshow_staff')
+@require_POST
+def select_terminal(request, pk):
+    device = get_object_or_404(SquareTerminal, pk=pk)
+    request.session['terminal'] = device.pk
+
+    return redirect(pair_terminal)

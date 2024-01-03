@@ -2,8 +2,20 @@
 {% load static %}
 {% block title %}Invoice{% endblock %}
 {% block extra_head %}
+<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'artshow/decimal.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'artshow/esc-pos-encoder-415c2c8.js' %}"></script>
+<script type="text/javascript" src="{% static 'artshow/js.cookie-2.2.0.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'artshow/receipt_printer.js' %}"></script>
+{% endblock %}
+{% block breadcrumbs %}
+<ul class="breadcrumbs">
+  <li><a href="/">Home</a></li>
+  <li><a href="{% url 'artshow-cashier' %}">Cashier</a></li>
+  <li><a href="{% url 'artshow-cashier-bidder' invoice.payer.id %}">Bidder</a></li>
+  <li><a href="{% url 'artshow-cashier-bidder-invoices' invoice.payer.id %}">Invoices</a></li>
+  <li class="current">{{ invoice_prefix}}{{ invoice.id }}</li>
+</ul>
 {% endblock %}
 {% block content %}
 <h3>Invoice</h3>
@@ -13,42 +25,202 @@
   <tr><td>Invoicee</td><td>{{ invoice.payer.name }}</td></tr>
   <tr><td>Bidder ID{{ invoice.payer.bidder_ids|pluralize }}</td><td>{{ invoice.payer.bidder_ids|join:"," }}</td></tr>
 </table>
+
 <h4>Items</h4>
 <table>
 <tr><th>Item</th><th>Amount</th></tr>
 {% for item in invoice.invoiceitem_set.all %}
 <tr><td>{{ item.piece }}</td><td class="money">{{ item.price|floatformat:money_precision }}</td></tr>
 {% endfor %}
-<tr class="lastrow"><td>Subtotal</td><td class="money">{{ invoice.item_total|floatformat:money_precision }}</td></tr>
+<tr class="lastrow"><td style="text-align: right;">Subtotal</td><td class="money">{{ invoice.item_total|floatformat:money_precision }}</td></tr>
 <tr><td>{{ tax_description }}</td><td class="money">{{ invoice.tax_paid|floatformat:money_precision }}</td></tr>
-<tr class="lastrow"><td>Total with Tax</td><td class="money">{{ invoice.item_and_tax_total|floatformat:money_precision }}</td></tr>
+<tr class="lastrow"><td style="text-align: right;">Total with Tax</td><td class="money">{{ invoice.item_and_tax_total|floatformat:money_precision }}</td></tr>
 </table>
-<h4>Payments</h4>
-<table>
-<tr><th>Type</th><th>Notes</th><th>Amount</th></tr>
-{% for payment in invoice.invoicepayment_set.all %}
-<tr><td>{{ payment.get_payment_method_display }}</td><td>{{ payment.notes }}</td><td class="money">{{ payment.amount|floatformat:money_precision }}</td></tr>
-{% endfor %}
-<tr class="lastrow"><td colspan="2" align="right">Payment Total</td><td class="money">{{ invoice.total_paid|floatformat:money_precision }}</td></tr>
-</table>
-{% if invoice.item_and_tax_total != invoice.total_paid %}<p><strong>Oh crap; item total and payment total do not match!</strong></p>
-{% endif %}
+
 {% if invoice.notes %}
 <h4>Notes</h4>
 <p>{{ invoice.notes }}</p>
 {% endif %}
 
+<h4>Payments</h4>
+<div class="paymenttable">
+<table>
+<tr><th>Type</th><th>Notes</th><th>Amount</th></tr>
+{% for payment in invoice.invoicepayment_set.all %}
+  <tr>
+    <td>{{ payment.get_payment_method_display }}</td>
+    <td>{{ payment.notes }}</td>
+    <td class="money">{{ payment.amount|floatformat:money_precision }}</td>
+    {% if not payment.complete %}
+    <td>
+      Pending...
+      <button payment="{{ payment.pk }}" class="cancelpaymentbutton">Cancel</button>
+    </td>
+    {% endif %}
+  </tr>
+{% endfor %}
+
+{% if payment_form.non_form_errors %}
+  <tr><td colspan="3">{{ payment_form.non_form_errors }}</td></tr>
+{% endif %}
+{% if payment_form.errors %}
+  <tr><td colspan="3"><ul>{% for formerrors in payment_form.errors %}{% for field in formerrors %}{% for error in field.errors %}<li>{{ error }}</li>{% endfor %}{% endfor %}{% endfor %}</ul></td></tr>
+{% endif %}
+  <tr class="lastrow">
+    <td colspan="2" style="text-align: right;">Total Tendered</td>
+    <td class="money">{{ invoice.total_paid|floatformat:money_precision }}</td>
+  </tr>
+{% if invoice.payment_remaining %}
+  <tr>
+    <td colspan="2" style="text-align: right;">Remaining to Pay</td>
+    <td class="money"><span class="paymentremaining">{{ invoice.payment_remaining|floatformat:money_precision }}</span></td>
+  </tr>
+  <tr class="paymenttenderedrow lastrow">
+    <td colspan="3">
+      <label>
+        Pay: <input class="paymenttendered" type="text" value="{{ invoice.payment_remaining|floatformat:money_precision }}"/>
+      </label>
+      by
+      {% for pt_id, pt_name in payment_types.items %}
+      <input class="paymentbutton" type="button" paymenttype="{{ pt_id }}" value="{{ pt_name }}" />
+      {% endfor %}
+    </td>
+  </tr>
+{% endif %}
+</table>
+</div>
+
+{% if invoice.payment_remaining %}
+<form id="paymentform" method="post">
+  {% csrf_token %}
+  {{ payment_form }}
+</form>
+<p>
+  <strong>Payment incomplete!</strong>
+</p>
+{% else %}
 <p>
   <button id="print-invoice">Print</button>
   <span id="receipt-printer-status">No receipt printer detected.</span>
 </p>
+{% endif %}
 
 {{ json_data|json_script:"json-data" }}
 
 <script>
-setUpReceiptPrinter('receipt-printer-status');
-
 const json = JSON.parse(document.getElementById('json-data').textContent);
+
+async function checkPendingPayments() {
+  for (payment of json.pendingPayments) {
+    const response = await fetch(`/artshow/cashier/payment/${payment}/`, {
+      credentials: 'include',
+      mode: 'cors',
+      headers: {
+        'Accept': 'text/plain',
+        'X-CSRFToken': Cookies.get('csrftoken'),
+      }
+    });
+    if (!response.ok) {
+      window.location.reload();
+      return;
+    }
+    const status = await response.text();
+    if (status != 'PENDING') {
+      window.location.reload();
+      return;
+    }
+  }
+
+  setTimeout(checkPendingPayments, 1000);
+}
+
+if (json.pendingPayments.length > 0) {
+  setTimeout(checkPendingPayments, 1000);
+}
+
+$(function() {
+  $('.paymenttable').each(function() {
+    const paymenttable = $(this);
+
+    paymenttable.find('.paymentbutton').click(function(event) {
+      event.preventDefault();
+
+      const paymenttendered = paymenttable.find('.paymenttendered');
+      paymenttendered.focus();
+
+      const paymentremaining = new Decimal(paymenttable.find('.paymentremaining').text());
+      const paymenttype = Math.floor($(this).attr("paymenttype"));
+
+      let amount = new Decimal(paymenttendered.val());
+      if (amount <= 0) {
+        return;
+      }
+
+      let change = amount.minus(paymentremaining);
+      if (change < 0) {
+        change = new Decimal(0);
+      }
+
+      let notes = "";
+      if (paymenttype == 1 /* cash */) {
+        const tendered = amount;
+        if (change > 0) {
+          amount = paymentremaining;
+          if (!window.confirm("Give " + change.toFixed(2) + " change")) {
+            return;
+          }
+        }
+        notes = "tendered: " + tendered.toFixed(2) + "  change: " + change.toFixed(2);
+      } else {
+        if (change > 0) {
+          window.alert("Amount cannot be larger than payment remaining.");
+          return;
+        }
+        if (paymenttype == 2 /* check */) {
+          if (!window.confirm("Ask for Identification. Does it match?")) {
+            return;
+          }
+        } else if (paymenttype == 3 /* card */) {
+          if (!window.confirm("Charge card amount " + amount.toFixed(2) + "\nWas this sucesssful?")) {
+            return;
+          }
+        } else if (paymenttype == 4 /* other */) {
+          notes = window.prompt("Enter details of payment.");
+          if (!notes) {
+            return;
+          }
+        } else if (paymenttype == 5 /* square */) {
+          // Payment is handled server-side.
+        } else {
+          return;
+        }
+      }
+
+      const paymentform = $('#paymentform');
+      paymentform.find("[name=payment_method]").val(paymenttype);
+      paymentform.find("[name=notes]").val(notes);
+      paymentform.find("[name=amount]").val(amount);
+      paymentform.submit();
+    });
+
+    paymenttable.find('.cancelpaymentbutton').click(function(event) {
+      event.preventDefault();
+
+      this.disabled = true;
+
+      const payment = $(this).attr('payment');
+      fetch(`/artshow/cashier/payment/${payment}/cancel/`, {
+        method: 'POST',
+        credentials: 'include',
+        mode: 'cors',
+        headers: {
+          'Accept': 'text/plain',
+          'X-CSRFToken': Cookies.get('csrftoken'),
+        }
+      });
+    });
+  });
+});
 
 function stringElipsis(text, length) {
     if (text.length > length) {
@@ -121,7 +293,7 @@ function invoiceBody(encoder, pageWidth) {
   }
 }
 
-document.getElementById('print-invoice').addEventListener('click', async () => {
+async function printInvoice() {
   const pageWidth = 42;
   const encoder = new EscPosEncoder();
   encoder
@@ -192,7 +364,13 @@ document.getElementById('print-invoice').addEventListener('click', async () => {
       .raw([0x1D, 0x56, 66, 0]);
 
   printReceipt(encoder.encode());
-});
+}
+
+const printInvoiceButton = document.getElementById('print-invoice');
+if (printInvoiceButton) {
+  setUpReceiptPrinter('receipt-printer-status');
+  printInvoiceButton.addEventListener('click', printInvoice);
+}
 
 </script>
 {% endblock %}

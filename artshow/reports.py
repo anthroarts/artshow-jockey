@@ -232,7 +232,7 @@ def get_summary_statistics():
     total_charges = tax_paid + piece_charges
 
     invoice_payments = InvoicePayment.objects.values('payment_method').annotate(total=Sum('amount'))
-    payment_method_choice_dict = dict(InvoicePayment.PAYMENT_METHOD_CHOICES)
+    payment_method_choice_dict = dict(InvoicePayment.PaymentMethod.choices)
     total_invoice_payments = Decimal(0)
     for ip in invoice_payments:
         ip['payment_method_desc'] = payment_method_choice_dict[ip['payment_method']]

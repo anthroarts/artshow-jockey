@@ -3,7 +3,8 @@
     <ul class="breadcrumbs">
         <li><a href="/">Home</a></li>
         <li><a href="{% url 'artshow-cashier' %}">Cashier</a></li>
-        <li class="current">Invoices for {{ bidder.person.name }}</li>
+        <li><a href="{% url 'artshow-cashier-bidder' bidder.id %}">Bidder</a></li>
+        <li class="current">Invoices</li>
     </ul>
 {% endblock %}
 {% block content %}

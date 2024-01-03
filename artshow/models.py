@@ -668,13 +668,16 @@ class Invoice (models.Model):
     tax_paid = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
 
     def total_paid(self):
-        return self.invoicepayment_set.aggregate(sum=Sum('amount'))['sum'] or Decimal('0.0')
+        return self.invoicepayment_set.filter(complete=True).aggregate(sum=Sum('amount'))['sum'] or Decimal('0.0')
 
     def item_total(self):
         return self.invoiceitem_set.aggregate(sum=Sum('price'))['sum'] or Decimal('0.0')
 
     def item_and_tax_total(self):
         return self.item_total() + (self.tax_paid or 0)
+
+    def payment_remaining(self):
+        return self.item_and_tax_total() - self.total_paid()
 
     def invoiceitems(self):
         return self.invoiceitem_set.order_by('piece__location', 'piece')
@@ -691,20 +694,27 @@ class Invoice (models.Model):
 
 
 class InvoicePayment(models.Model):
-    amount = models.DecimalField(max_digits=7, decimal_places=2)
     # The cashier code expects this ordering and numbering to special-case each of the payment
     # types.
-    # TODO: Create a flexible table with flags indicating how each should be handled.
-    PAYMENT_METHOD_CHOICES = [
-        (0, "Not Paid"),
-        (1, "Cash"),
-        # (2, "Check"),
-        (3, "Card"),
-        # (4, "Other"),
-    ]
-    payment_method = models.IntegerField(choices=PAYMENT_METHOD_CHOICES, default=0)
+    class PaymentMethod(models.IntegerChoices):
+        NOT_PAID = 0, "Not Paid"
+        CASH = 1, "Cash"
+        CHECK = 2, "Check"
+        MANUAL_CARD = 3, "Card"  # Manually processed credit card transaction.
+        OTHER = 4, "Other"
+        SQUARE_CARD = 5, "Card"  # Credit card captured by Square Terminal.
+
+    complete = models.BooleanField(default=False)
+    amount = models.DecimalField(max_digits=7, decimal_places=2)
+    payment_method = models.IntegerField(choices=PaymentMethod.choices,
+                                         default=PaymentMethod.NOT_PAID)
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     notes = models.CharField(max_length=100, blank=True)
+
+
+class SquareInvoicePayment (InvoicePayment):
+    checkout_id = models.CharField(max_length=255)
+    payment_ids = models.TextField(blank=True)
 
 
 class InvoiceItem (models.Model):
@@ -769,6 +779,12 @@ class Agent(models.Model):
                                               help_text="Person is allowed to retrieve pieces from the show")
     can_arbitrate = models.BooleanField(default=False,
                                         help_text="Person is allowed to make executive decisions regarding pieces")
+
+
+class SquareTerminal(models.Model):
+    device_id = models.CharField(max_length=128)
+    code = models.CharField(max_length=128)
+    name = models.CharField(max_length=128)
 
 
 class SquareWebhook(models.Model):
