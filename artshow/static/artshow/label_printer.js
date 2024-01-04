@@ -46,6 +46,7 @@ async function printLabels(data) {
     if (selectedDevice === null) {
         try {
             selectedDevice = await navigator.usb.requestDevice({ filters: supportedPrinters });
+            labelPrinterStatus.textContent = 'Label printer ready.';
         } catch (e) {
             labelPrinterStatus.textContent = 'No printer selected.';
             return;
