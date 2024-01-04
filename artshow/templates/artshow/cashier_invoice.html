@@ -320,10 +320,9 @@ async function printInvoice() {
         .line('"' + stringElipsis(item.name, pageWidth - 2) + '"');
   }
 
-  // Feed and cut.
+  // Keep the pick list and invoice together (no cut)
   encoder
       .raw([0x0A, 0x0A])
-      .raw([0x1D, 0x56, 66, 0])
 
       // Merchant copy
       .align('center')
@@ -344,12 +343,18 @@ async function printInvoice() {
       .newline()
       .newline()
       .line('Sign: ____________________________________')
+
       // Feed and cut.
       .raw([0x0A, 0x0A])
       .raw([0x1D, 0x56, 66, 0])
 
       // Customer copy
       .align('center')
+      .width(3)
+      .height(3)
+      .line(json.bidderIds.join(', '))
+      .height(1)
+      .newline()
       .width(2)
       .height(2)
       .line('Receipt')
