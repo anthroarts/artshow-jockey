@@ -46,6 +46,7 @@ async function printReceipt(data) {
     if (selectedDevice === null) {
         try {
             selectedDevice = await navigator.usb.requestDevice({ filters: supportedPrinters });
+            receiptPrinterStatus.textContent = 'Receipt printer ready.';
         } catch (e) {
             receiptPrinterStatus.textContent = 'No printer selected.';
             return;
