@@ -45,6 +45,8 @@ urlpatterns = [
             name='artshow-report-winning-bidders'),
     re_path(r'^reports/unsold-pieces/$', reports.unsold_pieces,
             name='artshow-report-unsold-pieces'),
+    re_path(r'^reports/scanned-pieces/$', reports.scanned_pieces,
+            name='artshow-report-scanned-pieces'),
     re_path(r'^reports/artist-panel-report/$', reports.artist_panel_report,
             name='artshow-report-artist-to-panel'),
     re_path(r'^reports/panel-artist-report/$', reports.panel_artist_report,
