@@ -4,7 +4,7 @@
 from decimal import Decimal
 from django.shortcuts import render
 from django.db.models import (
-    Case, Count, Exists, Max, OuterRef, Q, Subquery, Sum, Value as V, When
+    Case, Count, Exists, F, Max, OuterRef, Q, Subquery, Sum, Value as V, When
 )
 from django.db.models.fields import DecimalField
 from django.db.models.functions import Coalesce
@@ -112,6 +112,14 @@ def unsold_pieces(request):
 
     return render(request, 'artshow/reports-unsold-pieces.html',
                   {'bidders': bidders})
+
+
+@permission_required('artshow.is_artshow_staff')
+def scanned_pieces(request):
+    pieces = Piece.objects.order_by(F('bids_updated').asc(nulls_first=True), 'location', 'artist__artistid', 'pieceid')
+
+    return render(request, 'artshow/reports-scanned-pieces.html',
+                  {'pieces': pieces})
 
 
 @permission_required('artshow.is_artshow_staff')

@@ -1,0 +1,25 @@
+{% extends "artshow/base_generic.html" %}
+{% block title %}Scanned Pieces Report{% endblock %}
+{% block breadcrumbs %}
+<ul class="breadcrumbs">
+    <li><a href="/">Home</a></li>
+    <li><a href="{% url 'artshow-reports' %}">Reports</a></li>
+    <li class="current">Scanned Pieces Report</li>
+</ul>
+{% endblock %}
+{% block content %}
+<table>
+    <tr>
+        <th>Last Scanned</th>
+        <th>Location</th>
+        <th>Piece</th>
+    </tr>
+    {% for piece in pieces %}
+    <tr>
+        <td>{{ piece.bids_updated|date:"l, P" }}</td>
+        <td>{{ piece.location }}</td>
+        <td>{{ piece }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
