@@ -29,7 +29,7 @@ squareup = "*"
 oauthlib = "*"
 
 [requires]
-python_version = "3.11"
+python_version = "3.12"
 
 [scripts]
 gunicorn = "gunicorn wsgi"
