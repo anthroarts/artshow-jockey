@@ -7,6 +7,8 @@ from ajax_select import urls as ajax_select_urls
 import artshow.views
 
 admin.autodiscover()
+admin.site.site_title = settings.SITE_NAME + ' Admin'
+admin.site.site_header = settings.SITE_NAME + ' Admin'
 
 urlpatterns = [
     re_path(r'^admin/lookups/', include(ajax_select_urls)),

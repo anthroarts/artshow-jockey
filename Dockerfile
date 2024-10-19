@@ -1,7 +1,7 @@
-FROM python:3.11-alpine AS native-deps
+FROM python:3.12-alpine AS native-deps
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 WORKDIR /code
 
@@ -32,7 +32,7 @@ ENV OAUTHLIB_INSECURE_TRANSPORT=1
 ENV TEST_OAUTH_PROVIDER=1
 
 RUN flake8 && \
-    python manage.py test && \
+    python -Wa manage.py test && \
     python manage.py collectstatic
 
 # Production environment.

@@ -11,7 +11,10 @@
     <div id="user-tools">
 {% if user.is_active %}
       Welcome, <strong>{% if user.person %}{{ user.person.display_name }}{% else %}{{ user.username }}{% endif %}</strong>.
-      <a href="{% url 'logout' %}">Log out</a>
+      <form id="logout-form" method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Log out</button>
+      </form>
 {% else %}
       <a href="{% url 'login' %}">Log in</a>
 {% endif %}

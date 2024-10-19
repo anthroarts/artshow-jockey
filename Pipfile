@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "==4.2.*"
+django = "==5.1.*"
 django-ajax-selects = "*"
 django-appconf = "*"
 django-celery-results = "*"
@@ -29,7 +29,7 @@ squareup = "*"
 oauthlib = "*"
 
 [requires]
-python_version = "3.11"
+python_version = "3.12"
 
 [scripts]
 gunicorn = "gunicorn wsgi"
