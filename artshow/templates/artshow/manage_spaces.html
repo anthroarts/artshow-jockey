@@ -39,6 +39,15 @@
                     {% endif %}
                 </tr>
             {% endfor %}
+            {% for space in unreservable_spaces %}
+            <tr>
+                <td>{{ space }}</td>
+                <td><span class="helptext">{{ space.description }}</span></td>
+                <td>{{ space.allow_half_spaces|yesno }}</td>
+                <td class="money">${{ space.price }}</td>
+                <td {% if artshow_settings.ARTSHOW_SHOW_ALLOCATED_SPACES %}colspan="2"{% endif %}>Unavailable</td>
+            </tr>
+            {% endfor %}
         </table>
         <p><input type="submit" value="Save and Return"/></p>
     </form>

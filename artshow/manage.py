@@ -229,8 +229,8 @@ def spaces(request, artist_id):
     RequestSpaceForm = requestspaceform_factory(artist)
     RequestSpaceFormSet = formset_factory(RequestSpaceForm, extra=0)
 
-    spaces = Space.objects.order_by('id')
-    for s in spaces:
+    all_spaces = Space.objects.order_by('id')
+    for s in all_spaces:
         try:
             s.artist_allocation = s.allocation_set.get(artist=artist)
             # Re-calculate the number of allocated spaces based on the assigned
@@ -238,10 +238,17 @@ def spaces(request, artist_id):
             s.artist_allocation.allocated = 0.0
         except Allocation.DoesNotExist:
             s.artist_allocation = None
-    spaces = [s for s in spaces if s.reservable is True or s.artist_allocation is not None]
+
+    reservable_spaces = []
+    unreservable_spaces = []
+    for s in all_spaces:
+        if s.reservable is True or s.artist_allocation is not None:
+            reservable_spaces.append(s)
+        else:
+            unreservable_spaces.append(s)
 
     locations = Location.objects.filter(Q(artist_1=artist) | Q(artist_2=artist))
-    space_map = {s.pk: s for s in spaces}
+    space_map = {s.pk: s for s in reservable_spaces}
     for l in locations:
         if l.type.pk in space_map:
             s = space_map[l.type.pk]
@@ -278,10 +285,14 @@ def spaces(request, artist_id):
             return redirect(reverse('artshow-manage-artist', args=(artist_id,)))
     else:
         formset = RequestSpaceFormSet(initial=[{'requested': s.artist_allocation.requested if s.artist_allocation is not None else 0,
-                                                'space': s} for s in spaces])
+                                                'space': s} for s in reservable_spaces])
 
-    return render(request, "artshow/manage_spaces.html", {"artist": artist, "formset": formset,
-                                                          "artshow_settings": artshow_settings})
+    return render(request, "artshow/manage_spaces.html", {
+        "artist": artist,
+        "formset": formset,
+        "unreservable_spaces": unreservable_spaces,
+        "artshow_settings": artshow_settings,
+    })
 
 
 class ArtistModelForm(forms.ModelForm):
