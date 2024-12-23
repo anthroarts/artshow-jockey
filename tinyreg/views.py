@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
 
-from oauthlib.oauth2 import MismatchingStateError
+from oauthlib.oauth2 import AccessDeniedError, MismatchingStateError
 
 from requests_oauthlib import OAuth2Session
 
@@ -31,17 +31,20 @@ def oauth_redirect(request):
 
     request.session['oauth_state'] = state
     request.session['oauth_next'] = request.GET.get('next', '/')
+    print(f'Beginning OAuth2 flow, next={request.session['oauth_next']}')
     return redirect(authorization_url)
 
 
 def oauth_complete(request):
-    state = request.session.get('oauth_state')
+    state = request.session.pop('oauth_state', None)
+    next = request.session.pop('oauth_next', '/')
+
     if state is None:
         if request.user.is_authenticated:
-            return HttpResponseRedirect(request.session.get('oauth_next', '/'))
+            return HttpResponseRedirect(next)
 
         messages.error(request, 'Something went wrong. Please try again.')
-        return redirect(reverse('login'))
+        return HttpResponseRedirect(f'{settings.LOGIN_URL}?next={next}')
 
     oauth = get_oauth_session(request)
 
@@ -51,9 +54,12 @@ def oauth_complete(request):
             client_secret=settings.OAUTH_CLIENT_SECRET,
             authorization_response=get_absolute_url(request.get_full_path()),
             include_client_id=True)
+    except AccessDeniedError:
+        messages.error(request, 'Access denied. Please try again.')
+        return HttpResponseRedirect(f'{settings.LOGIN_URL}?next={next}')
     except MismatchingStateError:
         messages.error(request, 'Something went wrong. Please try again.')
-        return redirect(reverse('login'))
+        return HttpResponseRedirect(f'{settings.LOGIN_URL}?next={next}')
 
     user_info = oauth.get(settings.CONCAT_API + '/users/current').json()
     reg_id = str(user_info['id'])
@@ -88,4 +94,5 @@ def oauth_complete(request):
         person.save()
 
     auth.login(request, user)
-    return HttpResponseRedirect(request.session.get('oauth_next', '/'))
+    print(f'Completed OAuth2 flow, next={next}')
+    return HttpResponseRedirect(next)
