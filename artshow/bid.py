@@ -60,8 +60,10 @@ def login(request):
 
 @login_required(login_url=LOGIN_URL)
 def register(request):
-    person = request.user.person
+    if Bidder.objects.filter(person__user=request.user).exists():
+        return redirect('artshow-bid')
 
+    person = request.user.person
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
