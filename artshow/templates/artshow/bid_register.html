@@ -27,7 +27,7 @@
 
       <form action="" method="post" class="row g-3">
         {% csrf_token %}
-        
+
         {{ form.non_field_errors }}
         <div class="col-sm-12">
           {{ form.name.errors }}
@@ -79,7 +79,7 @@
           <label class="form-label" id="{{ form.postcode.auto_id }}">{{ form.postcode.label }}</label>
           {{ form.postcode }}
         </div>
-        
+
         <div class="col-sm-12">
           {{ form.country.errors }}
           <label class="form-label" id="{{ form.country.auto_id }}">{{ form.country.label }}</label>
