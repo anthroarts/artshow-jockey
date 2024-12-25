@@ -25,9 +25,50 @@
         Your bidder ID is <strong>{{ bidder.bidder_ids|join:', ' }}</strong>.
         For additional stickers, see art show staff.
       </p>
+      {% if show_has_bids %}
+      {% if pieces_in_voice_auction %}
+      <h3>Pieces awaiting voice auction:</h3>
+      <ul>
+        {% for piece in pieces_in_voice_auction %}
+        <li>
+          {{ piece }},
+          Top bid: {{ piece.top_bid }}
+          {% if piece.top_bidder == bidder %}(Yours){% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      <h3>Pieces won:</h3>
+      <ul>
+      {% for piece in pieces_won %}
+        <li>
+          {{ piece }},
+          Winning bid: {{ piece.top_bid }}
+        </li>
+      {% empty %}
+        <li><em>None</em></li>
+      {% endfor %}
+      </ul>
+
+      {% if pieces_not_won %}
+      <h3>Losing bids:</h3>
+      <ul>
+        {% for piece in pieces_not_won %}
+        <li>
+          {{ piece }},
+          Winning bid: {{ piece.top_bid }}
+        </li>
+        {% empty %}
+          <li><em>None</em></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% else %}
       <p>
-        Coming soon: a way to view your bids and the status of your bids.
+        No auction results to display.
       </p>
+      {% endif %}
       {% else %}
       <p>
         See art show staff to receive a bidder ID and your bid stickers.

@@ -31,7 +31,6 @@ def oauth_redirect(request):
 
     request.session['oauth_state'] = state
     request.session['oauth_next'] = request.GET.get('next', '/')
-    print(f'Beginning OAuth2 flow, next={request.session['oauth_next']}')
     return redirect(authorization_url)
 
 
@@ -94,5 +93,4 @@ def oauth_complete(request):
         person.save()
 
     auth.login(request, user)
-    print(f'Completed OAuth2 flow, next={next}')
     return HttpResponseRedirect(next)

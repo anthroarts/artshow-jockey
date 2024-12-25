@@ -1,12 +1,14 @@
 from django.contrib.auth.decorators import login_required
+from django.db.models import OuterRef, Subquery
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django import forms
-from .models import Bidder
+from .models import Bid, Bidder, Piece
 from .utils import artshow_settings
 
 LOGIN_URL = '/bid/login/'
+
 
 class RegisterForm(forms.Form):
     name = forms.CharField(
@@ -17,7 +19,7 @@ class RegisterForm(forms.Form):
         label="E-mail address", label_suffix="", max_length=100, required=True,
         widget=forms.TextInput(attrs={'class': 'form-control'}))
     phone = forms.CharField(
-        label="Phone number",  label_suffix="", max_length=40, required=True,
+        label="Phone number", label_suffix="", max_length=40, required=True,
         widget=forms.TextInput(attrs={'class': 'form-control'}))
     address1 = forms.CharField(
         label="Address", label_suffix="", max_length=100, required=True,
@@ -41,22 +43,51 @@ class RegisterForm(forms.Form):
         label="At-con contact (optional)", label_suffix="", max_length=100,
         required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
+
 @login_required(login_url=LOGIN_URL)
 def index(request):
     try:
         bidder = Bidder.objects.get(person__user=request.user)
+
+        pieces_won = []
+        pieces_not_won = []
+        pieces_in_voice_auction = []
+
+        winning_bid_query = Bid.objects.filter(
+            piece=OuterRef('pk'), invalid=False).order_by('-amount')
+        pieces = Piece.objects.filter(bid__bidder=bidder).annotate(
+            top_bidder=Subquery(winning_bid_query.values('bidder')[:1]),
+            top_bid=Subquery(winning_bid_query.values('amount')[:1])).distinct()
+
+        for piece in pieces:
+            if piece.status == Piece.StatusInShow and piece.voice_auction:
+                pieces_in_voice_auction.append(piece)
+            elif piece.status == Piece.StatusWon:
+                if piece.top_bidder == bidder.pk:
+                    pieces_won.append(piece)
+                else:
+                    pieces_not_won.append(piece)
+
+        show_has_bids = Bid.objects.filter(invalid=False).exists()
+
         return render(request, "artshow/bid_index.html", {
             'bidder': bidder,
+            'show_has_bids': show_has_bids,
+            'pieces_won': pieces_won,
+            'pieces_not_won': pieces_not_won,
+            'pieces_in_voice_auction': pieces_in_voice_auction,
             'artshow_settings': artshow_settings
         })
     except Bidder.DoesNotExist:
         return redirect('artshow-bid-register')
 
+
 def login(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect(request.GET.get('next', '/'))
+        return HttpResponseRedirect(request.GET.get('next', reverse('artshow-bid')))
 
     return render(request, "artshow/bid_login.html", {'artshow_settings': artshow_settings})
+
 
 @login_required(login_url=LOGIN_URL)
 def register(request):
