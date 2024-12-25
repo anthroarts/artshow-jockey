@@ -54,10 +54,11 @@ def index(request):
         pieces_in_voice_auction = []
 
         winning_bid_query = Bid.objects.filter(
-            piece=OuterRef('pk'), invalid=False).order_by('-amount')
+            piece=OuterRef('pk'), invalid=False).order_by('-amount')[:1]
         pieces = Piece.objects.filter(bid__bidder=bidder).annotate(
-            top_bidder=Subquery(winning_bid_query.values('bidder')[:1]),
-            top_bid=Subquery(winning_bid_query.values('amount')[:1])).distinct()
+            top_bidder=Subquery(winning_bid_query.values('bidder')),
+            top_bid=Subquery(winning_bid_query.values('amount'))
+        ).order_by('artist', 'code').distinct()
 
         for piece in pieces:
             if piece.status == Piece.StatusInShow and piece.voice_auction:

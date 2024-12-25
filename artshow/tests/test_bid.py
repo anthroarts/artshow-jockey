@@ -97,8 +97,12 @@ class BidTests(TestCase):
         self.assertEqual(response.context['bidder'], self.bidder)
         self.assertTrue(response.context['show_has_bids'])
         self.assertListEqual(response.context['pieces_won'], [])
-        self.assertListEqual(response.context['pieces_not_won'], [self.piece1])
         self.assertListEqual(response.context['pieces_in_voice_auction'], [])
+
+        pieces_not_won = response.context['pieces_not_won']
+        self.assertListEqual(pieces_not_won, [self.piece1])
+        self.assertEqual(pieces_not_won[0].top_bid, 20)
+        self.assertEqual(pieces_not_won[0].top_bidder, self.bidder2.pk)
 
     def testWinningBid(self):
         self.logIn()
@@ -113,9 +117,13 @@ class BidTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['bidder'], self.bidder)
         self.assertTrue(response.context['show_has_bids'])
-        self.assertListEqual(response.context['pieces_won'], [self.piece1])
         self.assertListEqual(response.context['pieces_not_won'], [])
         self.assertListEqual(response.context['pieces_in_voice_auction'], [])
+
+        pieces_won = response.context['pieces_won']
+        self.assertListEqual(pieces_won, [self.piece1])
+        self.assertEqual(pieces_won[0].top_bid, 20)
+        self.assertEqual(pieces_won[0].top_bidder, self.bidder.pk)
 
     def testWaitingVoiceAuction(self):
         self.logIn()
@@ -136,7 +144,11 @@ class BidTests(TestCase):
         self.assertTrue(response.context['show_has_bids'])
         self.assertListEqual(response.context['pieces_won'], [])
         self.assertListEqual(response.context['pieces_not_won'], [])
-        self.assertListEqual(response.context['pieces_in_voice_auction'], [self.piece1])
+
+        pieces_in_voice_auction = response.context['pieces_in_voice_auction']
+        self.assertListEqual(pieces_in_voice_auction, [self.piece1])
+        self.assertEqual(pieces_in_voice_auction[0].top_bid, 60)
+        self.assertEqual(pieces_in_voice_auction[0].top_bidder, self.bidder.pk)
 
     def testWonInVoiceAuction(self):
         self.logIn()
@@ -160,9 +172,43 @@ class BidTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['bidder'], self.bidder)
         self.assertTrue(response.context['show_has_bids'])
-        self.assertListEqual(response.context['pieces_won'], [self.piece1])
         self.assertListEqual(response.context['pieces_not_won'], [])
         self.assertListEqual(response.context['pieces_in_voice_auction'], [])
+
+        pieces_won = response.context['pieces_won']
+        self.assertListEqual(pieces_won, [self.piece1])
+        self.assertEqual(pieces_won[0].top_bid, 70)
+        self.assertEqual(pieces_won[0].top_bidder, self.bidder.pk)
+
+    def testLostInVoiceAuction(self):
+        self.logIn()
+        self.register()
+        Bid.objects.bulk_create([
+            Bid(bidder=self.bidder, bidderid=self.bidderid, piece=self.piece1, amount=10),
+            Bid(bidder=self.bidder2, bidderid=self.bidderid2, piece=self.piece1, amount=20),
+            Bid(bidder=self.bidder, bidderid=self.bidderid, piece=self.piece1, amount=30),
+            Bid(bidder=self.bidder2, bidderid=self.bidderid2, piece=self.piece1, amount=40),
+            Bid(bidder=self.bidder, bidderid=self.bidderid, piece=self.piece1, amount=50),
+            Bid(bidder=self.bidder2, bidderid=self.bidderid2, piece=self.piece1, amount=60),
+        ])
+        self.piece1.apply_won_status()
+        Bid.objects.bulk_create([
+            Bid(bidder=self.bidder2, bidderid=self.bidderid, piece=self.piece1, amount=100),
+        ])
+        self.piece1.status = Piece.StatusWon
+        self.piece1.save()
+
+        response = self.client.get(reverse('artshow-bid'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['bidder'], self.bidder)
+        self.assertTrue(response.context['show_has_bids'])
+        self.assertListEqual(response.context['pieces_won'], [])
+        self.assertListEqual(response.context['pieces_in_voice_auction'], [])
+
+        pieces_not_won = response.context['pieces_not_won']
+        self.assertListEqual(pieces_not_won, [self.piece1])
+        self.assertEqual(pieces_not_won[0].top_bid, 100)
+        self.assertEqual(pieces_not_won[0].top_bidder, self.bidder2.pk)
 
     def testBidLoggedInAlready(self):
         self.logIn()
