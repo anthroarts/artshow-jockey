@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
 
-from oauthlib.oauth2 import AccessDeniedError, MismatchingStateError
+from oauthlib.oauth2 import AccessDeniedError, MismatchingStateError, MissingTokenError
 
 from requests_oauthlib import OAuth2Session
 
@@ -25,12 +25,17 @@ def get_oauth_session(request):
 
 
 def oauth_redirect(request):
+    next = request.GET.get('next', '/')
+
+    if request.user.is_authenticated:
+        return HttpResponseRedirect(next)
+
     oauth = get_oauth_session(request)
     authorization_url, state = \
         oauth.authorization_url(settings.OAUTH_AUTHORIZE_URL)
 
     request.session['oauth_state'] = state
-    request.session['oauth_next'] = request.GET.get('next', '/')
+    request.session['oauth_next'] = next
     return redirect(authorization_url)
 
 
@@ -38,10 +43,10 @@ def oauth_complete(request):
     state = request.session.pop('oauth_state', None)
     next = request.session.pop('oauth_next', '/')
 
-    if state is None:
-        if request.user.is_authenticated:
-            return HttpResponseRedirect(next)
+    if request.user.is_authenticated:
+        return HttpResponseRedirect(next)
 
+    if state is None:
         messages.error(request, 'Something went wrong. Please try again.')
         return HttpResponseRedirect(f'{settings.LOGIN_URL}?next={next}')
 
@@ -56,7 +61,7 @@ def oauth_complete(request):
     except AccessDeniedError:
         messages.error(request, 'Access denied. Please try again.')
         return HttpResponseRedirect(f'{settings.LOGIN_URL}?next={next}')
-    except MismatchingStateError:
+    except MismatchingStateError | MissingTokenError:
         messages.error(request, 'Something went wrong. Please try again.')
         return HttpResponseRedirect(f'{settings.LOGIN_URL}?next={next}')
 
