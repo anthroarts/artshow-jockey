@@ -1,0 +1,21 @@
+{% extends "artshow/base_generic.html" %}
+{% block breadcrumbs %}
+<ul class="breadcrumbs">
+    <li><a href="{% url 'artshow-home' %}">Home</a></li>
+    <li><a href="{% url 'artshow-workflows' %}">Workflows</a></li>
+    <li class="current">Configure Telegram Webhook</li>
+</ul>
+{% endblock %}
+{% block content %}
+<h1>Current webhook info:</h1>
+<pre>{{ webhook_info }}</pre>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Set Webhook</button>
+</form>
+<form action="{% url 'telegram-delete-webhook' %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Delete Webhook</button>
+</form>
+{% endblock %}
+

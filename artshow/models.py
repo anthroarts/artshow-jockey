@@ -790,3 +790,8 @@ class SquareTerminal(models.Model):
 class SquareWebhook(models.Model):
     timestamp = models.DateTimeField()
     body = models.JSONField()
+
+
+class TelegramWebhook(models.Model):
+    timestamp = models.DateTimeField()
+    body = models.JSONField()

@@ -27,7 +27,8 @@ from .models import (
     Agent, Allocation, Artist, BatchScan, Bid, Bidder, BidderId, Checkoff,
     ChequePayment, EmailSignature, EmailTemplate, Invoice, InvoiceItem,
     InvoicePayment, Payment, PaymentType, Piece, Location, Space,
-    SquareInvoicePayment, SquarePayment, SquareTerminal, SquareWebhook
+    SquareInvoicePayment, SquarePayment, SquareTerminal, SquareWebhook,
+    TelegramWebhook
 )
 
 User = get_user_model()
@@ -646,6 +647,39 @@ class SquareWebhookAdmin(admin.ModelAdmin):
     def webhook_data_id(self, webhook):
         if 'data' in webhook.body and 'id' in webhook.body['data']:
             return webhook.body['data']['id']
+        return '(unknown)'
+
+    @admin.display(description='Body')
+    def pretty_json(self, webhook):
+        return format_html(
+            '<pre>{}</pre>',
+            json.dumps(webhook.body, sort_keys=True, indent=2),
+        )
+
+
+@admin.register(TelegramWebhook)
+class TelegramWebhookAdmin(admin.ModelAdmin):
+    list_display = ('timestamp', 'webhook_message_sender',
+                    'webhook_message_text')
+    fields = ('timestamp', 'pretty_json')
+    readonly_fields = ('timestamp', 'pretty_json')
+
+    @admin.display(description='Message Sender')
+    def webhook_message_sender(self, webhook):
+        if 'message' in webhook.body:
+            message = webhook.body['message']
+            if 'from' in message:
+                user = message['from']
+                if 'username' in user:
+                    return user['username']
+        return '(unknown)'
+
+    @admin.display(description='Message Text')
+    def webhook_message_text(self, webhook):
+        if 'message' in webhook.body:
+            message = webhook.body['message']
+            if 'text' in message:
+                return message['text']
         return '(unknown)'
 
     @admin.display(description='Body')

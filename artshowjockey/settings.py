@@ -265,6 +265,11 @@ with env.prefixed('ARTSHOW_SQUARE_'):
     ARTSHOW_SQUARE_SIGNATURE_KEY = env.str('SIGNATURE_KEY', default='')
     ARTSHOW_SQUARE_ENVIRONMENT = env.str('ENVIRONMENT', default='sandbox')
 
+with env.prefixed('ARTSHOW_TELEGRAM_'):
+    ARTSHOW_TELEGRAM_ADMINS = env.list('ADMINS', default=[])
+    ARTSHOW_TELEGRAM_BOT_TOKEN = env.str('BOT_TOKEN', default='')
+    ARTSHOW_TELEGRAM_WEBHOOK_SECRET = env.str('WEBHOOK_SECRET', default=None)
+
 SITE_ID = 1
 SITE_NAME = ARTSHOW_SHOW_NAME
 SITE_ROOT_URL = env.str('SITE_ROOT_URL', default='http://localhost:8000')
