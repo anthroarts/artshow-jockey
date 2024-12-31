@@ -74,6 +74,42 @@
         See art show staff to receive a bidder ID and your bid stickers.
       </p>
       {% endif %}
+
+      {% if email_confirmation_form %}
+      <p>
+        A confirmation code has been sent to <strong>{{ bidder.person.email }}</strong>. Enter it here:
+      </p>
+      <p>
+        <form action="{% url 'artshow-bid-confirm-email' %}" method="post" class="row row-cols-lg-auto g-3 align-items-center">
+          {% csrf_token %}
+
+          <div class="col-6">
+            {{ email_confirmation_form.code }}
+          </div>
+
+          <div class="col-3">
+            <button type="submit" class="btn btn-primary">Confirm</button>
+          </div>
+
+          <div class="col-3">
+            <button type="submit" formaction="{% url 'artshow-bid-send-email-code' %}" class="btn btn-secondary">Resend</button>
+          </div>
+        </form>
+      </p>
+      {% endif %}
+
+      {% if bidder.person.telegram_username %}
+      <p>
+        Telegram notifications will be sent to <strong>@{{ bidder.person.telegram_username }}</strong>.
+      </p>
+      {% endif %}
+
+      {% if bidder.person.email_confirmed %}
+      <p>
+        E-mail notifications will be sent to <strong>{{ bidder.person.email }}</strong>.
+      </p>
+      {% endif %}
+
       {% if artshow_settings.ARTSHOW_TELEGRAM_BOT_USERNAME %}
       {% if not bidder.person.telegram_username %}
       <p>
@@ -85,11 +121,19 @@
               data-auth-url="{{ artshow_settings.SITE_ROOT_URL }}{% url 'artshow-bid-telegram' %}"
               data-request-access="write">
       </script>
-      {% else %}
-      <p>
-        Telegram notifications will be sent to {{ bidder.person.telegram_username }}.
-      </p>
       {% endif %}
+      {% endif %}
+
+      {% if not email_confirmation_form and not bidder.person.email_confirmed %}
+      <p>
+        To receive e-mail notifications, click this button:
+      </p>
+      <p>
+        <form action="{% url 'artshow-bid-send-email-code' %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary">Verify e-mail address</button>
+        </form>
+      </p>
       {% endif %}
     </div>
   </body>

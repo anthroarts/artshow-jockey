@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en" data-bs-theme="auto">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ SITE_NAME }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  </head>
+  <body>
+    <nav class="navbar bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand">{{ SITE_NAME }}</a>
+        {% if user.is_active %}
+        <form class="d-flex" method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button class="btn btn-outline-danger" type="submit">Log out</button>
+        </form>
+        {% endif %}
+      </div>
+    </nav>
+
+    <div class="container">
+      {% if error %}
+      <div class="alert alert-danger" role="alert">
+        {{ error }}
+      </div>
+
+      <p>
+        <form action="" method="post" class="row row-cols-lg-auto g-3 align-items-center">
+          {% csrf_token %}
+
+          {{ form.non_field_errors }}
+          <div class="col-6">
+            {{ form.code }}
+          </div>
+
+          <div class="col-3">
+            <button type="submit" class="btn btn-primary">Confirm</button>
+          </div>
+
+          <div class="col-3">
+            <button type="submit" formaction="{% url 'artshow-bid-send-email-code' %}" class="btn btn-secondary">Resend</button>
+          </div>
+        </form>
+      </p>
+      {% else %}
+      <p>
+        You have been successfully registered to receive email notifications
+        at <strong>{{ person.email }}</strong>.
+      </p>
+      {% endif %}
+      <p>
+        <a href="{% url 'artshow-bid' %}" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5"/>
+          </svg>
+          Back
+        </a>
+      </p>
+    </div>
+  </body>
+</html>

@@ -1,9 +1,12 @@
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 from django.db.models import OuterRef, Subquery
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.timezone import now
+from django.views.decorators.http import require_POST
 from django import forms
 
 from .models import Bid, Bidder, Piece
@@ -12,6 +15,7 @@ from .utils import artshow_settings
 from datetime import datetime, timedelta
 import hashlib
 import hmac
+from random import randint
 
 LOGIN_URL = '/bid/login/'
 
@@ -50,42 +54,56 @@ class RegisterForm(forms.Form):
         required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
 
+class ConfirmationForm(forms.Form):
+    code = forms.CharField(
+        max_length=40, required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Code',
+        }))
+
+
 @login_required(login_url=LOGIN_URL)
 def index(request):
     try:
         bidder = Bidder.objects.get(person__user=request.user)
-
-        pieces_won = []
-        pieces_not_won = []
-        pieces_in_voice_auction = []
-
-        winning_bid_query = Bid.objects.filter(
-            piece=OuterRef('pk'), invalid=False).order_by('-amount')[:1]
-        pieces = Piece.objects.filter(bid__bidder=bidder).annotate(
-            top_bidder=Subquery(winning_bid_query.values('bidder')),
-            top_bid=Subquery(winning_bid_query.values('amount'))
-        ).order_by('artist', 'code').distinct()
-
-        for piece in pieces:
-            if piece.status == Piece.StatusInShow and piece.voice_auction:
-                pieces_in_voice_auction.append(piece)
-            elif piece.status == Piece.StatusWon:
-                if piece.top_bidder == bidder.pk:
-                    pieces_won.append(piece)
-                else:
-                    pieces_not_won.append(piece)
-
-        show_has_bids = Bid.objects.filter(invalid=False).exists()
-
-        return render(request, "artshow/bid_index.html", {
-            'bidder': bidder,
-            'show_has_bids': show_has_bids,
-            'pieces_won': pieces_won,
-            'pieces_not_won': pieces_not_won,
-            'pieces_in_voice_auction': pieces_in_voice_auction,
-        })
     except Bidder.DoesNotExist:
         return redirect('artshow-bid-register')
+
+    pieces_won = []
+    pieces_not_won = []
+    pieces_in_voice_auction = []
+
+    winning_bid_query = Bid.objects.filter(
+        piece=OuterRef('pk'), invalid=False).order_by('-amount')[:1]
+    pieces = Piece.objects.filter(bid__bidder=bidder).annotate(
+        top_bidder=Subquery(winning_bid_query.values('bidder')),
+        top_bid=Subquery(winning_bid_query.values('amount'))
+    ).order_by('artist', 'code').distinct()
+
+    for piece in pieces:
+        if piece.status == Piece.StatusInShow and piece.voice_auction:
+            pieces_in_voice_auction.append(piece)
+        elif piece.status == Piece.StatusWon:
+            if piece.top_bidder == bidder.pk:
+                pieces_won.append(piece)
+            else:
+                pieces_not_won.append(piece)
+
+    show_has_bids = Bid.objects.filter(invalid=False).exists()
+
+    email_confirmation_form = None
+    if bidder.person.email_confirmation_code:
+        email_confirmation_form = ConfirmationForm()
+
+    return render(request, "artshow/bid_index.html", {
+        'bidder': bidder,
+        'show_has_bids': show_has_bids,
+        'pieces_won': pieces_won,
+        'pieces_not_won': pieces_not_won,
+        'pieces_in_voice_auction': pieces_in_voice_auction,
+        'email_confirmation_form': email_confirmation_form,
+    })
 
 
 def login(request):
@@ -136,6 +154,54 @@ def register(request):
         })
 
     return render(request, "artshow/bid_register.html", {'form': form})
+
+
+@login_required(login_url=LOGIN_URL)
+@require_POST
+def send_email_code(request):
+    person = request.user.person
+    if person.email_confirmed:
+        return redirect('artshow-bid')
+
+    person.email_confirmation_code = str(randint(0, 999999)).zfill(6)
+    person.save()
+
+    text_content = render_to_string('artshow/bid_email_confirmation.txt', {
+        'code': person.email_confirmation_code,
+    })
+    send_mail(
+        subject='Confirm your e-mail address',
+        message=text_content,
+        from_email=artshow_settings.ARTSHOW_EMAIL_SENDER,
+        recipient_list=[person.email],
+    )
+
+    return redirect('artshow-bid')
+
+
+@login_required(login_url=LOGIN_URL)
+@require_POST
+def confirm_email(request):
+    person = request.user.person
+    if person.email_confirmed:
+        return redirect('artshow-bid')
+
+    error = 'Invalid form data.'
+    form = ConfirmationForm(request.POST)
+    if form.is_valid():
+        error = 'Invalid confirmation code.'
+        if form.cleaned_data['code'] == person.email_confirmation_code:
+            person.email_confirmed = True
+            person.email_confirmation_code = ''
+            person.save()
+
+            return redirect('artshow-bid')
+
+    form = ConfirmationForm()
+    return render(request, "artshow/bid_confirm_email.html", {
+        'error': error,
+        'form': form
+    })
 
 
 def sha256(data):
