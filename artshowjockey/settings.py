@@ -266,8 +266,8 @@ with env.prefixed('ARTSHOW_SQUARE_'):
     ARTSHOW_SQUARE_ENVIRONMENT = env.str('ENVIRONMENT', default='sandbox')
 
 with env.prefixed('ARTSHOW_TELEGRAM_'):
-    ARTSHOW_TELEGRAM_ADMINS = env.list('ADMINS', default=[])
-    ARTSHOW_TELEGRAM_BOT_TOKEN = env.str('BOT_TOKEN', default='')
+    ARTSHOW_TELEGRAM_BOT_USERNAME = env.str('BOT_USERNAME', default=None)
+    ARTSHOW_TELEGRAM_BOT_TOKEN = env.str('BOT_TOKEN', default=None)
     ARTSHOW_TELEGRAM_WEBHOOK_SECRET = env.str('WEBHOOK_SECRET', default=None)
 
 SITE_ID = 1

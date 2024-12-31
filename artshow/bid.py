@@ -3,9 +3,15 @@ from django.db.models import OuterRef, Subquery
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.utils.timezone import now
 from django import forms
+
 from .models import Bid, Bidder, Piece
 from .utils import artshow_settings
+
+from datetime import datetime, timedelta
+import hashlib
+import hmac
 
 LOGIN_URL = '/bid/login/'
 
@@ -77,7 +83,6 @@ def index(request):
             'pieces_won': pieces_won,
             'pieces_not_won': pieces_not_won,
             'pieces_in_voice_auction': pieces_in_voice_auction,
-            'artshow_settings': artshow_settings
         })
     except Bidder.DoesNotExist:
         return redirect('artshow-bid-register')
@@ -87,7 +92,7 @@ def login(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect(request.GET.get('next', reverse('artshow-bid')))
 
-    return render(request, "artshow/bid_login.html", {'artshow_settings': artshow_settings})
+    return render(request, "artshow/bid_login.html")
 
 
 @login_required(login_url=LOGIN_URL)
@@ -130,7 +135,42 @@ def register(request):
             'country': person.country,
         })
 
-    return render(request, "artshow/bid_register.html", {
-        'artshow_settings': artshow_settings,
-        'form': form,
+    return render(request, "artshow/bid_register.html", {'form': form})
+
+
+def sha256(data):
+    return hashlib.sha256(data.encode('utf-8')).hexdigest()
+
+
+def hmac_sha256(key, message):
+    return hmac.new(key.encode("utf-8"), message.encode("utf-8"), hashlib.sha256).hexdigest()
+
+
+@login_required(login_url=LOGIN_URL)
+def telegram(request):
+    hash = request.GET.get('hash')
+    if not hash:
+        return render(request, 'artshow/bid_telegram.html', {
+            'error': 'Invalid response from Telegram.'
+        })
+
+    secret_key = sha256(artshow_settings.ARTSHOW_TELEGRAM_BOT_TOKEN)
+    data_check_string = '\n'.join(f'{k}={v}' for k, v in sorted(request.GET.items()) if k != 'hash')
+    if hash != hmac_sha256(secret_key, data_check_string):
+        return render(request, 'artshow/bid_telegram.html', {
+            'error': 'Invalid response from Telegram.'
+        })
+
+    auth_date = datetime.fromtimestamp(int(request.GET.get('auth_date', 0)))
+    if auth_date < now() - timedelta(minutes=5):
+        return render(request, 'artshow/bid_telegram.html', {
+            'error': 'Authentication expired.'
+        })
+
+    person = request.user.person
+    person.telegram_username = request.GET.get('username')
+    person.save()
+
+    return render(request, 'artshow/bid_telegram.html', {
+        'person': person,
     })
