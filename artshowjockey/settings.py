@@ -239,6 +239,8 @@ with env.prefixed('ARTSHOW_'):
     ARTSHOW_EMAIL_FOOTER = env.str('EMAIL_FOOTER', default="")
     ARTSHOW_ARTIST_AGREEMENT_URL = \
         env.str('ARTIST_AGREEMENT_URL', default='https://example.com')
+    ARTSHOW_SCHEDULE_URL = \
+        env.str('SCHEDULE_URL', default='https://example.com/schedule/')
 
 ARTSHOW_CHEQUE_THANK_YOU = \
     "Thank you for exhibiting at the " + ARTSHOW_SHOW_NAME

@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
-from django.db.models import OuterRef, Subquery
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
@@ -9,10 +8,10 @@ from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 from django import forms
 
-from .models import Bid, Bidder, Piece
+from .models import Bid, Bidder
 from .utils import artshow_settings
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import hashlib
 import hmac
 from random import randint
@@ -70,33 +69,14 @@ def index(request):
     except Bidder.DoesNotExist:
         return redirect('artshow-bid-register')
 
-    pieces_won = []
-    pieces_not_won = []
-    pieces_in_voice_auction = []
-
-    winning_bid_query = Bid.objects.filter(
-        piece=OuterRef('pk'), invalid=False).order_by('-amount')[:1]
-    pieces = Piece.objects.filter(bid__bidder=bidder).annotate(
-        top_bidder=Subquery(winning_bid_query.values('bidder')),
-        top_bid=Subquery(winning_bid_query.values('amount'))
-    ).order_by('artist', 'code').distinct()
-
-    for piece in pieces:
-        if piece.status == Piece.StatusInShow and piece.voice_auction:
-            pieces_in_voice_auction.append(piece)
-        elif piece.status == Piece.StatusWon:
-            if piece.top_bidder == bidder.pk:
-                pieces_won.append(piece)
-            else:
-                pieces_not_won.append(piece)
-
+    pieces_won, pieces_not_won, pieces_in_voice_auction = bidder.get_results()
     show_has_bids = Bid.objects.filter(invalid=False).exists()
 
     email_confirmation_form = None
     if bidder.person.email_confirmation_code:
         email_confirmation_form = ConfirmationForm()
 
-    return render(request, "artshow/bid_index.html", {
+    response = render(request, "artshow/bid_index.html", {
         'bidder': bidder,
         'show_has_bids': show_has_bids,
         'pieces_won': pieces_won,
@@ -104,6 +84,10 @@ def index(request):
         'pieces_in_voice_auction': pieces_in_voice_auction,
         'email_confirmation_form': email_confirmation_form,
     })
+    # The Telegram login widget opens a popup window and needs access to the
+    # opener property.
+    response['Cross-Origin-Opener-Policy'] = 'unsafe-none'
+    return response
 
 
 def login(request):
@@ -204,36 +188,34 @@ def confirm_email(request):
     })
 
 
-def sha256(data):
-    return hashlib.sha256(data.encode('utf-8')).hexdigest()
-
-
-def hmac_sha256(key, message):
-    return hmac.new(key.encode("utf-8"), message.encode("utf-8"), hashlib.sha256).hexdigest()
-
-
 @login_required(login_url=LOGIN_URL)
 def telegram(request):
     hash = request.GET.get('hash')
     if not hash:
         return render(request, 'artshow/bid_telegram.html', {
-            'error': 'Invalid response from Telegram.'
+            'error': 'Telegram response has missing hash.'
         })
 
-    secret_key = sha256(artshow_settings.ARTSHOW_TELEGRAM_BOT_TOKEN)
+    secret_key = hashlib.sha256(artshow_settings.ARTSHOW_TELEGRAM_BOT_TOKEN.encode('utf-8'))
     data_check_string = '\n'.join(f'{k}={v}' for k, v in sorted(request.GET.items()) if k != 'hash')
-    if hash != hmac_sha256(secret_key, data_check_string):
+    digest = hmac.new(secret_key.digest(), data_check_string.encode("utf-8"), hashlib.sha256)
+    print(data_check_string)
+    print(digest.hexdigest())
+    print(hash)
+    if digest.hexdigest() != hash:
         return render(request, 'artshow/bid_telegram.html', {
             'error': 'Invalid response from Telegram.'
         })
 
-    auth_date = datetime.fromtimestamp(int(request.GET.get('auth_date', 0)))
+    auth_date = datetime.fromtimestamp(int(request.GET.get('auth_date', 0)),
+                                       timezone.utc)
     if auth_date < now() - timedelta(minutes=5):
         return render(request, 'artshow/bid_telegram.html', {
             'error': 'Authentication expired.'
         })
 
     person = request.user.person
+    person.telegram_chat_id = request.GET.get('id')
     person.telegram_username = request.GET.get('username')
     person.save()
 

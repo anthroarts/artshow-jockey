@@ -1,0 +1,34 @@
+{% extends "artshow/base_generic.html" %}
+{% block title %}Bulk Messaging{% endblock %}
+{% block breadcrumbs %}
+    <ul class="breadcrumbs">
+      <li><a href="{% url 'artshow-home' %}">Home</a></li>
+      <li><a href="{% url 'artshow-workflows' %}">Workflows</a></li>
+      <li class="current">Bulk Messaging</li>
+    </ul>
+{% endblock %}
+{% block content %}
+    <p>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Send</button>
+        </form>
+    </p>
+    <p>Active tasks:</p>
+    <ul>
+        {% for task in active_tasks %}
+        <li>{{ task.name }}: {{ task.percentage }}% ({{ task.remaining }} remaining)</li>
+        {% empty %}
+        <li><em>None</em></li>
+        {% endfor %}
+    </ul>
+    <p>Completed tasks:</p>
+    <ul>
+        {% for task in completed_tasks %}
+        <li>{{ task.name }} ({{ task.message_count }} message{{ task.message_count|pluralize }})</li>
+        {% empty %}
+        <li><em>None</em></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -11,9 +11,10 @@ from django.views.decorators.http import require_POST
 from .conf import settings
 from .mod11codes import make_check
 from .models import (
-    Artist, BidderId, ChequePayment, Location, Piece, Space, SquareTerminal
+    Artist, BidderId, BulkMessagingTask, ChequePayment, Location, Piece, Space,
+    SquareTerminal
 )
-from . import square
+from . import square, tasks
 
 
 @permission_required('artshow.is_artshow_staff')
@@ -565,3 +566,39 @@ def select_terminal(request, pk):
     request.session['terminal'] = device.pk
 
     return redirect(pair_terminal)
+
+
+BULK_MESSAGE_TYPES = {
+    'email_results': 'Send results via email',
+    'telegram_results': 'Send results via Telegram',
+}
+
+
+class BulkMessagingForm(forms.Form):
+    message_type = forms.ChoiceField(choices=BULK_MESSAGE_TYPES.items())
+
+
+@permission_required('artshow.is_artshow_staff')
+def bulk_messaging(request):
+    if request.method == 'POST':
+        form = BulkMessagingForm(request.POST)
+        if form.is_valid():
+            if form.cleaned_data['message_type'] == 'email_results':
+                tasks.email_results.delay()
+            elif form.cleaned_data['message_type'] == 'telegram_results':
+                tasks.telegram_results.delay()
+            return redirect('artshow-workflow-bulk-messaging')
+
+    active_tasks = []
+    completed_tasks = []
+    for task in BulkMessagingTask.objects.all():
+        if task.sent_count < task.message_count:
+            active_tasks.append(task)
+        else:
+            completed_tasks.append(task)
+
+    return render(request, 'artshow/workflows_bulk_messaging.html', {
+        'form': BulkMessagingForm(),
+        'active_tasks': active_tasks,
+        'completed_tasks': completed_tasks,
+    })

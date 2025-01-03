@@ -20,6 +20,7 @@ class Person (models.Model):
     email_confirmation_code = models.CharField(max_length=40, blank=True)
     reg_id = models.CharField(max_length=40, blank=True, verbose_name="Reg ID")
     telegram_username = models.CharField(max_length=100, blank=True)
+    telegram_chat_id = models.BigIntegerField(null=True, blank=True, default=None)
     preferred_name = models.CharField(max_length=100, blank=True)
     comment = models.CharField(max_length=100, blank=True)
 

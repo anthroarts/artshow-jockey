@@ -58,16 +58,20 @@ def delete_webhook(request):
     return redirect('telegram-configure-webhook')
 
 
+def send_message(chat_id, text):
+    response = requests.post(f'{api_url()}/sendMessage', {
+        'chat_id': chat_id,
+        'parse_mode': 'HTML',
+        'text': text
+    })
+    if response.status_code != 200:
+        logger.error(f'Failed to send message: {response.text}')
+
+
 def process_message(message):
     if 'text' in message:
         chat_id = message['chat']['id']
-        response = requests.post(f'{api_url()}/sendMessage', {
-            'chat_id': chat_id,
-            'parse_mode': 'HTML',
-            'text': f'Messages to this bot are not monitored. Please e-mail <a href="mailto:{settings.ARTSHOW_ADMIN_EMAIL}">{settings.ARTSHOW_ADMIN_EMAIL}</a>.'
-        })
-        if response.status_code != 200:
-            logger.error(f'Failed to send message: {response.text}')
+        send_message(chat_id, f'Messages to this bot are not monitored. Please e-mail <a href="mailto:{settings.ARTSHOW_ADMIN_EMAIL}">{settings.ARTSHOW_ADMIN_EMAIL}</a>.')
 
 
 def process_update(body):

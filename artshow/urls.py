@@ -152,6 +152,8 @@ urlpatterns = [
             name='telegram-configure-webhook'),
     re_path(r'^workflows/telegram_webhook/delete/$', telegram.delete_webhook,
             name='telegram-delete-webhook'),
+    re_path(r'^workflows/bulk_messaging/$', workflows.bulk_messaging,
+            name='artshow-workflow-bulk-messaging'),
     re_path(r'^webhook/square/$', square.webhook, name='square-webhook'),
     re_path(r'^webhook/telegram/$', telegram.webhook, name='telegram-webhook'),
 ]
