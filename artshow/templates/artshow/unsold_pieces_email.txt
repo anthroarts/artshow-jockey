@@ -1,0 +1,7 @@
+{% autoescape off %}This is a reminder that you still have {{ unsold_pieces|length }} piece{{ unsold_pieces|pluralize }} waiting to pick up at the {{ artshow_settings.SITE_NAME }}:
+{% for piece in unsold_pieces %}
+ * {{ piece }}, Winning bid: ${{ piece.top_bid }}{% endfor %}
+
+For details, visit {{ artshow_settings.SITE_ROOT_URL }}{% url 'artshow-bid' %}.
+
+For pick-up times, check the convention schedule: {{ artshow_settings.ARTSHOW_SCHEDULE_URL }}{% endautoescape %}

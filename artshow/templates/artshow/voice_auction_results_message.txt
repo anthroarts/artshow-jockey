@@ -1,0 +1,5 @@
+The results of the {{ type }} voice auction have been recorded and you have {{ piece_won_count }} piece{{ piece_won_count|pluralize }} ready to pick up.
+
+For details, visit {{ artshow_settings.SITE_ROOT_URL }}{% url 'artshow-bid' %}.
+
+For pick-up times, check the convention schedule: {{ artshow_settings.ARTSHOW_SCHEDULE_URL }}

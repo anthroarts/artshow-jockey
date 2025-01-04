@@ -7,15 +7,21 @@
     </ul>
 {% endblock %}
 {% block content %}
+    <h1>At-con</h1>
+    <ul>
+      <li><a href="{% url 'artshow-workflow-artist-checkin-lookup' %}">Artist Check-in</a></li>
+      <li><a href="{% url 'artshow-workflow-bidder-lookup' %}">Bidder Check-in</a></li>
+      <li><a href="{% url 'artshow-workflow-close-show' %}">Close Show</a></li>
+      <li><a href="{% url 'artshow-workflow-bulk-messaging' %}">Bulk Messaging</a></li>
+      <li><a href="{% url 'artshow-workflow-print-cheques' %}">Print Cheques</a></li>
+      <li><a href="{% url 'artshow-workflow-artist-checkout-lookup' %}">Artist Check-out</a></li>
+    </ul>
+    <h1>Pre-con</h1>
     <ul>
       <li><a href="{% url 'artshow-workflow-create-locations' %}">Create Locations</a></li>
       <li><a href="{% url 'artshow-workflow-printing' %}">Bid Sheet and Control Form Printing</a></li>
-      <li><a href="{% url 'artshow-workflow-artist-checkin-lookup' %}">Artist Check-in</a></li>
       <li><a href="{% url 'artshow-workflow-create-bidder-ids' %}">Create Bidder IDs</a></li>
-      <li><a href="{% url 'artshow-workflow-bidder-lookup' %}">Bidder Check-in</a></li>
-      <li><a href="{% url 'artshow-workflow-close-show' %}">Close Show</a></li>
-      <li><a href="{% url 'artshow-workflow-print-cheques' %}">Print Cheques</a></li>
+      <li><a href="{% url 'telegram-configure-webhook' %}">Configure Telegram Webhooks</a></li>
       <li><a href="{% url 'artshow-workflow-pair-terminal' %}">Pair Square Terminal</a></li>
-      <li><a href="{% url 'artshow-workflow-artist-checkout-lookup' %}">Artist Check-out</a></li>
     </ul>
 {% endblock %}

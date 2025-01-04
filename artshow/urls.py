@@ -12,6 +12,7 @@ from . import csvreports
 from . import pdfreports
 from . import reports
 from . import square
+from . import telegram
 from . import views
 from . import voice_auction
 from . import workflows
@@ -147,5 +148,12 @@ urlpatterns = [
     re_path(r'^workflows/artist_checkout/(?P<artistid>\d+)/control_form$',
             workflows.artist_print_checkout_control_form,
             name='artshow-workflow-artist-checkout-control-form'),
+    re_path(r'^workflows/telegram_webhook/$', telegram.set_webhook,
+            name='telegram-configure-webhook'),
+    re_path(r'^workflows/telegram_webhook/delete/$', telegram.delete_webhook,
+            name='telegram-delete-webhook'),
+    re_path(r'^workflows/bulk_messaging/$', workflows.bulk_messaging,
+            name='artshow-workflow-bulk-messaging'),
     re_path(r'^webhook/square/$', square.webhook, name='square-webhook'),
+    re_path(r'^webhook/telegram/$', telegram.webhook, name='telegram-webhook'),
 ]

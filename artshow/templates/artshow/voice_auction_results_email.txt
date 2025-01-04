@@ -1,0 +1,7 @@
+{% autoescape off %}The results of the {{ type }} voice auction have been recorded and you have {{ pieces_won|length }} piece{{ pieces_won|pluralize }} ready to pick up at the {{ artshow_settings.SITE_NAME }}:
+{% for piece in pieces_won %}
+ * {{ piece }}, Winning bid: ${{ piece.top_bid }}{% endfor %}
+
+For details, visit {{ artshow_settings.SITE_ROOT_URL }}{% url 'artshow-bid' %}.
+
+For pick-up times, check the convention schedule: {{ artshow_settings.ARTSHOW_SCHEDULE_URL }}{% endautoescape %}

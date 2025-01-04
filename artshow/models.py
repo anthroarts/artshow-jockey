@@ -10,7 +10,9 @@ __all__ = ["Allocation", "Artist", "ArtistManager", "BatchScan", "Bid", "Bidder"
 from decimal import Decimal
 
 from django.db import models
-from django.db.models import Count, IntegerField, Max, Sum, Q, Value as V
+from django.db.models import (
+    Count, IntegerField, Max, OuterRef, Subquery, Sum, Q, Value as V
+)
 from django.db.models.functions import Cast, Coalesce, Substr
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -394,6 +396,53 @@ class Bidder (models.Model):
             if b.is_top_bid and (not unsold_only or b.piece.status != Piece.StatusSold):
                 results.append(b)
         return results
+
+    def get_results(self):
+        pieces_won = []
+        pieces_not_won = []
+        pieces_in_voice_auction = []
+
+        winning_bid_query = Bid.objects.filter(
+            piece=OuterRef('pk'), invalid=False).order_by('-amount')[:1]
+        pieces = Piece.objects.filter(bid__bidder=self).annotate(
+            top_bidder=Subquery(winning_bid_query.values('bidder')),
+            top_bid=Subquery(winning_bid_query.values('amount'))
+        ).order_by('artist', 'code').distinct()
+
+        for piece in pieces:
+            if piece.status == Piece.StatusInShow and piece.voice_auction:
+                pieces_in_voice_auction.append(piece)
+            elif piece.status == Piece.StatusWon or piece.status == Piece.StatusSold:
+                if piece.top_bidder == self.pk:
+                    pieces_won.append(piece)
+                else:
+                    pieces_not_won.append(piece)
+
+        return pieces_won, pieces_not_won, pieces_in_voice_auction
+
+    def unsold_pieces(self):
+        winning_bid_query = Bid.objects.filter(
+            piece=OuterRef('pk'), invalid=False).order_by('-amount')[:1]
+        return Piece.objects.filter(
+            status=Piece.StatusWon,
+            bid__bidder=self
+        ).annotate(
+            top_bidder=Subquery(winning_bid_query.values('bidder')),
+            top_bid=Subquery(winning_bid_query.values('amount'))
+        ).filter(top_bidder=self.pk).order_by('artist', 'code').distinct()
+
+    def voice_auction_wins(self, adult):
+        winning_bid_query = Bid.objects.filter(
+            piece=OuterRef('pk'), invalid=False).order_by('-amount')[:1]
+        return Piece.objects.filter(
+            status=Piece.StatusWon,
+            voice_auction=True,
+            adult=adult,
+            bid__bidder=self
+        ).annotate(
+            top_bidder=Subquery(winning_bid_query.values('bidder')),
+            top_bid=Subquery(winning_bid_query.values('amount'))
+        ).filter(top_bidder=self.pk).order_by('artist', 'code').distinct()
 
     def __str__(self):
         return "%s (%s)" % (self.person.name, ", ".join(self.bidder_ids()))
@@ -790,3 +839,22 @@ class SquareTerminal(models.Model):
 class SquareWebhook(models.Model):
     timestamp = models.DateTimeField()
     body = models.JSONField()
+
+
+class TelegramWebhook(models.Model):
+    timestamp = models.DateTimeField()
+    body = models.JSONField()
+
+
+class BulkMessagingTask(models.Model):
+    name = models.CharField(max_length=100)
+    message_count = models.IntegerField(default=0)
+    sent_count = models.IntegerField(default=0)
+
+    @property
+    def percentage(self):
+        return float(self.sent_count) / self.message_count * 100
+
+    @property
+    def remaining(self):
+        return self.message_count - self.sent_count

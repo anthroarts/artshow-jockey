@@ -15,6 +15,7 @@ urlpatterns = [
     re_path(r'^admin/', admin.site.urls),
     re_path(r'^artshow/', include('artshow.urls')),
     re_path(r'^manage/', include('artshow.manage_urls')),
+    re_path(r'^bid/', include('artshow.bid_urls')),
     re_path(r'^accounts/', include('tinyreg.urls')),
     # Uncomment when using the debug toolbar.
     # re_path(r'^__debug__/', include('debug_toolbar.urls')),

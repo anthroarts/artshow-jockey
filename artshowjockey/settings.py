@@ -55,11 +55,6 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {
         env.str('CELERY_QUEUE_PREFIX', default='artshowjockey-'),
 }
 
-# Configure mail sent with the backend above to go through the Celery task
-# queue.
-CELERY_EMAIL_BACKEND = EMAIL_BACKEND
-EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
-
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -175,7 +170,6 @@ INSTALLED_APPS = [
     'ajax_select',
     'tinyannounce',
     'django_celery_results',
-    'djcelery_email',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     # Uncomment the next line to enable the debug toolbar.
@@ -245,6 +239,8 @@ with env.prefixed('ARTSHOW_'):
     ARTSHOW_EMAIL_FOOTER = env.str('EMAIL_FOOTER', default="")
     ARTSHOW_ARTIST_AGREEMENT_URL = \
         env.str('ARTIST_AGREEMENT_URL', default='https://example.com')
+    ARTSHOW_SCHEDULE_URL = \
+        env.str('SCHEDULE_URL', default='https://example.com/schedule/')
 
 ARTSHOW_CHEQUE_THANK_YOU = \
     "Thank you for exhibiting at the " + ARTSHOW_SHOW_NAME
@@ -264,6 +260,11 @@ with env.prefixed('ARTSHOW_SQUARE_'):
     ARTSHOW_SQUARE_ACCESS_TOKEN = env.str('ACCESS_TOKEN', default='')
     ARTSHOW_SQUARE_SIGNATURE_KEY = env.str('SIGNATURE_KEY', default='')
     ARTSHOW_SQUARE_ENVIRONMENT = env.str('ENVIRONMENT', default='sandbox')
+
+with env.prefixed('ARTSHOW_TELEGRAM_'):
+    ARTSHOW_TELEGRAM_BOT_USERNAME = env.str('BOT_USERNAME', default=None)
+    ARTSHOW_TELEGRAM_BOT_TOKEN = env.str('BOT_TOKEN', default=None)
+    ARTSHOW_TELEGRAM_WEBHOOK_SECRET = env.str('WEBHOOK_SECRET', default=None)
 
 SITE_ID = 1
 SITE_NAME = ARTSHOW_SHOW_NAME

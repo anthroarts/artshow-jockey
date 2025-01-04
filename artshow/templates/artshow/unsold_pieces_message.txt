@@ -1,0 +1,5 @@
+This is a reminder that you still have {{ unsold_piece_count }} piece{{ unsold_piece_count|pluralize }} waiting to pick up at the {{ artshow_settings.SITE_NAME}}:
+
+For details, visit {{ artshow_settings.SITE_ROOT_URL }}{% url 'artshow-bid' %}.
+
+For pick-up times, check the convention schedule: {{ artshow_settings.ARTSHOW_SCHEDULE_URL }}
