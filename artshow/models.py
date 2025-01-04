@@ -412,13 +412,37 @@ class Bidder (models.Model):
         for piece in pieces:
             if piece.status == Piece.StatusInShow and piece.voice_auction:
                 pieces_in_voice_auction.append(piece)
-            elif piece.status == Piece.StatusWon:
+            elif piece.status == Piece.StatusWon or piece.status == Piece.StatusSold:
                 if piece.top_bidder == self.pk:
                     pieces_won.append(piece)
                 else:
                     pieces_not_won.append(piece)
 
         return pieces_won, pieces_not_won, pieces_in_voice_auction
+
+    def unsold_pieces(self):
+        winning_bid_query = Bid.objects.filter(
+            piece=OuterRef('pk'), invalid=False).order_by('-amount')[:1]
+        return Piece.objects.filter(
+            status=Piece.StatusWon,
+            bid__bidder=self
+        ).annotate(
+            top_bidder=Subquery(winning_bid_query.values('bidder')),
+            top_bid=Subquery(winning_bid_query.values('amount'))
+        ).filter(top_bidder=self.pk).order_by('artist', 'code').distinct()
+
+    def voice_auction_wins(self, adult):
+        winning_bid_query = Bid.objects.filter(
+            piece=OuterRef('pk'), invalid=False).order_by('-amount')[:1]
+        return Piece.objects.filter(
+            status=Piece.StatusWon,
+            voice_auction=True,
+            adult=adult,
+            bid__bidder=self
+        ).annotate(
+            top_bidder=Subquery(winning_bid_query.values('bidder')),
+            top_bid=Subquery(winning_bid_query.values('amount'))
+        ).filter(top_bidder=self.pk).order_by('artist', 'code').distinct()
 
     def __str__(self):
         return "%s (%s)" % (self.person.name, ", ".join(self.bidder_ids()))

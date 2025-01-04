@@ -9,6 +9,7 @@ from django.views.decorators.http import require_POST
 from django import forms
 
 from .models import Bid, Bidder
+from .telegram import send_message as send_telegram_message
 from .utils import artshow_settings
 
 from datetime import datetime, timedelta, timezone
@@ -218,6 +219,12 @@ def telegram(request):
     person.telegram_chat_id = request.GET.get('id')
     person.telegram_username = request.GET.get('username')
     person.save()
+
+    send_telegram_message(
+        person.telegram_chat_id,
+        render_to_string('artshow/telegram_welcome_message.txt', {
+            'artshow_settings': artshow_settings,
+        }))
 
     return render(request, 'artshow/bid_telegram.html', {
         'person': person,

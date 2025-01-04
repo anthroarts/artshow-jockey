@@ -571,6 +571,12 @@ def select_terminal(request, pk):
 BULK_MESSAGE_TYPES = {
     'email_results': 'Send results via email',
     'telegram_results': 'Send results via Telegram',
+    'email_adult_voice_results': 'Send adult voice auction results via email',
+    'telegram_adult_voice_results': 'Send adult voice auction results via Telegram',
+    'email_general_voice_results': 'Send general voice auction results via email',
+    'telegram_general_voice_results': 'Send general voice auction results via Telegram',
+    'email_reminder': 'Send reminder for unsold pieces via email',
+    'telegram_reminder': 'Send reminder for unsold pieces via Telegram',
 }
 
 
@@ -587,6 +593,18 @@ def bulk_messaging(request):
                 tasks.email_results.delay()
             elif form.cleaned_data['message_type'] == 'telegram_results':
                 tasks.telegram_results.delay()
+            elif form.cleaned_data['message_type'] == 'email_adult_voice_results':
+                tasks.email_voice_results.delay(adult=True)
+            elif form.cleaned_data['message_type'] == 'telegram_adult_voice_results':
+                tasks.telegram_voice_results.delay(adult=True)
+            elif form.cleaned_data['message_type'] == 'email_general_voice_results':
+                tasks.email_voice_results.delay(adult=False)
+            elif form.cleaned_data['message_type'] == 'telegram_general_voice_results':
+                tasks.telegram_voice_results.delay(adult=False)
+            elif form.cleaned_data['message_type'] == 'email_reminder':
+                tasks.email_reminder.delay()
+            elif form.cleaned_data['message_type'] == 'telegram_reminder':
+                tasks.telegram_reminder.delay()
             return redirect('artshow-workflow-bulk-messaging')
 
     active_tasks = []

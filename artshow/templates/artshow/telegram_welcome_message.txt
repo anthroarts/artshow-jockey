@@ -1,0 +1,3 @@
+Thank you for signing up for notifications from the {{ artshow_settings.SITE_NAME }}.
+
+This converation may be recorded for quality assurance purposes.

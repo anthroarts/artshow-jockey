@@ -1,5 +1,5 @@
-The silent auction results are now available. {% if pieces_won %}You have won {{ pieces_won|length }} pieces{% if pieces_in_voice_auction %} and {{ pieces_in_voice_auction|length }} pieces you bid on have moved to the voice auction{% endif %}.{% else %}You have not won any pieces{% if pieces_in_voice_auction %} however {{ pieces_in_voice_auction|length }} pieces you bid on have moved to the voice auction{% endif %}.{% endif %}
+The silent auction results are now available. {% if pieces_won %}You have won {{ pieces_won|length }} piece{{ pieces_won|pluralize }}{% if pieces_in_voice_auction %} and {{ pieces_in_voice_auction|length }} piece{{ pieces_in_voice_auction|pluralize }} you bid on moved to the voice auction{% endif %}.{% else %}You have not won any pieces{% if pieces_in_voice_auction %} however {{ pieces_in_voice_auction|length }} piece{{ pieces_in_voice_auction|pluralize }} you bid on moved to the voice auction{% endif %}.{% endif %}
 
 For details, visit {{ artshow_settings.SITE_ROOT_URL }}{% url 'artshow-bid' %}.
 
-For voice auction times, check the convention schedule: {{ artshow_settings.ARTSHOW_SCHEDULE_URL }}
+For pick-up and voice auction times, check the convention schedule: {{ artshow_settings.ARTSHOW_SCHEDULE_URL }}

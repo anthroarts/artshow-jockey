@@ -65,7 +65,7 @@ def send_message(chat_id, text):
         'text': text
     })
     if response.status_code != 200:
-        logger.error(f'Failed to send message: {response.text}')
+        raise Exception(f'Failed to send Telegram message ({response.status_code}): {response.text}')
 
 
 def process_message(message):

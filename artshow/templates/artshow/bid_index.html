@@ -27,24 +27,24 @@
       </p>
       {% if show_has_bids %}
       {% if pieces_in_voice_auction %}
-      <h3>Pieces awaiting voice auction:</h3>
+      <h3>Pieces awaiting voice auction</h3>
       <ul>
         {% for piece in pieces_in_voice_auction %}
         <li>
           {{ piece }},
-          Top bid: {{ piece.top_bid }}
+          Top bid: ${{ piece.top_bid }}
           {% if piece.top_bidder == bidder.pk %}(Yours){% endif %}
         </li>
         {% endfor %}
       </ul>
       {% endif %}
 
-      <h3>Pieces won:</h3>
+      <h3>Pieces won</h3>
       <ul>
       {% for piece in pieces_won %}
         <li>
           {{ piece }},
-          Winning bid: {{ piece.top_bid }}
+          Winning bid: ${{ piece.top_bid }}
         </li>
       {% empty %}
         <li><em>None</em></li>
@@ -52,12 +52,12 @@
       </ul>
 
       {% if pieces_not_won %}
-      <h3>Losing bids:</h3>
+      <h3>Losing bids</h3>
       <ul>
         {% for piece in pieces_not_won %}
         <li>
           {{ piece }},
-          Winning bid: {{ piece.top_bid }}
+          Winning bid: ${{ piece.top_bid }}
         </li>
         {% empty %}
           <li><em>None</em></li>
@@ -75,6 +75,7 @@
       </p>
       {% endif %}
 
+      <h3>Notifications</h3>
       {% if email_confirmation_form %}
       <p>
         A confirmation code has been sent to <strong>{{ bidder.person.email }}</strong>. Enter it here:
