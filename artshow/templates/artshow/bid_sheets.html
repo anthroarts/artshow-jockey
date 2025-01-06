@@ -37,7 +37,7 @@
     </div>
     {% else %}
     <div class="bid-stickers">
-      <div class="bid-sticker"><span>Place 1st bid here{% if piece.buy_now %}, or auto buy for ${{ piece.buy_now|intcomma }}{% endif %}.</span></div>
+      <div class="bid-sticker"><span>Place 1st bid here{% if piece.buy_now %}<div class="ab-sticker-note"><strong>OR</strong> write "AB" to<br>auto buy for ${{ piece.buy_now|intcomma }}.</div>{% else %}.{% endif %}</span></div>
       <div class="bid-sticker"><span>Place 2nd bid here.</span></div>
       <div class="bid-sticker"><span>Place 3rd bid here.</span></div>
       <div class="bid-sticker"><span>Place 4th bid here.</span></div>
@@ -46,7 +46,7 @@
     </div>
     <div class="instructions">
       A piece with 6 bids will be taken to voice auction.
-      {% if piece.buy_now %}See a staff member to lock in an auto buy bid.{% endif %}
+      {% if piece.buy_now %}<br>See a staff member to lock in an auto buy bid.{% endif %}
     </div>
     <div class="instructions">
       {% if piece.reproduction_rights_included %}

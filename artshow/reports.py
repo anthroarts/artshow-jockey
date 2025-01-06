@@ -90,6 +90,8 @@ def unsold_pieces(request):
             winning_bid_query.values('bidder__person__name')[:1]),
         winning_bidder_phone=Subquery(
             winning_bid_query.values('bidder__person__phone')[:1]),
+        winning_bidder_telegram_username=Subquery(
+            winning_bid_query.values('bidder__person__telegram_username')[:1]),
         winning_bidder_email=Subquery(
             winning_bid_query.values('bidder__person__email')[:1]),
         winning_bid=Subquery(winning_bid_query.values('amount')[:1])
@@ -103,6 +105,7 @@ def unsold_pieces(request):
                 'id': piece['winning_bidder'],
                 'name': piece['winning_bidder_name'],
                 'phone': piece['winning_bidder_phone'],
+                'telegram_username': piece['winning_bidder_telegram_username'],
                 'email': piece['winning_bidder_email'],
                 'pieces': [piece],
             })

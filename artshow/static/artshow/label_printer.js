@@ -1,5 +1,6 @@
 const supportedPrinters = [
     { vendorId: 0x0A5F, productId: 0x0015 },  // Zebra LP-2824
+    { vendorId: 0x0A5F, productId: 0x00A3 },  // Zebra LP-2824 Plus
 ];
 
 function isSupported(device) {
@@ -58,7 +59,15 @@ async function printLabels(data) {
     try {
         await selectedDevice.selectConfiguration(1);
         await selectedDevice.claimInterface(0);
-        await selectedDevice.transferOut(6, new TextEncoder().encode(data));
+
+        let outEndpoint = undefined;
+        for (const endpoint of selectedDevice.configuration.interfaces[0].alternate.endpoints) {
+            if (endpoint.direction == 'out') {
+                outEndpoint = endpoint;
+                break;
+            }
+        }
+        await selectedDevice.transferOut(outEndpoint.endpointNumber, new TextEncoder().encode(data));
     } finally {
         await selectedDevice.close();
     }

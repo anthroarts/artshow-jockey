@@ -96,6 +96,10 @@ body {
   vertical-align: middle;
 }
 
+.ab-sticker-note {
+  margin-top: 5px;
+}
+
 .not-for-sale {
   grid-column: 1 / 4;
   text-align: center;
