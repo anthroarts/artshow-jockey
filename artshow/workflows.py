@@ -568,6 +568,16 @@ def select_terminal(request, pk):
     return redirect(pair_terminal)
 
 
+@permission_required('artshow.is_artshow_staff')
+@require_POST
+def cancel_terminal_checkout(request, pk):
+    device = get_object_or_404(SquareTerminal, pk=pk)
+    if device.checkout_id:
+        square.cancel_terminal_checkout(device.checkout_id)
+
+    return redirect(pair_terminal)
+
+
 BULK_MESSAGE_TYPES = {
     'email_results': 'Send results via email',
     'telegram_results': 'Send results via Telegram',

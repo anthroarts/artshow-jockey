@@ -175,7 +175,7 @@ def email_reminder():
 
 @app.task
 def telegram_reminder():
-    bidders = Bidder.objects.filter(person__email_confirmed=True)
+    bidders = Bidder.objects.filter(person__telegram_chat_id__isnull=False)
 
     messages_to_send = []
     for bidder in bidders:

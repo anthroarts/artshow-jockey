@@ -168,8 +168,20 @@ def process_device_paired(body):
 def process_checkout_created_or_updated(body):
     checkout = body['data']['object']['checkout']
 
+    checkout_id = checkout['id']
+    checkout_status = checkout['status']
+    if checkout_status in ('CANCELED', 'COMPLETED'):
+        try:
+            device_id = checkout['device_options']['device_id']
+            terminal = SquareTerminal.objects.get(device_id=device_id)
+            if checkout_id == terminal.checkout_id:
+                terminal.checkout_id = ''
+                terminal.save()
+        except SquareTerminal.DoesNotExist:
+            logger.info(f'Got webhook for unknown device: {device_id}')
+            # Let processing continue, since we might have a payment to update.
+
     try:
-        checkout_id = checkout['id']
         payment = SquareInvoicePayment.objects.get(checkout_id=checkout_id)
     except SquareInvoicePayment.DoesNotExist:
         logger.info(f'Got webhook for unknown checkout: {checkout_id}')
@@ -179,7 +191,6 @@ def process_checkout_created_or_updated(body):
     if currency != 'USD':
         raise Exception(f'Unexpected currency: {currency}')
 
-    checkout_status = checkout['status']
     if checkout_status == 'CANCELED':
         payment.delete()
     elif checkout_status == 'COMPLETED':

@@ -12,6 +12,7 @@
         <tr class="header">
             <th>Bidder</th>
             <th>Phone</th>
+            <th>Telegram</th>
             <th>Email</th>
             <th>Amount</th>
             <th>Notes</th>
@@ -21,12 +22,13 @@
             <tbody>
                 <tr>
                     <td class="bidder" rowspan="{{ bidder.pieces|length|add:"1" }}"><a href="{% url 'admin:artshow_bidder_change' bidder.id %}">{{ bidder.name }}</a></td>
-                    <td>{% if bidder.phone %}<a href="tel:{{ bidder.phone }}">{{ bidder.phone }}</a>{% else %}<i>None</i>{% endif %}</i></td>
+                    <td>{% if bidder.phone %}<a href="tel:{{ bidder.phone }}">{{ bidder.phone }}</a>{% else %}<i>None</i>{% endif %}</td>
+                    <td>{% if bidder.telegram_username %}<a href="https://t.me/{{ bidder.telegram_username }}">@{{ bidder.telegram_username }}</a>{% else %}<i>None</i>{% endif %}</td>
                     <td colspan="3">{% if bidder.email %}<a href="mailto:{{ bidder.email }}">{{ bidder.email }}</a>{% else %}<i>None</i>{% endif %}</td>
                 </tr>
             {% for piece in bidder.pieces %}
                 <tr>
-                    <td colspan="2">{{ piece.code }} - <i>{{ piece.name }}</i> by {% firstof piece.artist__publicname piece.artist__person__name %}</td>
+                    <td colspan="3">{{ piece.code }} - <i>{{ piece.name }}</i> by {% firstof piece.artist__publicname piece.artist__person__name %}</td>
                     <td>{{ piece.winning_bid }}</td>
                     <td>{{ piece.voice_auction|yesno:"Voice Auction," }}</td>
                 </tr>
