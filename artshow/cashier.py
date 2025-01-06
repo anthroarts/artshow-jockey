@@ -258,6 +258,7 @@ def cashier_invoice(request, invoice_id):
         'invoice': invoice,
         'payment_form': payment_form,
         'has_reproduction_rights': has_reproduction_rights,
+        'has_pending_payments': len(json_pending_payments) > 0,
         'money_precision': settings.ARTSHOW_MONEY_PRECISION,
         'tax_description': settings.ARTSHOW_TAX_DESCRIPTION,
         'invoice_prefix': settings.ARTSHOW_INVOICE_PREFIX,
