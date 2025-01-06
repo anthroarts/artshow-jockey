@@ -834,6 +834,7 @@ class SquareTerminal(models.Model):
     device_id = models.CharField(max_length=128)
     code = models.CharField(max_length=128)
     name = models.CharField(max_length=128)
+    checkout_id = models.CharField(max_length=255, blank=True)
 
 
 class SquareWebhook(models.Model):

@@ -180,24 +180,30 @@ def cashier_invoice(request, invoice_id):
             if payment.payment_method == 5:
                 try:
                     terminal = SquareTerminal.objects.get(pk=request.session.get('terminal'))
-                    invoice_id = f'{settings.ARTSHOW_INVOICE_PREFIX}{invoice.id}'
-                    note = f'{invoice_id} for Art Show Bidder {",".join(invoice.payer.bidder_ids())}'
-                    result = square.create_terminal_checkout(
-                        terminal.device_id,
-                        payment.amount,
-                        invoice_id,
-                        note,
-                    )
-                    if result is None:
-                        payment_form.add_error(None, 'Failed to create Square checkout')
+                    if terminal.checkout_id:
+                        payment_form.add_error(None, 'Terminal already waiting for payment')
                         payment = None
                     else:
-                        payment = SquareInvoicePayment(
-                            amount=payment.amount,
-                            payment_method=InvoicePayment.PaymentMethod.SQUARE_CARD,
-                            notes=payment.notes,
-                            checkout_id=result,
+                        invoice_id = f'{settings.ARTSHOW_INVOICE_PREFIX}{invoice.id}'
+                        note = f'{invoice_id} for Art Show Bidder {",".join(invoice.payer.bidder_ids())}'
+                        result = square.create_terminal_checkout(
+                            terminal.device_id,
+                            payment.amount,
+                            invoice_id,
+                            note,
                         )
+                        if result is None:
+                            payment_form.add_error(None, 'Failed to create Square checkout')
+                            payment = None
+                        else:
+                            payment = SquareInvoicePayment(
+                                amount=payment.amount,
+                                payment_method=InvoicePayment.PaymentMethod.SQUARE_CARD,
+                                notes=payment.notes,
+                                checkout_id=result,
+                            )
+                            terminal.checkout_id = result
+                            terminal.save()
 
                 except SquareTerminal.DoesNotExist:
                     payment_form.add_error(None, 'No Square terminal selected')
