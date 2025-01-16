@@ -37,7 +37,7 @@
     </div>
     {% else %}
     <div class="bid-stickers">
-      <div class="bid-sticker"><span>Place 1st bid here{% if piece.buy_now %}<div class="ab-sticker-note"><strong>OR</strong> write "AB" to<br>auto buy for ${{ piece.buy_now|intcomma }}.</div>{% else %}.{% endif %}</span></div>
+      <div class="bid-sticker"><span>Place 1st bid here{% if piece.buy_now %}<br><strong>OR</strong> write "AB" to<br>auto buy for ${{ piece.buy_now|intcomma }}.{% else %}.{% endif %}</span></div>
       <div class="bid-sticker"><span>Place 2nd bid here.</span></div>
       <div class="bid-sticker"><span>Place 3rd bid here.</span></div>
       <div class="bid-sticker"><span>Place 4th bid here.</span></div>
