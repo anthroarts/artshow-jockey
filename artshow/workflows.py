@@ -134,8 +134,9 @@ class PieceCheckinForm(forms.ModelForm):
         except KeyError:
             artist_locations = []
         super().__init__(**kwargs)
-        self.fields['location'].choices = [('', '---')]
-        self.fields['location'].choices.extend([(l, l) for l in artist_locations])
+        location_choices = [('', '---')]
+        location_choices.extend([(l, l) for l in artist_locations])
+        self.fields['location'].choices = location_choices
         if self.instance.id is not None:
             self.initial['print_item'] = True
             self.initial['location'] = self.instance.location
