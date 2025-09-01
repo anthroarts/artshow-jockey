@@ -11,4 +11,5 @@ con_specific
 artshow-utils/*.csv
 /static/
 /env/
+/.venv/
 supervisord.pid

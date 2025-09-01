@@ -1,4 +1,6 @@
-FROM python:3.12-alpine AS native-deps
+FROM python:3.12-slim-trixie AS native-deps
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -6,20 +8,17 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /code
 
 # Install native dependencies.
-RUN mkdir /data /run/nginx
-RUN pip install --upgrade pip pipenv
-RUN apk add --no-cache libcurl nginx
-RUN apk add --no-cache --virtual .build-deps build-base curl-dev
-
-FROM native-deps AS pipfile
-COPY Pipfile Pipfile.lock /code/
+RUN apt update
+RUN apt install -y nginx
+RUN mkdir /data
 
 # Development environment.
-FROM pipfile AS dev
-RUN pipenv install --system --dev
+FROM native-deps AS dev
 
-EXPOSE 8000/tcp
-CMD ["/usr/local/bin/supervisord", "-c", "/code/supervisord.conf"]
+ENV UV_NO_MANAGED_PYTHON=1
+
+COPY pyproject.toml uv.lock /code/
+RUN uv sync
 
 COPY . /code/
 
@@ -31,21 +30,25 @@ ENV DATABASE_URL="sqlite:///data/artshowjockey.db"
 ENV OAUTHLIB_INSECURE_TRANSPORT=1
 ENV TEST_OAUTH_PROVIDER=1
 
-RUN flake8 && \
-    python -Wa manage.py test && \
-    python manage.py collectstatic
-
-# Production environment.
-FROM pipfile AS prod
-RUN pipenv install --system \
- && pip uninstall -y pipenv \
- && apk del .build-deps \
- && rm -fr ~/.cache
+RUN uv run flake8 && \
+    uv run -- python -Wa manage.py test && \
+    uv run manage.py collectstatic
 
 EXPOSE 8000/tcp
-CMD ["/usr/local/bin/supervisord", "-c", "/code/supervisord.conf"]
+CMD ["uv", "run", "supervisord", "-c", "/code/supervisord.conf"]
+
+# Production environment.
+FROM native-deps AS prod
+
+ENV UV_NO_MANAGED_PYTHON=1
+ENV UV_NO_DEV=1
+
+COPY pyproject.toml uv.lock /code/
+RUN uv sync
 
 COPY . /code/
-
 RUN DATABASE_URL="sqlite:///data/artshowjockey.db" \
-    python manage.py collectstatic
+    uv run manage.py collectstatic
+
+EXPOSE 8000/tcp
+CMD ["/code/.venv/bin/supervisord", "-c", "/code/supervisord.conf"]

@@ -1,0 +1,7 @@
+{
+  "name": "Artshow Jockey",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "web",
+  "workspaceFolder": "/code",
+  "shutdownAction": "stopCompose"
+}
