@@ -1,4 +1,4 @@
-FROM python:3.12-slim-trixie AS native-deps
+FROM python:3.13-slim-trixie AS native-deps
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
