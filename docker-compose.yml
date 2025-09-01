@@ -3,8 +3,7 @@ services:
   web:
     build:
       context: .
-      # Uncomment the next line when using django-debug-toolbar.
-      # target: dev
+      target: dev
     depends_on: 
       - db
       - broker
