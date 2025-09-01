@@ -75,6 +75,10 @@ USE_I18N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
+# Opt into Django 6.0 behavior of assuming HTTPS as the default scheme for
+# URLField. Remove this when updating to Django 6.0.
+FORMS_URLFIELD_ASSUME_HTTPS = True
+
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = ''
