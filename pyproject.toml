@@ -20,7 +20,7 @@ dependencies = [
     "reportlab>=4.4.3",
     "requests>=2.32.5",
     "requests-oauthlib>=2.0.0",
-    "squareup==39.1.0.20241218",
+    "squareup==43.0.2.20250820",
     "supervisor>=4.3.0",
 ]
 
