@@ -11,8 +11,10 @@ from django.views.decorators.csrf import csrf_exempt
 
 from functools import cache
 
-from square.client import Client
-from square.utilities.webhooks_helper import is_valid_webhook_event_signature
+from square import Square
+from square.core.api_error import ApiError
+from square.environment import SquareEnvironment
+from square.utils.webhooks_helper import verify_signature
 
 from .conf import settings
 from .models import (
@@ -24,108 +26,107 @@ logger = logging.getLogger(__name__)
 
 @cache
 def client():
-    return Client(
-        access_token=settings.ARTSHOW_SQUARE_ACCESS_TOKEN,
-        environment=settings.ARTSHOW_SQUARE_ENVIRONMENT)
+    environment = SquareEnvironment.PRODUCTION
+    if settings.ARTSHOW_SQUARE_ENVIRONMENT == 'sandbox':
+        environment = SquareEnvironment.SANDBOX
+
+    return Square(
+        token=settings.ARTSHOW_SQUARE_ACCESS_TOKEN,
+        environment=environment)
 
 
-def log_errors(result):
-    assert result.is_error()
-
-    for error in result.errors:
+def log_errors(errors):
+    for error in errors:
         logger.error(f"Square error {error['category']}:{error['code']}: {error['detail']}")
 
 
 def create_payment_url(artist, name, amount, redirect_url):
-    result = client().checkout.create_payment_link({
-        'idempotency_key': str(uuid.uuid4()),
-        'quick_pay': {
-            'name': name,
-            'price_money': {
-                'amount': int(amount * 100),
-                'currency': 'USD',
+    try:
+        result = client().checkout.payment_links.create(
+            idempotency_key=str(uuid.uuid4()),
+            quick_pay={
+                'name': name,
+                'price_money': {
+                    'amount': int(amount * 100),
+                    'currency': 'USD',
+                },
+                'location_id': settings.ARTSHOW_SQUARE_LOCATION_ID,
             },
-            'location_id': settings.ARTSHOW_SQUARE_LOCATION_ID,
-        },
-        'checkout_options': {
-            'redirect_url': redirect_url,
-        },
-    })
+            checkout_options={
+                'redirect_url': redirect_url,
+            },
+        )
 
-    if result.is_success():
-        payment_link = result.body['payment_link']
+        payment_link = result.payment_link
         payment = SquarePayment(
             artist=artist,
             amount=amount,
             payment_type_id=settings.ARTSHOW_PAYMENT_PENDING_PK,
             description='Square payment',
             date=now(),
-            payment_link_id=payment_link['id'],
-            payment_link_url=payment_link['long_url'],
-            order_id=payment_link['order_id'],
+            payment_link_id=payment_link.id,
+            payment_link_url=payment_link.long_url,
+            order_id=payment_link.order_id,
         )
         payment.save()
         return payment.payment_link_url
-
-    elif result.is_error():
-        log_errors(result)
+    except ApiError as e:
+        log_errors(e.errors)
         return None
 
 
 def create_device_code(name):
-    result = client().devices.create_device_code({
-        'idempotency_key': str(uuid.uuid4()),
-        'device_code': {
-            'name': name,
-            'location_id': settings.ARTSHOW_SQUARE_LOCATION_ID,
-            'product_type': 'TERMINAL_API',
-        },
-    })
+    try:
+        result = client().devices.codes.create(
+            idempotency_key=str(uuid.uuid4()),
+            device_code={
+                'name': name,
+                'location_id': settings.ARTSHOW_SQUARE_LOCATION_ID,
+                'product_type': 'TERMINAL_API',
+            },
+        )
 
-    if result.is_success():
-        return result.body['device_code']['code']
-
-    elif result.is_error():
-        log_errors(result)
+        return result.device_code.code
+    except ApiError as e:
+        log_errors(e.errors)
         return None
 
 
 def create_terminal_checkout(device_id, amount, reference_id, note):
-    result = client().terminal.create_terminal_checkout({
-        'idempotency_key': str(uuid.uuid4()),
-        'checkout': {
-            'amount_money': {
-                'amount': int(amount * 100),
-                'currency': 'USD',
-            },
-            'reference_id': reference_id,
-            'device_options': {
-                'device_id': device_id,
-                'skip_receipt_screen': True,
-                'tip_settings': {
-                    'allow_tipping': False,
+    try:
+        result = client().terminal.checkouts.create(
+            idempotency_key=str(uuid.uuid4()),
+            checkout={
+                'amount_money': {
+                    'amount': int(amount * 100),
+                    'currency': 'USD',
                 },
+                'reference_id': reference_id,
+                'device_options': {
+                    'device_id': device_id,
+                    'skip_receipt_screen': True,
+                    'tip_settings': {
+                        'allow_tipping': False,
+                    },
+                },
+                'payment_options': {
+                    'accept_partial_authorization': False,
+                },
+                'note': note,
             },
-            'payment_options': {
-                'accept_partial_authorization': False,
-            },
-            'note': note,
-        },
-    })
+        )
 
-    if result.is_success():
-        return result.body['checkout']['id']
-
-    elif result.is_error():
-        log_errors(result)
+        return result.checkout.id
+    except ApiError as e:
+        log_errors(e.errors)
         return None
 
 
 def cancel_terminal_checkout(checkout_id):
-    result = client().terminal.cancel_terminal_checkout(checkout_id)
-
-    if result.is_error():
-        log_errors(result)
+    try:
+        client().terminal.checkouts.cancel(checkout_id)
+    except ApiError as e:
+        log_errors(e.errors)
 
 
 def process_payment_created_or_updated(body):
@@ -212,11 +213,11 @@ def process_webhook(body):
 @csrf_exempt
 def webhook(request):
     body = request.body.decode('utf-8')
-    valid = is_valid_webhook_event_signature(
-        body,
-        request.headers['x-square-hmacsha256-signature'],
-        settings.ARTSHOW_SQUARE_SIGNATURE_KEY,
-        settings.SITE_ROOT_URL + reverse('square-webhook'))
+    valid = verify_signature(
+        request_body=body,
+        signature_header=request.headers['x-square-hmacsha256-signature'],
+        signature_key=settings.ARTSHOW_SQUARE_SIGNATURE_KEY,
+        notification_url=settings.SITE_ROOT_URL + reverse('square-webhook'))
 
     if not valid:
         logger.debug('Received invalid webhook!')
