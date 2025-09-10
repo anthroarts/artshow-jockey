@@ -4,6 +4,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV UV_NO_MANAGED_PYTHON=1
+ENV UV_PROJECT_ENVIRONMENT=/venv
 
 WORKDIR /code
 
@@ -14,8 +16,6 @@ RUN mkdir /data
 
 # Development environment.
 FROM native-deps AS dev
-
-ENV UV_NO_MANAGED_PYTHON=1
 
 COPY pyproject.toml uv.lock /code/
 RUN uv sync
@@ -40,7 +40,6 @@ CMD ["uv", "run", "supervisord", "-c", "/code/supervisord.conf"]
 # Production environment.
 FROM native-deps AS prod
 
-ENV UV_NO_MANAGED_PYTHON=1
 ENV UV_NO_DEV=1
 
 COPY pyproject.toml uv.lock /code/
