@@ -275,9 +275,9 @@ def spaces(request, artist_id):
                     # Allocation doesn't exist, and we want to reserve it. Create one.
                     allocation = Allocation(artist=artist, space=space)
                 else:
-                    # If the Allocation existed, the current allocated is 0, and the request is 0, then
-                    # just delete the Allocation object.
-                    if allocation.allocated == 0 and requested == 0:
+                    # If the Allocation existed and the request is 0, then just
+                    # delete the Allocation object.
+                    if requested == 0:
                         allocation.delete()
                         continue
                 allocation.requested = requested

@@ -340,18 +340,16 @@ class Allocation(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     space = models.ForeignKey(Space, on_delete=models.CASCADE)
     requested = models.DecimalField(max_digits=4, decimal_places=1, validators=[validate_space])
-    allocated = models.DecimalField(max_digits=4, decimal_places=1, validators=[validate_space], default=0)
 
     def clean(self):
         validate_space_increments(self.requested, self.space.allow_half_spaces)
-        validate_space_increments(self.allocated, self.space.allow_half_spaces)
 
     def requested_charge(self):
         return self.requested * self.space.price
 
     def __str__(self):
-        return "%s (%s) - %s/%s %s" % (self.artist.artistname(), self.artist.artistid,
-                                       self.allocated, self.requested, self.space.name)
+        return "%s (%s) - %s %s" % (self.artist.artistname(), self.artist.artistid,
+                                    self.requested, self.space.name)
 
     class Meta:
         unique_together = (('artist', 'space'), )
