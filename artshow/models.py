@@ -52,23 +52,6 @@ class Space(models.Model):
     def clean(self):
         validate_space_increments(self.available, self.allow_half_spaces)
 
-    def allocated(self):
-        allocated = self.allocation_set.aggregate(sum=Sum('allocated'))['sum']
-        if allocated is None:
-            return 0
-        else:
-            return allocated
-
-    def remaining(self):
-        return self.available - self.allocated()
-
-    def waiting(self):
-        data = self.allocation_set.aggregate(allocated=Sum('allocated'), requested=Sum('requested'))
-        if data['allocated'] is None or data['requested'] is None:
-            return 0
-        else:
-            return data['requested'] - data['allocated']
-
     def __str__(self):
         return self.name
 

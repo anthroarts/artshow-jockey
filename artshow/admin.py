@@ -255,7 +255,7 @@ admin.site.register(Artist, ArtistAdmin)
 
 
 class SpaceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'shortname', 'price', 'reservable', 'available', 'allocated', 'remaining', 'waiting')
+    list_display = ('name', 'shortname', 'price', 'reservable', 'available')
     list_editable = ('reservable', 'available')
 
 
