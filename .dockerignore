@@ -1,4 +1,5 @@
 .dockerignore
 .git
+.venv
 Dockerfile
 docker-compose.yml
