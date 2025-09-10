@@ -366,9 +366,6 @@ class Allocation(models.Model):
     def requested_charge(self):
         return self.requested * self.space.price
 
-    def allocated_charge(self):
-        return self.allocated * self.space.price
-
     def __str__(self):
         return "%s (%s) - %s/%s %s" % (self.artist.artistname(), self.artist.artistid,
                                        self.allocated, self.requested, self.space.name)
