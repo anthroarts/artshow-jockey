@@ -176,7 +176,7 @@ def artist_payment_report(request):
     artists = list(artists)
     for a in artists:
         a.total = a.total or 0
-        a.total_requested_cost, a.deduction_to_date, a.deduction_remaining = a.deduction_remaining_with_details()
+        a.total_allocated_cost, a.deduction_to_date, a.deduction_remaining, a.allocations = a.deduction_remaining_with_details()
         a.total -= a.deduction_remaining
     if non_zero:
         artists = [a for a in artists if a.total != 0]

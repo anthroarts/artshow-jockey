@@ -49,22 +49,9 @@ def artist(request, artist_id):
     pieces = artist.piece_set.order_by("pieceid")
     payments = artist.payment_set.order_by("date", "id")
     payments_total = payments.aggregate(payments_total=Sum('amount'))['payments_total'] or Decimal(0)
-    total_requested_cost, deduction_to_date, deduction_remaining = \
+    total_allocated_cost, deduction_to_date, deduction_remaining, allocations = \
         artist.deduction_remaining_with_details()
     payments_total -= deduction_remaining
-
-    allocations = artist.allocation_set.order_by("space__id")
-
-    allocation_map = {a.space.pk: a for a in allocations}
-    # Re-calculate the number of allocated spaces based on the assigned
-    # locations.
-    for a in allocations:
-        a.allocated = 0.0
-
-    locations = Location.objects.filter(Q(artist_1=artist) | Q(artist_2=artist))
-    for l in locations:
-        if l.type.pk in allocation_map:
-            allocation_map[l.type.pk].allocated += 0.5 if l.space_is_split or l.half_space else 1.0
 
     can_edit_personal_details = not settings.ARTSHOW_SHUT_USER_EDITS and \
         (request.user == artist.person.user)
@@ -352,7 +339,7 @@ def person_details(request, artist_id):
 @login_required
 def make_payment(request, artist_id):
     artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
-    total_requested_cost, deduction_to_date, deduction_remaining, payment_remaining = \
+    total_allocated_cost, deduction_to_date, deduction_remaining, payment_remaining, allocations = \
         artist.payment_remaining_with_details()
 
     payment_remaining = Decimal(payment_remaining).quantize(Decimal('1.00'))
@@ -380,8 +367,8 @@ def make_payment(request, artist_id):
 
     context = {
         "artist": artist,
-        "allocations": artist.allocation_set.order_by("id"),
-        "total_requested_cost": total_requested_cost,
+        "allocations": allocations,
+        "total_allocated_cost": total_allocated_cost,
         "deduction_to_date": deduction_to_date,
         "deduction_remaining": deduction_remaining,
         "account_balance": artist.balance(),
