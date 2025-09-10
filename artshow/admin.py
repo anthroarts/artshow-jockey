@@ -246,23 +246,8 @@ class ArtistAdmin(AjaxSelectAdmin):
     def create_cheques(self, request, artists):
         Artist.create_cheques(artists)
 
-    # noinspection PyUnusedLocal
-    def allocate_spaces(self, request, artists):
-        artists = artists.order_by('reservationdate', 'artistid')
-        spaces_remaining = {}
-        for space in Space.objects.all():
-            spaces_remaining[space.id] = space.remaining()
-        for artist in artists:
-            for alloc in artist.allocation_set.all():
-                needed = alloc.requested - alloc.allocated
-                to_allocate = min(needed, spaces_remaining[alloc.space.id])
-                if to_allocate > 0:
-                    alloc.allocated += to_allocate
-                    spaces_remaining[alloc.space.id] -= to_allocate
-                    alloc.save()
-
     actions = ('send_email', 'print_bidsheets', 'print_control_forms', 'print_mailing_labels', 'apply_space_fees',
-               'apply_winnings_and_commission', 'create_cheques', 'allocate_spaces', 'print_piece_stickers')
+               'apply_winnings_and_commission', 'create_cheques', 'print_piece_stickers')
     filter_horizontal = ('checkoffs',)
 
 
