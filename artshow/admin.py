@@ -51,10 +51,9 @@ class AgentInline(AjaxSelectAdminTabularInline):
 class AllocationInlineForm(forms.ModelForm):
     class Meta:
         model = Allocation
-        fields = ('artist', 'space', 'requested', 'allocated')
+        fields = ('artist', 'space', 'requested')
         widgets = {
             'requested': forms.TextInput(attrs={'size': 6}),
-            'allocated': forms.TextInput(attrs={'size': 6}),
         }
 
 
