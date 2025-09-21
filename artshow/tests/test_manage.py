@@ -1,8 +1,8 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.test import Client, TestCase
 from django.urls import reverse
 
-
+from .. import testdata
 from ..models import Artist
 from peeps.models import Person
 
@@ -12,6 +12,8 @@ class ManageTests(TestCase):
     def setUp(self):
         user = User.objects.create_user(
             username='test', email='test@example.com', password='test')
+        permission = Permission.objects.get(codename='is_artshow_staff')
+        user.user_permissions.add(permission)
         user.save()
 
         person = Person(user=user)
@@ -65,4 +67,10 @@ class ManageTests(TestCase):
     def testManageMakePayment(self):
         response = self.client.get(reverse('artshow-manage-make-payment',
                                            args=(self.artist.artistid,)))
+        self.assertEqual(response.status_code, 200)
+
+    def testCloseShow(self):
+        testdata.create('test@example.com')
+
+        response = self.client.post(reverse('artshow-workflow-close-show'))
         self.assertEqual(response.status_code, 200)
