@@ -28,7 +28,7 @@
     {% for piece in sold_pieces %}
     <tr>
       <td>{{ piece.pieceid }}</td>
-      <td>{{ piece.name }}</td>
+      <td>{{ piece.title }}</td>
       <td>{{ piece.top_bid.amount }}</td>
     </tr>
     {% endfor %}
@@ -45,7 +45,7 @@
     {% for piece in voice_auction %}
     <tr>
       <td>{{ piece.pieceid }}</td>
-      <td>{{ piece.name }}</td>
+      <td>{{ piece.title }}</td>
       <td>{{ piece.top_bid.amount }}</td>
     </tr>
     {% endfor %}

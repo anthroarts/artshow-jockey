@@ -28,7 +28,7 @@
                 </tr>
             {% for piece in bidder.pieces %}
                 <tr>
-                    <td colspan="3">{{ piece.code }} - <i>{{ piece.name }}</i> by {% firstof piece.artist__publicname piece.artist__person__name %}</td>
+                    <td colspan="3">{{ piece.code }} - <i>{{ piece.title }}</i> by {{ piece.artistname }}</td>
                     <td>{{ piece.winning_bid }}</td>
                     <td>{{ piece.voice_auction|yesno:"Voice Auction," }}</td>
                 </tr>

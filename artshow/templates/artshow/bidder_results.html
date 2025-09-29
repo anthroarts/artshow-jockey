@@ -10,8 +10,8 @@
             {% for b in bidder.top_bids %}
                 <tr>
                     <td>{{ b.piece.code }}</td>
-                    <td>{{ b.piece.name }}</td>
-                    <td>{{ b.piece.artist }}</td>
+                    <td>{{ b.piece.title }}</td>
+                    <td>{{ b.piece.artistname }}</td>
                     <td>{{ b.amount }}</td>
                     <td>{% if b.piece.voice_auction %}Voice Auction{% endif %}</td>
                 </tr>

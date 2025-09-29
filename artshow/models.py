@@ -466,6 +466,11 @@ class Piece (models.Model):
     code = models.CharField(max_length=10, editable=False)
     name = models.CharField(max_length=100, verbose_name="title")
     media = models.CharField(max_length=100, blank=True)
+    original = models.BooleanField(null=False, default=True)
+    print_number = models.IntegerField(null=True, blank=True, default=None,
+                                       verbose_name="print number within the run")
+    print_run = models.IntegerField(null=True, blank=True, default=None,
+                                    verbose_name="size of the print run")
     other_artist = models.CharField(
         max_length=100, blank=True,
         help_text="Alternate artist name for this piece")
@@ -476,9 +481,11 @@ class Piece (models.Model):
     not_for_sale = models.BooleanField(default=False)
     adult = models.BooleanField(default=False)
     min_bid = models.DecimalField(
-        max_digits=5, decimal_places=0, blank=True, null=True)
+        max_digits=5, decimal_places=0, blank=True, null=True,
+        verbose_name="minimum bid")
     buy_now = models.DecimalField(
-        max_digits=5, decimal_places=0, blank=True, null=True)
+        max_digits=5, decimal_places=0, blank=True, null=True,
+        verbose_name="auto-buy price")
     reproduction_rights_included = models.BooleanField(
         default=False,
         help_text="This sale includes reproduction rights to the piece.")
@@ -521,6 +528,11 @@ class Piece (models.Model):
     def artistname(self):
         return self.other_artist or self.artist.artistname()
 
+    def title(self):
+        if self.original:
+            return self.name
+        return f'{self.name} ({self.print_number}/{self.print_run})'
+
     def top_bid(self):
         return self.bid_set.exclude(invalid=True).order_by('-amount')[0:1].get()
 
@@ -536,7 +548,10 @@ class Piece (models.Model):
         super(Piece, self).save(*args, **kwargs)
 
     def __str__(self):
-        return "%s - \"%s\" by %s" % (self.code, self.name, self.artistname())
+        if self.original:
+            return f'{self.code} - "{self.name}" by {self.artistname()}'
+        else:
+            return f'{self.code} - "{self.name}" by {self.artistname()} ({self.print_number}/{self.print_run})'
 
     def clean(self):
         if self.pieceid is not None and self.pieceid <= 0:
@@ -555,6 +570,18 @@ class Piece (models.Model):
             raise ValidationError("A Piece must either be Not For Sale or have a Minimum Bid")
         if self.min_bid and self.buy_now and self.min_bid >= self.buy_now:
             raise ValidationError("Buy Now must be empty, or greater than Minimum Bid")
+        if self.original:
+            if self.print_number is not None or self.print_run is not None:
+                raise ValidationError("An original piece cannot be part of a print run")
+        else:
+            if self.print_number is None or self.print_run is None:
+                raise ValidationError("A print must be part of a numbered run")
+            if self.print_run < 1:
+                raise ValidationError("A print run must be 1 or more prints")
+            if self.print_number < 1:
+                raise ValidationError("Print number must be greater than or equal to 1")
+            if self.print_number > self.print_run:
+                raise ValidationError("Print number must be less than or equalt to the size of the print run")
 
     def apply_won_status(self):
         if self.status == Piece.StatusInShow:

@@ -116,17 +116,8 @@ class PieceCheckinForm(forms.ModelForm):
     class Meta:
         model = Piece
         fields = (
-            'print_item', 'pieceid', 'name', 'media', 'adult',
-            'reproduction_rights_included', 'not_for_sale', 'min_bid',
-            'buy_now', 'location',
+            'print_item', 'location',
         )
-        widgets = {
-            'pieceid': forms.TextInput(attrs={'size': 4}),
-            'name': forms.TextInput(attrs={'size': 40}),
-            'media': forms.TextInput(attrs={'size': 40}),
-            'min_bid': forms.TextInput(attrs={'size': 5}),
-            'buy_now': forms.TextInput(attrs={'size': 5}),
-        }
 
     def __init__(self, **kwargs):
         try:
@@ -144,7 +135,7 @@ class PieceCheckinForm(forms.ModelForm):
 
 PieceCheckinFormSet = inlineformset_factory(Artist, Piece,
                                             form=PieceCheckinForm,
-                                            extra=3, can_delete=False)
+                                            extra=0, can_delete=False)
 
 
 @permission_required('artshow.is_artshow_staff')
@@ -160,6 +151,7 @@ def artist_checkin(request, artistid):
                                       form_kwargs={'artist_locations': artist.assigned_locations()})
         if formset.is_valid():
             formset.save()
+            messages.info(request, "Changes saved")
             # Create a fresh formset for further edits.
             formset = PieceCheckinFormSet(queryset=queryset, instance=artist,
                                           form_kwargs={'artist_locations': artist.assigned_locations()})
@@ -192,6 +184,7 @@ def artist_print_checkin_control_form(request, artistid):
         c = {'artist': artist, 'formset': formset}
         return render(request, 'artshow/workflows_artist_checkin.html', c)
     formset.save()
+    messages.info(request, "Changes saved")
 
     c = {
         'artists': [artist],
@@ -215,6 +208,7 @@ def artist_print_bid_sheets(request, artistid):
         c = {'artist': artist, 'formset': formset}
         return render(request, 'artshow/workflows_artist_checkin.html', c)
     formset.save()
+    messages.info(request, "Changes saved")
 
     pieces = []
     for form in formset:
@@ -243,6 +237,7 @@ def artist_print_piece_stickers(request, artistid):
         c = {'artist': artist, 'formset': formset}
         return render(request, 'artshow/workflows_artist_checkin.html', c)
     formset.save()
+    messages.info(request, "Changes saved")
 
     pieces = []
     for form in formset:

@@ -99,7 +99,7 @@
 {% if bid.form.non_field_errors or bid.form.select.errors %}
 <tr><td colspan="4">{{ bid.form.non_field_errors }}{{ bid.form.select.errors }}</td></tr>
 {% endif %}
-<tr class="selectrow purchaseitem"><td>{{ bid.form.select }}{{ bid.form.bid }}</td><td>{{ bid.piece.name }}</td><td>{{ bid.piece.artist.artistname }}</td><td class="amount money">{{ bid.amount|floatformat:money_precision }}</td></tr>
+<tr class="selectrow purchaseitem"><td>{{ bid.form.select }}{{ bid.form.bid }}</td><td>{{ bid.piece.title }}</td><td>{{ bid.piece.artistname }}</td><td class="amount money">{{ bid.amount|floatformat:money_precision }}</td></tr>
 {% empty %}
 <tr><td colspan="4">No pieces to select from.</td></tr>
 {% endfor %}

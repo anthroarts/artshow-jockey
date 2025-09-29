@@ -10,8 +10,8 @@
 {% for form in formset %}
 <tr>
   <td>{{ form.id }}{{ form.piece }}{{ form.initial.piece.code }}</td>
-  <td>{{ form.initial.piece.artist.artistname }}</td>
-  <td>{{ form.initial.piece.name }}</td>
+  <td>{{ form.initial.piece.artistname }}</td>
+  <td>{{ form.initial.piece.title }}</td>
   <td>{{ form.initial.piece.top_bid.bidder.bidder_ids|join:", " }}</td>
   <td>{{ form.initial.piece.top_bid.amount }}</td>
   <td>{{ form.action.errors }}{{ form.action }}</td>

@@ -21,7 +21,7 @@
             {% for piece in bidder.pieces %}
                 <tr>
                     {% if forloop.first %}<th class="bidder" rowspan="{{ bidder.pieces|length }}">{{ bidder.bidder_ids|join:", " }}</th>{% endif %}
-                    <td>{{ piece.code }} - <i>{{ piece.name }}</i> by {% firstof piece.artist__publicname piece.artist__person__name %}</td>
+                    <td>{{ piece.code }} - <i>{{ piece.title }}</i> by {{ piece.artistname }}</td>
                     <td>{{ piece.winning_bid }}</td>
                     <td>{{ piece.voice_auction|yesno:"Voice Auction," }}</td>
                 </tr>

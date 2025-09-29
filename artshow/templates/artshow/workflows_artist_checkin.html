@@ -66,14 +66,14 @@ document.getElementById('select-none').addEventListener('click', () => {
     {% endif %}
     <tr>{{ form.id.errors }}{{ form.id }}{{ form.artist.errors }}{{ form.artist }}
       <td>{{ form.print_item.errors }}{{ form.print_item }}</td>
-      <td>{{ form.pieceid.errors }}{{ form.pieceid }}</td>
-      <td>{{ form.name.errors }}{{ form.name }}</td>
-      <td>{{ form.media.errors }}{{ form.media }}</td>
-      <td>{{ form.adult.errors }}{{ form.adult }}</td>
-      <td>{{ form.reproduction_rights_included.errors }}{{ form.reproduction_rights_included }}</td>
-      <td>{{ form.not_for_sale.errors }}{{ form.not_for_sale }}</td>
-      <td>{{ form.min_bid.errors }}{{ form.min_bid }}</td>
-      <td>{{ form.buy_now.errors }}{{ form.buy_now }}</td>
+      <td id="pieceId{{ forloop.counter0 }}">{{ form.instance.pieceid }}</td>
+      <td id="pieceTitle{{ forloop.counter0 }}">{{ form.instance.title }}</td>
+      <td id="pieceMedia{{ forloop.counter0 }}">{{ form.instance.media }}</td>
+      <td>{{ form.instance.adult|yesno }}</td>
+      <td>{{ form.instance.reproduction_rights_included|yesno }}</td>
+      <td>{{ form.instance.not_for_sale|yesno }}</td>
+      <td>{% if form.instance.min_bid is not None %}${{ form.instance.min_bid }}{% endif %}</td>
+      <td>{% if form.instance.buy_now is not None %}${{ form.instance.buy_now }}{% endif %}</td>
       <td>{{ form.location.errors }}{{ form.location|tabindex:forloop.counter }}</td>
     </tr>
     {% endfor %}
@@ -117,9 +117,9 @@ printPieceStickers.addEventListener('click', async () => {
       continue;
     }
 
-    const pieceId = document.getElementById(`id_piece_set-${i}-pieceid`).value;
-    const pieceName = document.getElementById(`id_piece_set-${i}-name`).value;
-    const media = document.getElementById(`id_piece_set-${i}-media`).value;
+    const pieceId = document.getElementById(`pieceId${i}`).textContent;
+    const pieceName = document.getElementById(`pieceTitle${i}`).textContent;
+    const media = document.getElementById(`pieceMedia${i}`).textContent;
 
     stickers.push({pieceId, pieceName, media});
   }
