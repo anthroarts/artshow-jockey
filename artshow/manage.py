@@ -1,6 +1,6 @@
 from decimal import Decimal
 from django.apps import apps
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Sum, Q
 from django.forms import HiddenInput, ModelChoiceField
 from django.forms.formsets import formset_factory
@@ -12,9 +12,9 @@ from .models import (
 )
 from django import forms
 from django.contrib.auth.decorators import login_required
-from django.forms.models import inlineformset_factory
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
+from django.views.decorators.http import require_POST, require_safe
 from .utils import artshow_settings
 from . import square
 from . import utils
@@ -76,34 +76,49 @@ class PieceForm(forms.ModelForm):
     class Meta:
         model = Piece
         fields = (
-            'pieceid', 'name', 'media', 'other_artist', 'condition',
-            'not_for_sale', 'adult', 'reproduction_rights_included', 'min_bid',
-            'buy_now'
+            'name', 'media', 'not_for_sale', 'adult',
+            'reproduction_rights_included', 'min_bid', 'buy_now',
+            'original', 'print_number', 'print_run',
         )
         widgets = {
-            'pieceid': forms.TextInput(attrs={'size': 4}),
-            'name': forms.TextInput(attrs={'size': 40}),
-            'media': forms.TextInput(attrs={'size': 40}),
-            'min_bid': forms.TextInput(attrs={'size': 5}),
-            'buy_now': forms.TextInput(attrs={'size': 5}),
+            'name': forms.TextInput(attrs={'size': 40, 'class': 'form-control'}),
+            'media': forms.TextInput(attrs={'size': 40, 'class': 'form-control'}),
+            'not_for_sale': forms.CheckboxInput(attrs={'class': 'form-check-input',
+                                                       'data-bs-toggle': 'collapse',
+                                                       'data-bs-target': '#saleOptions',
+                                                       'aria-controls': 'saleOptions',
+                                                       'aria-expanded': 'true'}),
+            'adult': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'reproduction_rights_included': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'min_bid': forms.TextInput(attrs={'size': 5, 'class': 'form-control'}),
+            'buy_now': forms.TextInput(attrs={'size': 5, 'class': 'form-control'}),
+            'original': forms.RadioSelect(choices=[(True, 'Original'), (False, 'Print')],
+                                          attrs={'class': 'form-check-input'}),
+            'print_number': forms.TextInput(attrs={'size': 5, 'class': 'form-control'}),
+            'print_run': forms.TextInput(attrs={'size': 5, 'class': 'form-control'}),
         }
 
 
-PieceFormSet = inlineformset_factory(Artist, Piece, form=PieceForm,
-                                     extra=EXTRA_PIECES,
-                                     can_delete=True,
-                                     )
-
-
-class DeleteConfirmForm(forms.Form):
-    confirm_delete = forms.BooleanField(
-        required=False,
-        help_text="You are about to delete pieces. The information is not recoverable. Please confirm."
-    )
+def piece_as_json(piece):
+    return {
+        'id': piece.pieceid,
+        'editable': piece.is_artist_editable(),
+        'name': piece.name,
+        'media': piece.media,
+        'original': piece.original,
+        'print_number': piece.print_number,
+        'print_run': piece.print_run,
+        'not_for_sale': piece.not_for_sale,
+        'adult': piece.adult,
+        'reproduction_rights_included': piece.reproduction_rights_included,
+        'min_bid': piece.min_bid,
+        'buy_now': piece.buy_now,
+    }
 
 
 @login_required
 @user_edits_allowable
+@require_safe
 def pieces(request, artist_id):
     artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
 
@@ -112,26 +127,79 @@ def pieces(request, artist_id):
         return render(request, "artshow/manage_error.html", {'artshow_settings': artshow_settings,
                                                              'error': error})
 
-    # TODO create a custom filter/exclude in the model rather than checking for a status here.
-    locked_pieces = artist.piece_set.exclude(status=Piece.StatusNotInShow).order_by("pieceid")
-    editable_pieces = artist.piece_set.filter(status=Piece.StatusNotInShow).order_by("pieceid")
+    pieces_json = {
+        piece.pieceid: piece_as_json(piece) for piece in artist.piece_set.order_by("pieceid")}
 
-    # TODO things go badly if the status on a piece changes between the render, and the post
-    if request.method == "POST":
-        formset = PieceFormSet(request.POST, queryset=editable_pieces, instance=artist)
-        delete_confirm_form = DeleteConfirmForm(request.POST)
-        if formset.is_valid() and delete_confirm_form.is_valid():
-            if not formset.deleted_forms or delete_confirm_form.cleaned_data['confirm_delete']:
-                formset.save()
-                messages.info(request, "Changes to piece details have been saved")
-                return redirect('.')
-    else:
-        formset = PieceFormSet(queryset=editable_pieces, instance=artist)
-        delete_confirm_form = DeleteConfirmForm()
+    context = {
+        'artist': artist,
+        'pieces_json': pieces_json,
+        'form': PieceForm(),
+        'artshow_settings': artshow_settings
+    }
 
-    return render(request, "artshow/manage_pieces.html",
-                  {'artist': artist, 'formset': formset, 'delete_confirm_form': delete_confirm_form,
-                   'locked_pieces': locked_pieces, 'artshow_settings': artshow_settings})
+    return render(request, "artshow/manage_pieces.html", context)
+
+
+@login_required
+@user_edits_allowable
+@require_POST
+def add_piece(request, artist_id):
+    artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
+    if not artist.grants_access_to(request.user, can_edit_pieces=True):
+        raise PermissionDenied
+
+    next_id = 1
+    for piece in artist.piece_set.order_by('pieceid'):
+        if piece.pieceid == next_id:
+            next_id += 1
+        else:
+            break
+
+    form = PieceForm(request.POST)
+    if not form.is_valid():
+        return HttpResponse(form.errors.as_json(), content_type='application/json', status=400)
+
+    piece = form.save(commit=False)
+    piece.pieceid = next_id
+    piece.artist = artist
+    piece.save()
+    return JsonResponse(piece_as_json(piece))
+
+
+@login_required
+@user_edits_allowable
+@require_POST
+def edit_piece(request, artist_id, piece_id):
+    artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
+    if not artist.grants_access_to(request.user, can_edit_pieces=True):
+        raise PermissionDenied
+
+    piece = get_object_or_404(artist.piece_set, pieceid=piece_id)
+    if not piece.is_artist_editable:
+        raise PermissionDenied
+
+    form = PieceForm(request.POST, instance=piece)
+    if form.is_valid():
+        form.save()
+        return JsonResponse(piece_as_json(piece))
+
+    return HttpResponse(form.errors.as_json(), content_type='application/json', status=400)
+
+
+@login_required
+@user_edits_allowable
+@require_POST
+def delete_piece(request, artist_id, piece_id):
+    artist = get_object_or_404(Artist.objects.viewable_by(request.user), pk=artist_id)
+    if not artist.grants_access_to(request.user, can_edit_pieces=True):
+        raise PermissionDenied
+
+    piece = get_object_or_404(artist.piece_set, pieceid=piece_id)
+    if not piece.is_artist_editable:
+        raise PermissionDenied
+
+    piece.delete()
+    return HttpResponse(status=200)
 
 
 def yesno(b):
@@ -154,7 +222,7 @@ def downloadcsv(request, artist_id):
     c.writerow(field_names)
 
     for p in artist.piece_set.all():
-        c.writerow((p.pieceid, p.code, p.name, p.media, p.min_bid, p.buy_now, yesno(p.adult), yesno(p.not_for_sale)))
+        c.writerow((p.pieceid, p.code, p.title(), p.media, p.min_bid, p.buy_now, yesno(p.adult), yesno(p.not_for_sale)))
 
     return response
 

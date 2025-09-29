@@ -47,8 +47,8 @@ def winning_bidders(request):
                 for bid in top_bids[i:i + MAX_PIECES_PER_PAGE]:
                     bidder_data.append((
                         bid.piece.code,
-                        Paragraph("<i>%s</i>  by %s" % (escape(bid.piece.name),
-                                                        escape(bid.piece.artist.artistname())),
+                        Paragraph("<i>%s</i>  by %s" % (escape(bid.piece.title()),
+                                                        escape(bid.piece.artistname())),
                                   normal_style),
                         str(bid.amount),
                         bid.piece.voice_auction and "Voice Auction" or ""))
@@ -126,8 +126,8 @@ def bid_entry(request, pieces):
     for piece in pieces:
         data.append((
             Paragraph(escape(piece.location), normal_style),
-            Paragraph(escape(piece.artist.artistname()), normal_style),
-            Paragraph(escape(piece.name), normal_style),
+            Paragraph(escape(piece.artistname()), normal_style),
+            Paragraph(escape(piece.title()), normal_style),
             Paragraph(escape(piece.code), normal_style),
             "",
             "",
@@ -217,7 +217,7 @@ def invoice_to_pdf(invoice, outf):
         num_items += 1
         piece = item.piece
         paragraphs = [
-            Paragraph("<i>" + escape(piece.name) + "</i> \u2014 by " + escape(piece.artistname()), normal_style)]
+            Paragraph("<i>" + escape(piece.title()) + "</i> \u2014 by " + escape(piece.artistname()), normal_style)]
         details_body_parts = [escape(piece.media)]
         if piece.condition:
             details_body_parts.append(escape(piece.condition))
@@ -306,7 +306,7 @@ def picklist_to_pdf(invoice, outf):
         num_items += 1
         piece = item.piece
         paragraphs = [
-            Paragraph("<i>" + escape(piece.name) + "</i> \u2014 by " + escape(piece.artistname()), normal_style)]
+            Paragraph("<i>" + escape(piece.title()) + "</i> \u2014 by " + escape(piece.artistname()), normal_style)]
         details_body_parts = [escape(piece.media)]
         if piece.condition:
             details_body_parts.append(escape(piece.condition))

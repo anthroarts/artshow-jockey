@@ -222,7 +222,7 @@ def cashier_invoice(request, invoice_id):
 
     json_items = [{
         'code': item.piece.code,
-        'name': item.piece.name,
+        'name': item.piece.title(),
         'artistName': item.piece.artistname(),
         'price': item.price,
         'location': item.piece.location,

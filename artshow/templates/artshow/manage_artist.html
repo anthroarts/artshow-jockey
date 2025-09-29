@@ -123,13 +123,13 @@
         {% for p in pieces %}
             <tr>
                 <td>{{ p.pieceid }}</td>
-                <td>{{ p.name }}</td>
+                <td>{{ p.title }}</td>
                 <td>{{ p.media }}</td>
                 <td>{{ p.adult|yesno }}</td>
                 <td>{{ p.reproduction_rights_included|yesno }}</td>
                 <td>{{ p.not_for_sale|yesno }}</td>
-                <td>{{ p.min_bid }}</td>
-                <td>{{ p.buy_now }}</td>
+                <td>{% if p.min_bid is not None %}${{ p.min_bid }}{% endif %}</td>
+                <td>{% if p.buy_now is not None %}${{ p.buy_now }}{% endif %}</td>
             </tr>
         {% endfor %}
         <tr class="totalsrow">

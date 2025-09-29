@@ -20,9 +20,9 @@
         </thead>
         {% for p in pieces %}
             <tr>
-                <td>{{ p.artist.artistname }}</td>
+                <td>{{ p.artistname }}</td>
                 <td>{{ p.code }}</td>
-                <td>{{ p.name }}</td>
+                <td>{{ p.title }}</td>
                 <td>{{ p.top_bid.amount }}</td>
             </tr>
         {% endfor %}

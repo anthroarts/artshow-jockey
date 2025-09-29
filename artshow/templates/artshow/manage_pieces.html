@@ -1,4 +1,10 @@
 {% extends "artshow/manage_base.html" %}
+{% load static %}
+{% block extra_head %}
+<script type="text/javascript" src="{% static 'artshow/js.cookie-2.2.0.min.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha256-ew8UiV1pJH/YjpOEBInP1HxVvT/SfrCmwSoUzF9JIgc=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha256-2FMn2Zx6PuH5tdBQDRNwrOo60ts5wWPC9R8jK67b3t4=" crossorigin="anonymous">
+{% endblock %}
 {% block title %}Edit Pieces{% endblock %}
 {% block breadcrumbs %}
     <ul class="breadcrumbs">
@@ -10,15 +16,8 @@
 {% endblock %}
 {% block content %}
     <p>Managing pieces for artist <strong>{{ artist.artistname }}</strong></p>
-    <p>To enter more than 5 pieces, click "Save" and 5 more slots will appear.</p>
-    <form method="post">{% csrf_token %}
-        {% if formset.deleted_forms %}
-            <div class="confirmdelete">
-                {{ delete_confirm_form.as_p }}
-            </div>
-        {% endif %}
-        {{ formset.management_form }}
-        <table>
+    <p>
+        <table id="piece-table">
             <tr>
                 <th>Piece ID</th>
                 <th>Name/Title</th>
@@ -28,63 +27,360 @@
                 <th>Not For Sale</th>
                 <th>Min Bid</th>
                 <th>Buy Now</th>
-                <th>Delete?</th>
+                <th></th>
+                <th></th>
             </tr>
-            {% for piece in locked_pieces %}
-                <tr>
-                    <td>{{ piece.pieceid }}</td>
-                    <td>{{ piece.name }}</td>
-                    <td>{{ piece.media }}</td>
-                    <td>{{ piece.adult|yesno }}</td>
-                    <td>{{ piece.reproduction_rights_included|yesno }}</td>
-                    <td>{{ piece.not_for_sale|yesno }}</td>
-                    <td>{{ piece.min_bid }}</td>
-                    <td>{{ piece.buy_now }}</td>
-                    <td>Locked-In</td>
-                </tr>
-                {% if piece.other_artist %}
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td colspan="6">Artist: {{ piece.other_artist }}</td>
-                        <td>&nbsp;</td>
-                    </tr>
-                {% endif %}
-                {% if piece.condition %}
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td colspan="6">Condition: {{ piece.condition }}</td>
-                        <td>&nbsp;</td>
-                    </tr>
-                {% endif %}
-            {% endfor %}
-            {% for form in formset %}
-                {% if form.non_field_errors %}
-                    <tr>
-                        <td colspan="8">{{ form.non_field_errors }}</td>
-                    </tr>
-                {% endif %}
-                <tr>{{ form.id.errors }}{{ form.id }}{{ form.artist.errors }}{{ form.artist }}
-                    <td>{{ form.pieceid.errors }}{{ form.pieceid }}</td>
-                    <td>{{ form.name.errors }}{{ form.name }}</td>
-                    <td>{{ form.media.errors }}{{ form.media }}</td>
-                    <td>{{ form.adult.errors }}{{ form.adult }}</td>
-                    <td>{{ form.reproduction_rights_included.errors }}{{ form.reproduction_rights_included }}</td>
-                    <td>{{ form.not_for_sale.errors }}{{ form.not_for_sale }}</td>
-                    <td>{{ form.min_bid.errors }}{{ form.min_bid }}</td>
-                    <td>{{ form.buy_now.errors }}{{ form.buy_now }}</td>
-                    <td>{{ form.DELETE }}</td>
-                </tr>
-            {% endfor %}
         </table>
-        <p><input type="submit" value="Save"/></p>
-    </form>
-    {% if locked_pieces %}
-        <hr/>
-        <p><strong>Locked-In</strong> pieces cannot be edited as we have already printed the bid-sheets for them. If you
-            wanted to:</p>
-        <ul>
-            <li>make a change, duplicate the piece under a new piece ID, and show the piece under that ID.</li>
-            <li>delete it, simply don't show the piece. Our system handles "no-show" pieces just fine.</li>
-        </ul>
+    </p>
+
+    <p>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-whatever="add">Add another piece</button>
+    </p>
+
+    <div class="modal" tabindex="-1" id="editModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit piece</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editForm">
+                    <fieldset id="editFields" disabled>
+                        <div class="modal-body" id="editBody">
+                            <div>
+                                <label class="form-label" for="{{ form.name.auto_id }}">{{ form.name.label }}</label>
+                                {{ form.name }}
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label" for="{{ form.media.auto_id }}">{{ form.media.label }}</label>
+                                {{ form.media }}
+                            </div>
+                            <div class="form-check mt-2">
+                                <label class="form-label" for="{{ form.adult.auto_id }}">{{ form.adult.label }}</label>
+                                {{ form.adult }}
+                            </div>
+                            {% for radio in form.original %}
+                            <div class="form-check form-check-inline">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label> 
+                            </div>
+                            {% endfor %}
+                            <div class="collapse" id="printRunOptions">
+                                <div class="mt-2">
+                                    <label class="form-label" for="{{ form.print_run.auto_id }}">{{ form.print_run.label }}</label>
+                                    {{ form.print_run }}
+                                </div>
+                                <div class="mt-2">
+                                    <label class="form-label" for="{{ form.print_number.auto_id }}">{{ form.print_number.label }}</label>
+                                    {{ form.print_number }}
+                                </div>
+                            </div>
+                            <div class="form-check mt-2">
+                                <label class="form-label" for="{{ form.not_for_sale.auto_id }}">{{ form.not_for_sale.label }}</label>
+                                {{ form.not_for_sale }}
+                            </div>
+                            <div class="collapse show" id="saleOptions">
+                                <div>
+                                    <label class="form-label" for="{{ form.min_bid.auto_id }}">{{ form.min_bid.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        {{ form.min_bid }}
+                                        <span class="input-group-text">.00</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <label class="form-label" for="{{ form.buy_now.auto_id }}">{{ form.buy_now.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        {{ form.buy_now }}
+                                        <span class="input-group-text">.00</span>
+                                    </div>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <label class="form-label" for="{{ form.reproduction_rights_included.auto_id }}">{{ form.reproduction_rights_included.label }}</label>
+                                    {{ form.reproduction_rights_included }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" tabindex="-1" id="deleteModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete piece</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this piece?
+                </div>
+                <div class="modal-footer">
+                    <form id="deleteForm">
+                        <fieldset id="deleteFields" disabled>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep</button>
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if has_locked_pieces %}
+    <hr/>
+    <p>
+        <strong>Locked-In</strong> pieces cannot be edited as we have already printed the bid-sheets for them. If you
+        wanted to:
+    </p>
+    <ul>
+        <li>make a change, duplicate the piece under a new piece ID, and show the piece under that ID.</li>
+        <li>delete it, simply don't show the piece. Our system handles "no-show" pieces just fine.</li>
+    </ul>
     {% endif %}
+
+    {{ pieces_json|json_script:"pieces-data" }}
+
+    <script>
+        const pieces = JSON.parse(document.getElementById('pieces-data').textContent);
+        const pieceTable = document.getElementById('piece-table');
+
+        function renderPiece(piece) {
+            let controls = '<td colspan="2">Locked-In</td>';
+            if (piece.editable) {
+                controls = `
+                    <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-whatever="${piece.id}">Edit</button></td>
+                    <td><button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-bs-whatever="${piece.id}">Delete</button></td>
+                `;
+            }
+
+            return `
+                <td>${piece.id}</td>
+                <td>${piece.name}${piece.original ? '' : ` (${piece.print_number}/${piece.print_run})`}</td>
+                <td>${piece.media}</td>
+                <td>${piece.adult ? 'yes' : 'no'}</td>
+                <td>${piece.reproduction_rights_included ? 'yes' : 'no' }</td>
+                <td>${piece.not_for_sale ? 'yes' : 'no' }</td>
+                <td>${piece.min_bid === null ? '' : `$${piece.min_bid}`}</td>
+                <td>${piece.buy_now === null ? '' : `$${piece.buy_now}`}</td>
+                ${controls}
+            `;
+        }
+
+        function addPieceToTable(piece) {
+            const row = document.createElement('tr');
+            row.setAttribute('data-piece-id', piece.id);
+            row.innerHTML = renderPiece(piece);
+            pieceTable.append(row);
+        }
+
+        for (const piece_id in pieces) {
+            const piece = pieces[piece_id];
+            addPieceToTable(piece);
+        }
+
+        let selectedPiece = null;
+
+        const editModal = document.getElementById('editModal');
+        const editForm = document.getElementById('editForm');
+        const editFields = document.getElementById('editFields');
+        editModal.addEventListener('show.bs.modal', event => {
+            const button = event.relatedTarget;
+            const pieceId = button.getAttribute('data-bs-whatever');
+            if (pieceId == 'add') {
+                selectedPiece = null;
+                editForm.querySelector('#id_name').value = "";
+                editForm.querySelector('#id_media').value = "";
+                editForm.querySelector('#id_adult').checked = false;
+                editForm.querySelector('#id_original_0').checked = true;
+                editForm.querySelector('#id_original_1').checked = false;
+                printRunCollapse.hide();
+                editForm.querySelector('#id_print_number').value = "";
+                editForm.querySelector('#id_print_run').value = "";
+                editForm.querySelector('#id_reproduction_rights_included').checked = false;
+                editForm.querySelector('#id_not_for_sale').checked = false;
+                saleOptionsCollapse.show();
+                editForm.querySelector('#id_min_bid').value = "";
+                editForm.querySelector('#id_buy_now').value = "";
+            } else {
+                selectedPiece = pieces[pieceId];
+                editForm.querySelector('#id_name').value = selectedPiece.name;
+                editForm.querySelector('#id_media').value = selectedPiece.media;
+                editForm.querySelector('#id_adult').checked = selectedPiece.adult;
+                editForm.querySelector('#id_original_0').checked = selectedPiece.original;
+                editForm.querySelector('#id_original_1').checked = !selectedPiece.original;
+                if (selectedPiece.original) {
+                    printRunCollapse.hide();
+                } else {
+                    printRunCollapse.show();
+                }
+                editForm.querySelector('#id_print_number').value = selectedPiece.print_number;
+                editForm.querySelector('#id_print_run').value = selectedPiece.print_run;
+                editForm.querySelector('#id_reproduction_rights_included').checked = selectedPiece.reproduction_rights_included;
+                editForm.querySelector('#id_not_for_sale').checked = selectedPiece.not_for_sale;
+                if (selectedPiece.not_for_sale) {
+                    saleOptionsCollapse.hide();
+                } else {
+                    saleOptionsCollapse.show();
+                }
+                editForm.querySelector('#id_min_bid').value = selectedPiece.min_bid;
+                editForm.querySelector('#id_buy_now').value = selectedPiece.buy_now;
+            }
+            resetErrors();
+            editFields.disabled = false;
+        });
+
+        editModal.addEventListener('shown.bs.modal', event => {
+            document.getElementById('id_name').focus();
+        });
+
+        function resetErrors() {
+            editForm.querySelectorAll('.alert').forEach(element => element.remove());
+            editForm.querySelectorAll('.invalid-feedback').forEach(element => element.remove());
+            editForm.querySelectorAll('.is-invalid').forEach(element => element.classList.remove('is-invalid'));
+        }
+
+        editForm.addEventListener('submit', async event => {
+            event.preventDefault();
+            const formData = new FormData(editForm);
+
+            editFields.disabled = true;
+            resetErrors();
+
+            let url = '../piece/';
+            if (selectedPiece) {
+                url += `${selectedPiece.id}/`;
+            }
+
+            const response = await fetch(url, {
+                method: 'POST',
+                credentials: 'include',
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRFToken': Cookies.get('csrftoken'),
+                },
+                body: formData,
+            });
+
+            if (response.ok) {
+                const savedPiece = await response.json();
+                pieces[savedPiece.id] = savedPiece;
+                if (selectedPiece) {
+                    const row = pieceTable.querySelector(`[data-piece-id="${selectedPiece.id}"]`);
+                    row.innerHTML = renderPiece(savedPiece);
+                } else {
+                    addPieceToTable(savedPiece);
+                }
+
+                bootstrap.Modal.getInstance(editModal).hide();
+                return;
+            }
+
+            const errors = await response.json();
+            for (const field in errors) {
+                if (field == "__all__") {
+                    const editBody = document.getElementById('editBody');
+                    const feedback = document.createElement('div');
+                    feedback.classList.add('alert');
+                    feedback.classList.add('alert-danger');
+                    const messages = errors[field].map(error => error.message);
+                    feedback.innerText = messages.join(' ');
+                    editBody.prepend(feedback);
+                } else {
+                    const fieldWithError = document.getElementById(`id_${field}`);
+                    const feedback = document.createElement('div');
+                    feedback.classList.add('invalid-feedback');
+                    const messages = errors[field].map(error => error.message);
+                    feedback.innerText = messages.join(' ');
+                    fieldWithError.classList.add('is-invalid');
+                    fieldWithError.after(feedback);
+                }
+            }
+            editFields.disabled = false;
+        });
+
+        const printRunOptions = document.getElementById('printRunOptions');
+        const printRunCollapse = new bootstrap.Collapse('#printRunOptions', {
+            toggle: false
+        });
+        printRunOptions.addEventListener('shown.bs.collapse', event => {
+            if (editForm.querySelector('#id_original_0').checked) {
+                printRunCollapse.hide();
+            }
+        });
+        printRunOptions.addEventListener('hidden.bs.collapse', event => {
+            if (editForm.querySelector('#id_original_1').checked) {
+                printRunCollapse.show();
+            } else {
+                editForm.querySelector('#id_print_number').value = "";
+                editForm.querySelector('#id_print_run').value = "";
+            }
+        });
+        editForm.querySelector('#id_original_0').addEventListener('change', event => {
+            printRunCollapse.hide();
+        });
+        editForm.querySelector('#id_original_1').addEventListener('change', event => {
+            printRunCollapse.show();
+        });
+
+        const saleOptions = document.getElementById('saleOptions');
+        const saleOptionsCollapse = new bootstrap.Collapse('#saleOptions', {
+            toggle: false
+        });
+        saleOptions.addEventListener('shown.bs.collapse', event => {
+            if (editForm.querySelector('#id_not_for_sale').checked) {
+                saleOptionsCollapse.hide();
+            }
+        });
+        saleOptions.addEventListener('hidden.bs.collapse', event => {
+            if (!editForm.querySelector('#id_not_for_sale').checked) {
+                saleOptionsCollapse.show();
+            } else {
+                editForm.querySelector('#id_min_bid').value = "";
+                editForm.querySelector('#id_buy_now').value = "";
+                editForm.querySelector('#id_reproduction_rights_included').checked = false;
+            }
+        });
+
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteForm = document.getElementById('deleteForm');
+        const deleteFields = document.getElementById('deleteFields');
+        deleteModal.addEventListener('show.bs.modal', event => {
+            const button = event.relatedTarget;
+            const pieceId = button.getAttribute('data-bs-whatever');
+            selectedPiece = pieces[pieceId];
+            deleteFields.disabled = false;
+        });
+        deleteForm.addEventListener('submit', async event => {
+            event.preventDefault();
+
+            deleteFields.disabled = true;
+
+            const response = await fetch(`../piece/${selectedPiece.id}/delete/`, {
+                method: 'POST',
+                credentials: 'include',
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRFToken': Cookies.get('csrftoken'),
+                },
+            });
+            if (!response.ok) {
+                window.location.reload();
+                return;
+            }
+            delete pieces[selectedPiece.id];
+            pieceTable.querySelector(`[data-piece-id="${selectedPiece.id}"]`).remove();
+
+            bootstrap.Modal.getInstance(deleteModal).hide();
+        });
+    </script>
 {% endblock %}

@@ -112,7 +112,7 @@
   {% for piece in artist.ordered_pieces %}
   <tr>
     <td>{{ piece.pieceid }}</td>
-    <td>{{ piece.name }}</td>
+    <td>{{ piece.title }}</td>
     <td>{{ piece.adult|yesno }}</td>
     <td>{% if piece.not_for_sale %}NFS{% else %}${{ piece.min_bid }}{% endif %}</td>
     <td>{% if piece.buy_now %}${{ piece.buy_now }}{% else %}N/A{% endif %}</td>
