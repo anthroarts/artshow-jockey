@@ -203,21 +203,21 @@ class Artist (models.Model):
                 a.allocated += size
                 a.allocated_charge += size * a.space.price
 
-        total_requested_cost = reduce(lambda acc, a: acc + a.allocated * a.space.price,
+        total_allocated_cost = reduce(lambda acc, a: acc + a.allocated * a.space.price,
                                       allocations, Decimal(0))
 
         # Deductions from accounts are always negative, so we re-negate it.
         deduction_to_date = - (
             self.payment_set.filter(payment_type_id=settings.ARTSHOW_SPACE_FEE_PK).aggregate(amount=Sum("amount"))["amount"] or 0)
-        deduction_remaining = max(total_requested_cost - deduction_to_date, 0)
-        return total_requested_cost, deduction_to_date, deduction_remaining, allocations
+        deduction_remaining = max(total_allocated_cost - deduction_to_date, 0)
+        return total_allocated_cost, deduction_to_date, deduction_remaining, allocations
 
     def payment_remaining_with_details(self):
         """Calculate remaining payment expected, based on negative balance, plus any space reservations as yet
         unaccounted for."""
-        total_requested_cost, deduction_to_date, deduction_remaining, allocations = self.deduction_remaining_with_details()
+        total_allocated_cost, deduction_to_date, deduction_remaining, allocations = self.deduction_remaining_with_details()
         payment_remaining = max(deduction_remaining - self.balance(), 0)
-        return total_requested_cost, deduction_to_date, deduction_remaining, payment_remaining, allocations
+        return total_allocated_cost, deduction_to_date, deduction_remaining, payment_remaining, allocations
 
     def __str__(self):
         return "%s (%s)" % (self.artistname(), self.artistid)
