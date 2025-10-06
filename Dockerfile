@@ -36,7 +36,7 @@ RUN uv run flake8 && \
     uv run manage.py collectstatic
 
 EXPOSE 8000/tcp
-CMD ["uv", "run", "supervisord", "-c", "/code/supervisord.conf"]
+CMD ["/venv/bin/supervisord", "-c", "/code/supervisord.conf"]
 
 # Production environment.
 FROM native-deps AS prod
@@ -51,4 +51,4 @@ RUN DATABASE_URL="sqlite:///data/artshowjockey.db" \
     uv run manage.py collectstatic
 
 EXPOSE 8000/tcp
-CMD ["/code/.venv/bin/supervisord", "-c", "/code/supervisord.conf"]
+CMD ["/venv/bin/supervisord", "-c", "/code/supervisord.conf"]
