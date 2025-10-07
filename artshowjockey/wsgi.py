@@ -26,3 +26,8 @@ application = get_wsgi_application()
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
 # application = HelloWorldApplication(application)
+
+# Preload the application code by preloading the URLs configuration
+from django.urls import get_resolver
+from artshowjockey.settings import ROOT_URLCONF
+get_resolver(ROOT_URLCONF).url_patterns
