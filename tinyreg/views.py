@@ -85,15 +85,15 @@ def oauth_complete(request):
         person = Person(
             name=user_info['firstName'] + ' ' + user_info['lastName'],
             address1=user_info['addressLine1'],
-            address2=user_info.get('addressLine2', ''),
+            address2=user_info.get('addressLine2') or '',
             city=user_info['addressCity'],
             state=user_info['addressState'],
             postcode=user_info['addressZipcode'],
             country=user_info['addressCountry'],
-            phone=user_info.get('phone', ''),
+            phone=user_info.get('phone') or '',
             email=user_info['email'],
             reg_id=reg_id,
-            preferred_name=user_info.get('preferredName', ''),
+            preferred_name=user_info.get('preferredName') or '',
             user=user)
         person.save()
 

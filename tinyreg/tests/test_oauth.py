@@ -90,6 +90,39 @@ class OAuthTests(LiveServerTestCase):
         self.assertEqual(person.phone, '')
         self.assertEqual(person.email, 'fox@example.com')
 
+    def test_create_user_optional_fields_null(self):
+        CurrentUserView.current_user = {
+            'id': 42,
+            'firstName': 'Foxy',
+            'lastName': 'McFoxerson',
+            'addressLine1': '123 Main St.',
+            'addressLine2': None,
+            'addressCity': 'New York',
+            'addressState': 'NY',
+            'addressZipcode': '12345',
+            'addressCountry': 'US',
+            'phone': None,
+            'email': 'fox@example.com',
+        }
+
+        url = reverse('oauth-redirect')
+        response = requests.get(self.live_server_url + url)
+        self.assertEqual(response.status_code, 200)
+
+        user = User.objects.get(username="42")
+        person = user.person
+        self.assertEqual(person.reg_id, "42")
+        self.assertEqual(person.name, 'Foxy McFoxerson')
+        self.assertEqual(person.preferred_name, '')
+        self.assertEqual(person.address1, '123 Main St.')
+        self.assertEqual(person.address2, '')
+        self.assertEqual(person.city, 'New York')
+        self.assertEqual(person.state, 'NY')
+        self.assertEqual(person.postcode, '12345')
+        self.assertEqual(person.country, 'US')
+        self.assertEqual(person.phone, '')
+        self.assertEqual(person.email, 'fox@example.com')
+
     def test_log_in_with_existing_person(self):
         CurrentUserView.current_user = {
             'id': 42,
