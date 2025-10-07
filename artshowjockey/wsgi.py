@@ -27,7 +27,7 @@ application = get_wsgi_application()
 # from helloworld.wsgi import HelloWorldApplication
 # application = HelloWorldApplication(application)
 
-# Preload the application code by preloading the URLs configuration
-from django.urls import get_resolver
-from artshowjockey.settings import ROOT_URLCONF
+# Preload the application code by preloading the URLs configuration.
+from django.urls import get_resolver  # noqa: E402
+from artshowjockey.settings import ROOT_URLCONF  # noqa: E402
 get_resolver(ROOT_URLCONF).url_patterns
