@@ -11,8 +11,8 @@
 {% block content %}
     <h1>Make a payment</h1>
     <p>
-      To secure your space requests, we require pre-payment for the cost of
-      that space. We can only accept payment using a credit card.
+      After space has been allocated we require pre-payment for the cost of
+      the space to secure it. We only accept payment using a credit card.
     </p>
 
     <p>Summary of your current account balance:</p>
@@ -20,35 +20,37 @@
         <tr>
             <th>Space</th>
             <th>Requested</th>
+            <th>Allocated</th>
             <th>Cost</th>
         </tr>
         {% for a in allocations %}
         <tr>
             <td>{{ a.space }}</td>
+            <td class="number">{{ a.requested }}</td>
             <td class="number">{{ a.allocated }}</td>
             <td class="money">${{ a.allocated_charge|floatformat:2 }}</td>
         </tr>
         {% endfor %}
         <tr class="totalsrow">
-            <td colspan="2">Total cost for requested spaces</td>
+            <td colspan="3">Total cost for allocated spaces</td>
             <td class="money">${{ total_allocated_cost|floatformat:2 }}</td>
         </tr>
         {% if deduction_to_date %}
             <tr>
-                <td colspan="2">Minus space fees already deducted</td>
+                <td colspan="3">Minus space fees already deducted</td>
                 <td class="money">${{ deduction_to_date|floatformat:2 }}</td>
                 <td class="tablenotes">&larr; We usually don't deduct space fees from your account until the middle of
                     the show. If we do, we'll tell you why.
                 </td>
             </tr>
             <tr class="totalsrow">
-                <td colspan="2">Remaining cost for requested spaces</td>
+                <td colspan="3">Remaining cost for requested spaces</td>
                 <td class="money">${{ deduction_remaining|floatformat:2 }}</td>
             </tr>
         {% endif %}
         {% if account_balance %}
             <tr>
-                <td colspan="2">Minus account balance</td>
+                <td colspan="3">Minus account balance</td>
                 <td class="money">${{ account_balance|floatformat:2 }}</td>
                 <td class="tablenotes">&larr; You have a positive account balance. Before the show, this is most often
                     used to secure your space requests, and is thus taken into account here.
@@ -56,7 +58,7 @@
             </tr>
         {% endif %}
         <tr class="totalsrow">
-            <td colspan="2">Payment required</td>
+            <td colspan="3">Payment required</td>
             <td class="money">${{ payment_remaining|floatformat:2 }}</td>
         </tr>
     </table>
