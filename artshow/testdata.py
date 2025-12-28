@@ -85,7 +85,7 @@ def create(email):
     locations = Location.objects.bulk_create(locations)
 
     # Create 500 bidders
-    bidder_users = [User(username=f'bidder{i}', email=email.replace('@', f'+artist{i}@')) for i in range(500)]
+    bidder_users = [User(username=f'bidder{i}', email=email.replace('@', f'+bidder{i}@')) for i in range(500)]
     bidder_users = User.objects.bulk_create(bidder_users)
 
     bidder_people = [
