@@ -41,9 +41,8 @@ def winning_bidders(request):
     ).order_by('bidder', 'id')
     winning_bid_query = Bid.objects.filter(
         piece=OuterRef('pk'), invalid=False).order_by('-amount')
-    pieces = Piece.objects.values(
-        'code', 'name', 'artist__publicname', 'artist__person__name',
-        'voice_auction'
+    pieces = Piece.objects.select_related(
+        'artist', 'artist__person'
     ).filter(Exists(winning_bid_query)).annotate(
         winning_bidder=Subquery(winning_bid_query.values('bidder')[:1]),
         winning_bid=Subquery(winning_bid_query.values('amount')[:1])
@@ -64,8 +63,8 @@ def winning_bidders(request):
 
     bidder_index = 0
     for piece in pieces:
-        assert piece['winning_bidder'] >= bidders[bidder_index]['bidder']
-        while piece['winning_bidder'] != bidders[bidder_index]['bidder']:
+        assert piece.winning_bidder >= bidders[bidder_index]['bidder']
+        while piece.winning_bidder != bidders[bidder_index]['bidder']:
             bidder_index += 1
         bidders[bidder_index]['pieces'].append(piece)
 
