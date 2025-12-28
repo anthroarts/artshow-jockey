@@ -100,12 +100,14 @@ def create(email):
     bidder_ids = [BidderId(id=str(i).zfill(4), bidder=bidder) for i, bidder in enumerate(bidders, start=1)]
     BidderId.objects.bulk_create(bidder_ids)
 
-    # Create 5000 bids
+    # Create bids
     bids = []
-    for i in range(1, 5001):
-        piece = pieces[i % len(pieces)]
-        bidder = bidders[i % len(bidders)]
-        bidder_id = bidder.bidderid_set.first()
-        if bidder_id:
-            bids.append(Bid(piece=piece, bidder=bidder, amount=i, bidderid=bidder_id))
+    for piece in pieces:
+        num_bids = distribution(6)
+        bid = piece.min_bid
+        for _ in range(num_bids + 1):
+            bidder = random.choice(bidders)
+            bidder_id = bidder.bidderid_set.first()
+            bids.append(Bid(piece=piece, bidder=bidder, amount=bid, bidderid=bidder_id))
+            bid += 10
     Bid.objects.bulk_create(bids)
