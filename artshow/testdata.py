@@ -21,7 +21,7 @@ def create(email):
     artist_users = User.objects.bulk_create(artist_users)
 
     artist_people = [
-        Person(user=user, email=user.email, name=generate_name(style='capital'))
+        Person(user=user, email=user.email, email_confirmed=True, name=generate_name(style='capital'))
         for user in artist_users
     ]
     artist_people = Person.objects.bulk_create(artist_people)
@@ -89,7 +89,7 @@ def create(email):
     bidder_users = User.objects.bulk_create(bidder_users)
 
     bidder_people = [
-        Person(user=user, email=user.email, name=generate_name(style='capital'))
+        Person(user=user, email=user.email, email_confirmed=True, name=generate_name(style='capital'))
         for user in bidder_users
     ]
     bidder_people = Person.objects.bulk_create(bidder_people)
