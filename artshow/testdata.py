@@ -1,4 +1,6 @@
 from django.contrib.auth.models import User
+from names_generator import generate_name
+import random
 
 from .models import Artist, Bid, Bidder, BidderId, Piece
 from peeps.models import Person
@@ -8,34 +10,48 @@ def create(email):
     # Create 99 artists
     artist_users = [
         User(username=f'artist{i}', email=email.replace('@', f'+artist{i}@'))
-        for i in range(2, 101)
+        for i in range(1, 100)
     ]
     artist_users = User.objects.bulk_create(artist_users)
 
-    artist_people = [Person(user=user) for user in artist_users]
+    artist_people = [
+        Person(user=user, email=user.email, name=generate_name(style='capital'))
+        for user in artist_users
+    ]
     artist_people = Person.objects.bulk_create(artist_people)
 
-    artists = [Artist(person=person, artistid=i) for i, person in enumerate(artist_people, start=2)]
+    artists = []
+    for i, person in enumerate(artist_people, start=1):
+        publicname = ""
+        if bool(random.getrandbits(1)):
+            publicname = generate_name(style='capital')
+        artists.append(Artist(person=person, artistid=i, publicname=publicname))
     artists = Artist.objects.bulk_create(artists)
 
     # Create pieces for artists
     pieces = []
     for artist in artists:
-        pieces.append(Piece(
-            artist=artist,
-            pieceid=1,
-            name=f"Masterpiece by {artist.artistname()}",
-            min_bid=10,
-            status=Piece.StatusInShow,
-            location="A1"
-        ))
+        num_pieces = random.randint(1, 25)
+        for i in range(1, num_pieces + 1):
+            pieces.append(Piece(
+                artist=artist,
+                pieceid=i,
+                code=f'{artist.artistid}-{i}',
+                name=generate_name(style='capital'),
+                min_bid=10,
+                status=Piece.StatusInShow,
+                location="A1"
+            ))
     pieces = Piece.objects.bulk_create(pieces)
 
     # Create 500 bidders
-    bidder_users = [User(username=f'bidder{i}', email=f'bidder{i}@example.com') for i in range(1, 501)]
+    bidder_users = [User(username=f'bidder{i}', email=email.replace('@', f'+artist{i}@')) for i in range(500)]
     bidder_users = User.objects.bulk_create(bidder_users)
 
-    bidder_people = [Person(user=user) for user in bidder_users]
+    bidder_people = [
+        Person(user=user, email=user.email, name=generate_name(style='capital'))
+        for user in bidder_users
+    ]
     bidder_people = Person.objects.bulk_create(bidder_people)
 
     bidders = [Bidder(person=person) for person in bidder_people]
