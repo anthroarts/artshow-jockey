@@ -28,62 +28,69 @@ def send_telegram_message(task_pk, chat_id, text):
     BulkMessagingTask.objects.filter(pk=task_pk).update(sent_count=F('sent_count') + 1)
 
 
+@app.task(rate_limit='1/s', autoretry_for=(Exception,), retry_backoff=True)
+def send_results_email(task_pk, bidder_pk):
+    bidder = Bidder.objects.get(pk=bidder_pk)
+
+    pieces_won, pieces_not_won, pieces_in_voice_auction = bidder.get_results()
+    text_content = render_to_string('artshow/bid_results_email.txt', {
+        'artshow_settings': artshow_settings,
+        'bidder': bidder,
+        'pieces_won': pieces_won,
+        'pieces_not_won': pieces_not_won,
+        'pieces_in_voice_auction': pieces_in_voice_auction,
+    })
+
+    mail.send_mail(
+        subject=f'{artshow_settings.SITE_NAME} results',
+        message=text_content,
+        from_email=artshow_settings.ARTSHOW_EMAIL_SENDER,
+        recipient_list=[bidder.person.email],
+    )
+
+    BulkMessagingTask.objects.filter(pk=task_pk).update(sent_count=F('sent_count') + 1)
+
+
 @app.task
 def email_results():
-    bidders = Bidder.objects.filter(person__email_confirmed=True)
-
-    messages_to_send = []
-    for bidder in bidders:
-        pieces_won, pieces_not_won, pieces_in_voice_auction = \
-            bidder.get_results()
-        text_content = render_to_string('artshow/bid_results_email.txt', {
-            'artshow_settings': artshow_settings,
-            'bidder': bidder,
-            'pieces_won': pieces_won,
-            'pieces_not_won': pieces_not_won,
-            'pieces_in_voice_auction': pieces_in_voice_auction,
-        })
-        messages_to_send.append((bidder.person.email, text_content))
+    bidders = Bidder.objects.values('pk').filter(person__email_confirmed=True)
 
     task = BulkMessagingTask(name='Send results via email')
-    task.message_count = len(messages_to_send)
+    task.message_count = len(bidders)
     task.save()
 
-    for (email, text_content) in messages_to_send:
-        send_email.delay(
-            task_pk=task.pk,
-            recipient=email,
-            subject=f'{artshow_settings.SITE_NAME} results',
-            message=text_content,
-        )
+    for bidder in bidders:
+        send_results_email.delay(task_pk=task.pk, bidder_pk=bidder.pk)
+
+
+@app.task(rate_limit='1/s', autoretry_for=(Exception,), retry_backoff=True)
+def send_results_telegram_message(task_pk, bidder_pk):
+    bidder = Bidder.objects.get(pk=bidder_pk)
+
+    pieces_won, pieces_not_won, pieces_in_voice_auction = bidder.get_results()
+    text_content = render_to_string('artshow/bid_results_message.txt', {
+        'artshow_settings': artshow_settings,
+        'bidder': bidder,
+        'pieces_won': pieces_won,
+        'pieces_not_won': pieces_not_won,
+        'pieces_in_voice_auction': pieces_in_voice_auction,
+    })
+
+    telegram.send_message(bidder.person.telegram_chat_id, text_content)
+
+    BulkMessagingTask.objects.filter(pk=task_pk).update(sent_count=F('sent_count') + 1)
 
 
 @app.task
 def telegram_results():
-    bidders = Bidder.objects.filter(person__telegram_chat_id__isnull=False)
-
-    messages_to_send = []
-    for bidder in bidders:
-        pieces_won, pieces_not_won, pieces_in_voice_auction = \
-            bidder.get_results()
-        text_content = render_to_string('artshow/bid_results_message.txt', {
-            'artshow_settings': artshow_settings,
-            'bidder': bidder,
-            'pieces_won': pieces_won,
-            'pieces_not_won': pieces_not_won,
-            'pieces_in_voice_auction': pieces_in_voice_auction,
-        })
-        messages_to_send.append((bidder.person.telegram_chat_id, text_content))
+    bidders = Bidder.objects.values('pk').filter(person__telegram_chat_id__isnull=False)
 
     task = BulkMessagingTask(name='Send results via Telegram')
-    task.message_count = len(messages_to_send)
+    task.message_count = len(bidders)
     task.save()
 
-    for (chat_id, text_content) in messages_to_send:
-        send_telegram_message.delay(
-            task_pk=task.pk,
-            chat_id=chat_id,
-            text=text_content)
+    for bidder in bidders:
+        send_results_telegram_message.delay(task_pk=task.pk, bidder_pk=bidder.pk)
 
 
 @app.task
