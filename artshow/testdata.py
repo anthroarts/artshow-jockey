@@ -111,3 +111,20 @@ def create(email):
             bids.append(Bid(piece=piece, bidder=bidder, amount=bid, bidderid=bidder_id))
             bid += 10
     Bid.objects.bulk_create(bids)
+
+
+def voice_auction():
+    pieces = Piece.objects.filter(status=Piece.StatusInShow, voice_auction=True)
+    bids = []
+    bidders = Bidder.objects.prefetch_related('bidderid_set').all()
+
+    for piece in pieces:
+        if random.choices((True, False), weights=(9, 1)):
+            bid = piece.top_bid().amount + 10
+            bidder = random.choice(bidders)
+            bidder_id = bidder.bidderid_set.first()
+            bids.append(Bid(piece=piece, bidder=bidder, amount=bid, bidderid=bidder_id))
+        piece.status = Piece.StatusWon
+
+    pieces.bulk_update(pieces, ['status'])
+    Bid.objects.bulk_create(bids)

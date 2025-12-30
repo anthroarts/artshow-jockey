@@ -23,3 +23,8 @@ class ManageTests(TestCase):
 
         response = self.client.post(reverse('artshow-workflow-close-show'))
         self.assertEqual(response.status_code, 200)
+
+        testdata.voice_auction()
+
+        response = self.client.post(reverse('artshow-workflow-close-show'))
+        self.assertEqual(response.status_code, 200)
