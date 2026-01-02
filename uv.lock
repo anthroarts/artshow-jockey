@@ -50,6 +50,7 @@ dependencies = [
     { name = "django-ses" },
     { name = "environs", extra = ["django"] },
     { name = "gunicorn" },
+    { name = "names-generator" },
     { name = "num2words" },
     { name = "pdfrw" },
     { name = "psycopg", extra = ["binary"] },
@@ -78,6 +79,7 @@ requires-dist = [
     { name = "django-ses", specifier = ">=4.4.0" },
     { name = "environs", extras = ["django"], specifier = ">=14.3.0" },
     { name = "gunicorn", specifier = ">=23.0.0" },
+    { name = "names-generator", specifier = ">=0.2.0" },
     { name = "num2words", specifier = ">=0.5.14" },
     { name = "pdfrw", specifier = ">=0.4" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2.9" },
@@ -243,6 +245,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/cb/a2/57f4ac79838cfae6912f997b4d1a64a858fb0c86d7fcaae6f7b58d267fca/click-repl-0.3.0.tar.gz", hash = "sha256:17849c23dba3d667247dc4defe1757fff98694e90fe37474f3feebb69ced26a9", size = 10449, upload-time = "2023-06-15T12:43:51.141Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/52/40/9d857001228658f0d59e97ebd4c346fe73e138c6de1bce61dc568a57c7f8/click_repl-0.3.0-py3-none-any.whl", hash = "sha256:fb7e06deb8da8de86180a33a9da97ac316751c094c6899382da7feeeeb51b812", size = 10289, upload-time = "2023-06-15T12:43:48.626Z" },
+]
+
+[[package]]
+name = "cmdkit"
+version = "2.7.7"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a9/8d/0483d6018a5293ef74889ee132b243d34c324be19378acb93341bbefb43b/cmdkit-2.7.7.tar.gz", hash = "sha256:afe20b60ee60658e299dba465248b74c1801bfe24f891ef745b3a6810251c280", size = 23225, upload-time = "2024-12-28T21:21:57.08Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/23/62/c82680c31dc2dcfa55918a28720d2e5695cbb4e778b621416d12883203cd/cmdkit-2.7.7-py3-none-any.whl", hash = "sha256:9dfb1ae63329d0ce1970886206ef14a9773d5ebcc15608c96df119bc82abf023", size = 26819, upload-time = "2024-12-28T21:21:54.931Z" },
 ]
 
 [[package]]
@@ -517,6 +528,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e7/ff/0ffefdcac38932a54d2b5eed4e0ba8a408f215002cd178ad1df0f2806ff8/mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325", size = 9658, upload-time = "2022-01-24T01:14:51.113Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/27/1a/1f68f9ba0c207934b35b86a8ca3aad8395a3d6dd7921c0686e23853ff5a9/mccabe-0.7.0-py2.py3-none-any.whl", hash = "sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e", size = 7350, upload-time = "2022-01-24T01:14:49.62Z" },
+]
+
+[[package]]
+name = "names-generator"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cmdkit" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fd/de/60c26d1488db2ffdb050d2c0e6007998c2afd90760a4d7b23d32cde5b446/names_generator-0.2.0.tar.gz", hash = "sha256:de60e354b8ca8f2d1ce0816079d3ba569417371867b94328021f03c9dd47a5be", size = 27106, upload-time = "2024-04-16T03:38:58.399Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bf/3d/7210fc4b1999771b875d96ffa30cf4384c7fe8f0a7d9874df4b753b7703e/names_generator-0.2.0-py3-none-any.whl", hash = "sha256:693e8e48e9a54a2a8f714b01d1bd70945743a15d4587059e7e4e16efc361be11", size = 26699, upload-time = "2024-04-16T03:38:54.288Z" },
 ]
 
 [[package]]

@@ -1,7 +1,6 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.test import Client, TestCase
 from django.urls import reverse
-
 
 from ..models import Artist
 from peeps.models import Person
@@ -12,6 +11,8 @@ class ManageTests(TestCase):
     def setUp(self):
         user = User.objects.create_user(
             username='test', email='test@example.com', password='test')
+        permission = Permission.objects.get(codename='is_artshow_staff')
+        user.user_permissions.add(permission)
         user.save()
 
         person = Person(user=user)

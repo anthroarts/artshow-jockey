@@ -1,14 +1,16 @@
-version: '3'
 services:
   web:
     build:
       context: .
       target: dev
     depends_on: 
-      - db
-      - broker
+      db:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
     ports:
       - "8000:8000"
+    mem_limit: 1024M
     environment:
       - DEBUG=1
       - SECRET_KEY="Not so secret developer key"
@@ -34,10 +36,20 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=insecuredefaultpassword
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   broker:
     image: "rabbitmq"
     volumes:
       - broker-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 volumes:
   db-data:
   broker-data:

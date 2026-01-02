@@ -41,9 +41,8 @@ def winning_bidders(request):
     ).order_by('bidder', 'id')
     winning_bid_query = Bid.objects.filter(
         piece=OuterRef('pk'), invalid=False).order_by('-amount')
-    pieces = Piece.objects.values(
-        'code', 'name', 'artist__publicname', 'artist__person__name',
-        'voice_auction'
+    pieces = Piece.objects.select_related(
+        'artist', 'artist__person'
     ).filter(Exists(winning_bid_query)).annotate(
         winning_bidder=Subquery(winning_bid_query.values('bidder')[:1]),
         winning_bid=Subquery(winning_bid_query.values('amount')[:1])
@@ -64,8 +63,8 @@ def winning_bidders(request):
 
     bidder_index = 0
     for piece in pieces:
-        assert piece['winning_bidder'] >= bidders[bidder_index]['bidder']
-        while piece['winning_bidder'] != bidders[bidder_index]['bidder']:
+        assert piece.winning_bidder >= bidders[bidder_index]['bidder']
+        while piece.winning_bidder != bidders[bidder_index]['bidder']:
             bidder_index += 1
         bidders[bidder_index]['pieces'].append(piece)
 
@@ -79,9 +78,8 @@ def winning_bidders(request):
 def unsold_pieces(request):
     winning_bid_query = Bid.objects.filter(
         piece=OuterRef('pk'), invalid=False).order_by('-amount')
-    pieces = Piece.objects.values(
-        'code', 'name', 'artist__publicname', 'artist__person__name',
-        'voice_auction'
+    pieces = Piece.objects.select_related(
+        'artist', 'artist__person'
     ).filter(status=Piece.StatusWon).filter(
         Exists(winning_bid_query)
     ).annotate(
@@ -100,16 +98,16 @@ def unsold_pieces(request):
     bidders = []
     last_bidder = None
     for piece in pieces:
-        if last_bidder != piece['winning_bidder']:
+        if last_bidder != piece.winning_bidder:
             bidders.append({
-                'id': piece['winning_bidder'],
-                'name': piece['winning_bidder_name'],
-                'phone': piece['winning_bidder_phone'],
-                'telegram_username': piece['winning_bidder_telegram_username'],
-                'email': piece['winning_bidder_email'],
+                'id': piece.winning_bidder,
+                'name': piece.winning_bidder_name,
+                'phone': piece.winning_bidder_phone,
+                'telegram_username': piece.winning_bidder_telegram_username,
+                'email': piece.winning_bidder_email,
                 'pieces': [piece],
             })
-            last_bidder = piece['winning_bidder']
+            last_bidder = piece.winning_bidder
         else:
             bidders[-1]['pieces'].append(piece)
 
