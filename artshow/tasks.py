@@ -34,14 +34,14 @@ def send_results_email(task_pk, bidder_pk):
 
 @app.task
 def email_results():
-    bidders = Bidder.objects.values('pk').filter(person__email_confirmed=True)
+    bidders = Bidder.objects.filter(person__email_confirmed=True).values_list('pk', flat=True)
 
     task = BulkMessagingTask(name='Send results via email')
     task.message_count = len(bidders)
     task.save()
 
     for bidder in bidders:
-        send_results_email.delay(task_pk=task.pk, bidder_pk=bidder.pk)
+        send_results_email.delay(task_pk=task.pk, bidder_pk=bidder)
 
 
 @app.task(rate_limit='1/s', autoretry_for=(Exception,), retry_backoff=True)
@@ -64,14 +64,14 @@ def send_results_telegram_message(task_pk, bidder_pk):
 
 @app.task
 def telegram_results():
-    bidders = Bidder.objects.values('pk').filter(person__telegram_chat_id__isnull=False)
+    bidders = Bidder.objects.filter(person__telegram_chat_id__isnull=False).values_list('pk', flat=True)
 
     task = BulkMessagingTask(name='Send results via Telegram')
     task.message_count = len(bidders)
     task.save()
 
     for bidder in bidders:
-        send_results_telegram_message.delay(task_pk=task.pk, bidder_pk=bidder.pk)
+        send_results_telegram_message.delay(task_pk=task.pk, bidder_pk=bidder)
 
 
 @app.task(rate_limit='1/s', autoretry_for=(Exception,), retry_backoff=True)
@@ -160,7 +160,7 @@ def telegram_voice_results(adult):
     task.save()
 
     for bidder in bidders:
-        send_voice_results_telegram_message.delay(task_pk=task.pk, bidder_pk=bidder.pk, adult=adult)
+        send_voice_results_telegram_message.delay(task_pk=task.pk, bidder_pk=bidder, adult=adult)
 
 
 @app.task(rate_limit='1/s', autoretry_for=(Exception,), retry_backoff=True)
@@ -233,4 +233,4 @@ def telegram_reminder():
     task.save()
 
     for bidder in bidders:
-        send_results_telegram_message.delay(task_pk=task.pk, bidder_pk=bidder.pk)
+        send_reminder_telegram_message.delay(task_pk=task.pk, bidder_pk=bidder)
