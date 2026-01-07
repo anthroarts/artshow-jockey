@@ -12,7 +12,7 @@ WORKDIR /code
 
 # Install native dependencies.
 RUN apt update
-RUN apt install -y nginx
+RUN apt install -y nginx procps
 RUN mkdir /data
 
 # Development environment.
