@@ -26,5 +26,19 @@
     <td>{{ artist.allocated_spaces }}</td></tr>{% endfor %}
 </table>
 
+<script type="text/markdown" id="markdown">
+| # | Artist Name | Locations |
+| - | ----------- | --------- |{% for artist in artists %}
+| {{ artist.artistid }} | {% if artist.website %}[{{ artist.artistname }}]({{ artist.website }}){% else %}{{ artist.artistname }}{% endif %} | {{ artist.locations|join:', ' }} |{% endfor %}
+</script>
+
+<button id="copyMarkdown">Copy Markdown</button>
+
+<script>
+document.getElementById('copyMarkdown').addEventListener('click', () => {
+    navigator.clipboard.writeText(document.getElementById('markdown').textContent);
+});
+</script>
+
 {% endblock %}
 
