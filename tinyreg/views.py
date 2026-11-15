@@ -16,12 +16,12 @@ def get_absolute_url(url):
     return settings.SITE_ROOT_URL + url
 
 
-def get_oauth_session(request):
+def get_oauth_session(state=None):
     return OAuth2Session(
         settings.OAUTH_CLIENT_ID,
         redirect_uri=get_absolute_url(reverse('oauth-complete')),
         scope=['pii:basic', 'pii:email', 'pii:phone', 'pii:address'],
-        state=request.session.get('oauth_state'))
+        state=state)
 
 
 def oauth_redirect(request):
@@ -30,7 +30,9 @@ def oauth_redirect(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect(next)
 
-    oauth = get_oauth_session(request)
+    # Pending logins in multiple tabs share this session-bound state until a
+    # callback consumes it. Either tab can complete the login first.
+    oauth = get_oauth_session(state=request.session.get('oauth_state'))
     authorization_url, state = \
         oauth.authorization_url(settings.OAUTH_AUTHORIZE_URL)
 
@@ -46,11 +48,13 @@ def oauth_complete(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect(next)
 
-    if state is None:
+    if not state:
         messages.error(request, 'Something went wrong. Please try again.')
         return HttpResponseRedirect(f'{settings.LOGIN_URL}?next={next}')
 
-    oauth = get_oauth_session(request)
+    # Pass the consumed state explicitly; an empty expected state disables
+    # oauthlib's callback state validation.
+    oauth = get_oauth_session(state=state)
 
     try:
         oauth.fetch_token(
@@ -61,7 +65,7 @@ def oauth_complete(request):
     except AccessDeniedError:
         messages.error(request, 'Access denied. Please try again.')
         return HttpResponseRedirect(f'{settings.LOGIN_URL}?next={next}')
-    except MismatchingStateError | MissingTokenError:
+    except (MismatchingStateError, MissingTokenError):
         messages.error(request, 'Something went wrong. Please try again.')
         return HttpResponseRedirect(f'{settings.LOGIN_URL}?next={next}')
 
