@@ -25,7 +25,7 @@ MAX_PIECES_PER_PAGE = 30
 @permission_required('artshow.is_artshow_staff')
 def winning_bidders(request):
     bidders = Bidder.objects.all().annotate(first_bidderid=Min('bidderid')).order_by('first_bidderid')
-    response = HttpResponse(mimetype="application/pdf")
+    response = HttpResponse(content_type="application/pdf")
 
     styles = getSampleStyleSheet()
     normal_style = styles["Normal"]
@@ -113,7 +113,7 @@ def bid_entry_by_location(request):
 
 @permission_required('artshow.is_artshow_staff')
 def bid_entry(request, pieces):
-    response = HttpResponse(mimetype="application/pdf")
+    response = HttpResponse(content_type="application/pdf")
 
     styles = getSampleStyleSheet()
     normal_style = styles["Normal"]
@@ -275,7 +275,7 @@ def invoice_to_pdf(invoice, outf):
 @permission_required('artshow.is_artshow_staff')
 def pdf_invoice(request, invoice_id):
     invoice = get_object_or_404(Invoice, pk=invoice_id)
-    response = HttpResponse(mimetype="application/pdf")
+    response = HttpResponse(content_type="application/pdf")
     invoice_to_pdf(invoice, response)
     return response
 
@@ -360,6 +360,6 @@ def picklist_to_pdf(invoice, outf):
 @permission_required('artshow.is_artshow_staff')
 def pdf_picklist(request, invoice_id):
     invoice = get_object_or_404(Invoice, pk=invoice_id)
-    response = HttpResponse(mimetype="application/pdf")
+    response = HttpResponse(content_type="application/pdf")
     picklist_to_pdf(invoice, response)
     return response
