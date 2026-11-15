@@ -48,7 +48,7 @@ jobs:
       matrix:
         # Services under CD. Each also needs to be granted in the
         # artshow-jockey-github-deploy role in fargate-infrastructure.
-        service: [artshow-2027]
+        service: [artshow-2026, artshow-2027]
 
     concurrency:
       group: deploy-${{ matrix.service }}
