@@ -11,6 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from functools import cache
 
+import httpx
+
 from square import Square
 from square.core.api_error import ApiError
 from square.environment import SquareEnvironment
@@ -37,7 +39,7 @@ def client():
 
 def log_errors(errors):
     for error in errors:
-        logger.error(f"Square error {error['category']}:{error['code']}: {error['detail']}")
+        logger.error(f"Square error {error.category}:{error.code}: {error.detail}")
 
 
 def create_payment_url(artist, name, amount, redirect_url):
@@ -73,6 +75,25 @@ def create_payment_url(artist, name, amount, redirect_url):
     except ApiError as e:
         log_errors(e.errors)
         return None
+
+
+def delete_payment_link(payment_link_id):
+    if not payment_link_id:
+        logger.error("Cannot delete payment link with empty payment_link_id")
+        return False
+
+    try:
+        result = client().checkout.payment_links.delete(payment_link_id)
+        if result.errors:
+            log_errors(result.errors)
+            return False
+        return True
+    except ApiError as e:
+        log_errors(e.errors)
+        return False
+    except httpx.HTTPError:
+        logger.exception(f"Failed to delete Square payment link {payment_link_id}")
+        return False
 
 
 def create_device_code(name):
