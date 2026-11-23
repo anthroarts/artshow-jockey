@@ -12,6 +12,7 @@ from django.contrib import admin, messages
 from django.contrib.admin import helpers
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
+from django.db import transaction
 from django.db.models import IntegerField, Max
 from django.db.models.functions import Cast, Substr
 from django.http import HttpResponse
@@ -23,6 +24,7 @@ import json
 
 from . import email1
 from . import processbatchscan
+from . import square
 from .models import (
     Agent, Allocation, Artist, BatchScan, Bid, Bidder, BidderId, Checkoff,
     ChequePayment, EmailSignature, EmailTemplate, Invoice, InvoiceItem,
@@ -598,10 +600,49 @@ class SquarePaymentAdmin(admin.ModelAdmin):
                                    args=(obj.artist.pk,)),
                            str(obj.artist))
 
+    @admin.action(description='Cancel pending payments', permissions=['delete'])
+    def cancel_pending_payments(self, request, queryset):
+        for payment in queryset:
+            if payment.payment_type_id != settings.ARTSHOW_PAYMENT_PENDING_PK:
+                self.message_user(
+                    request,
+                    f'Payment {payment.id} is not pending and cannot be cancelled.',
+                    messages.WARNING,
+                )
+                continue
+
+            if square.delete_payment_link(payment.payment_link_id):
+                with transaction.atomic():
+                    pending = SquarePayment.objects.select_for_update().filter(
+                        pk=payment.pk,
+                        payment_type_id=settings.ARTSHOW_PAYMENT_PENDING_PK,
+                    )
+                    if pending.exists():
+                        self.log_deletions(request, pending)
+                        pending.delete()
+                        self.message_user(
+                            request,
+                            f'Cancelled pending payment {payment.id}.',
+                            messages.SUCCESS,
+                        )
+                    else:
+                        self.message_user(
+                            request,
+                            f'Payment {payment.id} is no longer pending.',
+                            messages.WARNING,
+                        )
+            else:
+                self.message_user(
+                    request,
+                    f'Failed to cancel payment {payment.id} with Square.',
+                    messages.ERROR,
+                )
+
     list_display = ('id', 'clickable_artist', 'amount', 'payment_type', 'date')
     list_filter = ('payment_type',)
     raw_id_fields = ('artist',)
     readonly_fields = ('payment_link_id', 'payment_link_url', 'order_id')
+    actions = ('cancel_pending_payments',)
 
 
 @admin.register(SquareTerminal)
