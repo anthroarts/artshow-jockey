@@ -4,6 +4,14 @@ on:
   push:
     branches: ['main']
 
+# One run at a time, in push order. The deploy job at the end must not let an
+# older commit land after a newer one, and job-level concurrency orders by when a
+# job started waiting, not by push. At the workflow level a newer push only ever
+# replaces an older *pending* run, so the newest commit always deploys last.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
