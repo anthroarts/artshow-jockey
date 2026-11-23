@@ -1,0 +1,115 @@
+name: Deploy
+
+# Rolls an image onto the Art Show Fargate services.
+#
+# Terraform (anthroarts/fargate-infrastructure) owns each task definition's
+# config: environment, secrets, roles, CPU/memory. This workflow owns the image.
+# It copies the latest revision in the service's task definition family, swaps
+# in the image, registers that as a new revision, and points the service at it.
+#
+# Called by deploy-image.yml after every push to main. Run it by hand with no
+# image after a Terraform config change: that keeps the running image and picks
+# up the new config.
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: Image to deploy, pinned by digest
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      image:
+        description: >-
+          Image to deploy (ghcr.io/anthroarts/artshow-jockey@sha256:...).
+          Leave empty to keep the running image and pick up the latest task definition config.
+        type: string
+        required: false
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-west-2
+  AWS_ROLE: arn:aws:iam::474196809376:role/artshow-jockey-github-deploy
+  ECS_CLUSTER: Fargate
+  IMAGE_REPO: ghcr.io/anthroarts/artshow-jockey
+
+jobs:
+  deploy:
+    # The deploy role only trusts main, so fail fast and legibly elsewhere.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Services under CD. Each also needs to be granted in the
+        # artshow-jockey-github-deploy role in fargate-infrastructure.
+        service: [artshow-2026, artshow-2027]
+
+    concurrency:
+      group: deploy-${{ matrix.service }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE }}
+
+      - name: Register task definition and update service
+        env:
+          SERVICE: ${{ matrix.service }}
+          IMAGE: ${{ inputs.image }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$IMAGE" ]; then
+            running=$(aws ecs describe-services --cluster "$ECS_CLUSTER" --services "$SERVICE" \
+              --query 'services[0].taskDefinition' --output text)
+            IMAGE=$(aws ecs describe-task-definition --task-definition "$running" \
+              --query "taskDefinition.containerDefinitions[?name=='$SERVICE'].image | [0]" --output text)
+            echo "No image given; keeping the running image $IMAGE"
+          fi
+
+          case "$IMAGE" in
+            "$IMAGE_REPO"@sha256:*) ;;
+            *) echo "::error::Refusing to deploy '$IMAGE': expected $IMAGE_REPO@sha256:..."; exit 1 ;;
+          esac
+
+          # The family name alone resolves to its latest ACTIVE revision, which
+          # may be Terraform's (fresh config, stale image) or ours.
+          aws ecs describe-task-definition --task-definition "$SERVICE" --query taskDefinition > latest.json
+          echo "Base: $(jq -r .taskDefinitionArn latest.json)"
+
+          if [ "$(jq --arg name "$SERVICE" '[.containerDefinitions[] | select(.name == $name)] | length' latest.json)" != 1 ]; then
+            echo "::error::Expected exactly one container named $SERVICE in the task definition"
+            exit 1
+          fi
+
+          jq --arg name "$SERVICE" --arg image "$IMAGE" '
+            .containerDefinitions |= map(if .name == $name then .image = $image else . end)
+            | del(.taskDefinitionArn, .revision, .status, .requiresAttributes,
+                  .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)
+          ' latest.json > new.json
+
+          new=$(aws ecs register-task-definition --cli-input-json file://new.json \
+            --query taskDefinition.taskDefinitionArn --output text)
+          echo "Registered $new"
+
+          aws ecs update-service --cluster "$ECS_CLUSTER" --service "$SERVICE" \
+            --task-definition "$new" --query 'service.deployments[0].id' --output text
+
+          echo "Waiting for $SERVICE to stabilize (migrations run on container start)..."
+          aws ecs wait services-stable --cluster "$ECS_CLUSTER" --services "$SERVICE"
+
+          {
+            echo "### Deployed \`$SERVICE\`"
+            echo
+            echo "- Task definition: \`$new\`"
+            echo "- Image: \`$IMAGE\`"
+          } >> "$GITHUB_STEP_SUMMARY"
